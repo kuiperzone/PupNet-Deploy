@@ -1,0 +1,84 @@
+=======================================
+LATEST VERSION 2.0.0 as PUBPAK for .NET
+=======================================
+
+o NAME REBRAND: From "Publish-AppImage" to Pubpak for .NET.
+o LICENSE CHANGE: From MIT to GPL-3.0-or-later
+
+o New FLATPAK package output.
+o Added "-p, --property" option to command line, allowing properties to be passed to dotnet publish.
+o Added "-x, --app-version" option to command line.
+o Added "-a, --arch" option to command line.
+o Added PKG_TEMP_DIR config option.
+o Removed PKG_APPIMAGE_SUFFIX config option which is no longer supported.
+o The APP_XML_SRC option renamed to APP_METADATA
+o The PKG_APPIMAGE_ARGS option renamed to APPIMAGE_ARGS
+o Fixed possible bug with fully qualified output path.
+o Demo project updated to .NET 7.
+o Other changes, tweaks and updates mainly around support for Flatpak.
+o Updated README documentation and associated media.
+
+Note, "Pubpak 2.0 for .NET" is backward compatible with conf files written for "Publish-AppImage".
+
+
+=======================================
+PREVIOUS VERSIONS
+=======================================
+
+* * *
+Information below this refers to legacy
+app called  "Publish-AppImage for .NET".
+See: https://github.com/kuiperzone/Publish-AppImage
+* * *
+
+VERSION 1.3.1
+Legacy Publish-AppImage for .NET
+
+o Removed redundant echo statements.
+
+
+VERSION 1.3.0
+Legacy Publish-AppImage for .NET
+
+o Added "launchable" and "provides" to template appdata.xml file. This should avoid pedantic warnings
+performed by appimagetool when validating APP_XML_SRC metadata (*).
+o Added "--output" option to explicitly specify the final output filename part.
+o Demo project updated to .NET 6.
+o Minor changes to documentation.
+
+(*) See for info: https://github.com/AppImage/AppImageKit/issues/603
+
+
+VERSION 1.2.0
+Legacy Publish-AppImage for .NET
+
+o Versioning of project output changed! Removed version (-x) arg from command line. Instead, specify APP_VERSION in the .conf file.
+o Added dummy "post-publish.sh" file for test purposes only.
+o Updates to readme file and conf file
+
+
+VERSION 1.1.2
+Legacy Publish-AppImage for .NET
+
+o Updated HelloWorld appdata.xml to avoid warnings.
+o Fixed typos in readme
+o Added gitignore
+
+
+VERSION 1.1.1
+Legacy Publish-AppImage for .NET
+
+o Fixed typo.
+
+
+VERSION 1.1.0
+Legacy Publish-AppImage for .NET
+
+o Exports new APPDIR_ROOT variable.
+o Now checks for target binary after POST_PUBLISH (instead of before) in case this command actually creates it.
+o Does not create/overwrite AppRun if POST_PUBLISH creates it.
+
+
+VERSION 1.0.0
+Legacy Publish-AppImage for .NET
+First release. Tested against .NET SDK 5.0.

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+    <id>${AppId}</id>
+    <metadata_license>MIT</metadata_license>
+    <project_license>${AppLicense}</project_license>
+    <content_rating type="oars-1.1" />
+
+    <name>${AppName}</name>
+    <summary>${AppSummary}</summary>
+    <developer_name>${AppVendor}</developer_name>
+    <url type="homepage">${AppUrl}</url>
+
+    <description>
+        <p>This is a longer application description. REPLACE THIS WITH YOUR OWN.
+        IMPORTANT: In this file, you can use supported macros. See the --help output for details.</p>
+    </description>
+
+    <releases>
+        <release version="${AppVersion}" date="${IsoDate}">
+            <description><p>The latest release.</p></description>
+        </release>
+    </releases>
+
+    <!--
+    <screenshots>
+        <screenshot type="default">
+            <image>https://placeholder.co/800x450.png/F68715/000000?text=${AppBase}</image>
+        </screenshot>
+    </screenshots>
+    -->
+
+    <launchable type="desktop-id">${DesktopName}</launchable>
+
+</component>

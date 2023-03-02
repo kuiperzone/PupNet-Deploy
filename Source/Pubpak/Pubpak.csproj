@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>true</IsPackable>
+
+    <Version>3.0.0</Version>
+    <PackageId>KuiperZone.Pubpak</PackageId>
+    <Product>PUBPAK for .NET</Product>
+    <Authors>Andy Thomas</Authors>
+    <Copyright>© Andy Thomas 2022-23</Copyright>
+    <Company>KuiperZone</Company>
+    <Description>Easily publish deployment packages</Description>
+    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer</PackageTags>
+    <Language>en-US</Language>
+    <PackageProjectUrl>https://github.com/kuiperzone/Pubpak</PackageProjectUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="KuiperZone.Utility.Yaap" Version="1.0.6" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<None Include="$(ProjectDir)\..\..\LICENSE" Link="LICENSE.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
+		<None Include="$(ProjectDir)\..\Assets\app.svg" Link="app.svg">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.ico" Link="app.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.16x16.png" Link="app.16x16.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.24x24.png" Link="app.24x24.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.32x32.png" Link="app.32x32.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.48x48.png" Link="app.48x48.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+  </ItemGroup>
+
+</Project>

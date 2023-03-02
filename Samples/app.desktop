@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=${AppName}
+Exec=${LaunchExec}
+Icon=${AppId}
+Comment=${AppSummary}
+Categories=${DesktopCategory}
+MimeType=${DesktopMimeType}
+Terminal=${DesktopTerminal}
+Keywords=
