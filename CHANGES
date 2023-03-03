@@ -2,7 +2,7 @@
 LATEST VERSION 2.0.0 as PUBPAK for .NET
 =======================================
 
-o NAME REBRAND: From "Publish-AppImage" to Pubpak for .NET.
+o NAME REBRAND: From "Publish-AppImage" to PupNet for .NET.
 o LICENSE CHANGE: From MIT to GPL-3.0-or-later
 
 o New FLATPAK package output.
@@ -18,7 +18,7 @@ o Demo project updated to .NET 7.
 o Other changes, tweaks and updates mainly around support for Flatpak.
 o Updated README documentation and associated media.
 
-Note, "Pubpak 2.0 for .NET" is backward compatible with conf files written for "Publish-AppImage".
+Note, "PupNet 2.0 for .NET" is backward compatible with conf files written for "Publish-AppImage".
 
 
 =======================================

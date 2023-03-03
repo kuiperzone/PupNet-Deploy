@@ -1,22 +1,22 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Determines temporary build directory tree.
@@ -51,8 +51,8 @@ public class BuildTree
         AppMetaName = conf.AppId + ".metainfo.xml";
         AppMetaPath = Path.Combine(AppShareMeta, AppMetaName);
 
-        DesktopName = conf.AppId + ".desktop";
-        DesktopPath = Path.Combine(AppShareApplications, DesktopName);
+        DesktopId = conf.AppId + ".desktop";
+        DesktopPath = Path.Combine(AppShareApplications, DesktopId);
 
         AppInstall = Path.Combine(AppDir, "usr", "bin");
         AppExecPath = Path.Combine(AppInstall, AppExecName);
@@ -88,7 +88,7 @@ public class BuildTree
     /// <summary>
     /// Global root.
     /// </summary>
-    public static readonly string Global = Path.Combine(Path.GetTempPath(), $"{nameof(KuiperZone)}.{nameof(Pubpak)}");
+    public static readonly string Global = Path.Combine(Path.GetTempPath(), $"{nameof(KuiperZone)}.{nameof(PupNet)}");
 
     /// <summary>
     /// Gets application project root.
@@ -149,7 +149,7 @@ public class BuildTree
     /// <summary>
     /// Gets the expected filename (not directory) for the desktop file. Always has value, but does not imply content exists.
     /// </summary>
-    public string DesktopName { get; }
+    public string DesktopId { get; }
 
     /// <summary>
     /// Gets the full path to the desktop file. Always has value, but does not imply content exists.

@@ -1,25 +1,25 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
 using System.Text;
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Accepts a configuration and assembles path and assets information. The build
@@ -42,7 +42,7 @@ public class BuildAssets
 
         var kind = Conf.Args.Kind;
 
-        var icons = Conf.AppIcons.Count != 0 ? Conf.AppIcons : DefaultIcons;
+        var icons = Conf.Icons.Count != 0 ? Conf.Icons : DefaultIcons;
         LinuxIcons = GetLinuxIconPaths(icons);
         SourceIcon = GetSourceIcon(kind, icons);
 
@@ -53,13 +53,8 @@ public class BuildAssets
 
         if (kind.IsLinux())
         {
-            DesktopContent = GetDesktopContent(Conf.DesktopPath, Macros);
-            AppMetaContent = GetAppMetaContent(Conf.AppMetaPath, Macros);
-        }
-
-        if (kind == PackKind.Rpm)
-        {
-            RpmSpecContent = GetRpmSpec();
+            DesktopContent = Macros.Expand(string.Join('\n', Conf.DesktopEntry));
+            AppMetaContent = GetAppMetaContent(Conf.MetaInfo, Macros);
         }
 
         if (kind == PackKind.Flatpak)
@@ -72,11 +67,6 @@ public class BuildAssets
     /// Gets an AppStream metadata template.
     /// </summary>
     public static string AppMetaTemplate { get; } = GetAppMetaTemplate();
-
-    /// <summary>
-    /// Gets an AppStream metadata template.
-    /// </summary>
-    public static string DesktopTemplate { get; } = GetDesktopTemplate();
 
     /// <summary>
     /// Known and accepted PNG icon sizes.
@@ -120,8 +110,64 @@ public class BuildAssets
 
     public string? DesktopContent { get; }
     public string? AppMetaContent { get; }
-    public string? RpmSpecContent { get; }
     public string? FlatpakManifestContent { get; }
+
+    /// <summary>
+    /// Gets the RPM file. Must provide file list for actual build.
+    /// </summary>
+    public string GetRpmSpecContent(IReadOnlyCollection<string>? files = null)
+    {
+        // We don't actually need install, build sections.
+        var sb = new StringBuilder();
+        var dict = Macros.Dictionary;
+
+        sb.AppendLine($"Name: {Conf.AppBase}");
+        sb.AppendLine($"Version: {dict[BuildMacros.AppVersion]}");
+        sb.AppendLine($"Release: {dict[BuildMacros.PackRelease]}");
+        sb.AppendLine($"BuildArch: {dict[BuildMacros.BuildArch]}");
+        sb.AppendLine($"Summary: {Conf.AppSummary}");
+        sb.AppendLine($"License: {Conf.AppLicense}");
+        sb.AppendLine($"Vendor: {Conf.AppVendor}");
+
+        if (!string.IsNullOrEmpty(Conf.AppUrl))
+        {
+            sb.AppendLine($"Url: {Conf.AppUrl}");
+        }
+
+        // We expect dotnet "--self-contained true" to provide dependencies
+        // https://rpm-list.redhat.narkive.com/KqUzv7C1/using-nodeps-with-rpmbuild-is-it-possible
+        sb.AppendLine("AutoReqProv: no");
+
+        // Description is mandatory, but just repeat summary
+        sb.AppendLine();
+        sb.AppendLine("%description");
+        sb.AppendLine(Conf.AppSummary);
+
+        sb.AppendLine();
+        sb.AppendLine("%files");
+
+        if (files != null)
+        {
+            foreach (var item in files)
+            {
+                if (item.Length != 0)
+                {
+                    if (!item.StartsWith('/'))
+                    {
+                        sb.Append('/');
+                    }
+
+                    sb.AppendLine(item);
+                }
+            }
+        }
+        else
+        {
+            sb.Append("[FILE LIST]");
+        }
+
+        return sb.ToString();
+    }
 
     private static IReadOnlyCollection<string> GetDefaultIcons()
     {
@@ -147,7 +193,7 @@ public class BuildAssets
         var sb = new StringBuilder();
         sb.AppendLine($"<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         sb.AppendLine($"<component type=\"desktop\">");
-        sb.AppendLine($"{Indent}<id>${{{BuildMacros.AppId}}}</id>");
+        sb.AppendLine($"{Indent}<id>${{{BuildMacros.AppId}}}.desktop</id>");
         sb.AppendLine($"{Indent}<metadata_license>MIT</metadata_license>");
         sb.AppendLine($"{Indent}<project_license>${{{BuildMacros.AppLicense}}}</project_license>");
         sb.AppendLine($"{Indent}<content_rating type=\"oars-1.1\" />");
@@ -172,16 +218,15 @@ public class BuildAssets
         sb.AppendLine($"{Indent}<!-- Uncomment and provide screenshot");
         sb.AppendLine($"{Indent}<screenshots>");
         sb.AppendLine($"{IndentIndent}<screenshot type=\"default\">");
-        sb.AppendLine($"{IndentIndentIndent}<image>https://placeholder.co/800x450.png/F68715/000000?text=${{{BuildMacros.AppBase}}}</image>");
+        sb.AppendLine($"{IndentIndentIndent}<image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>");
         sb.AppendLine($"{IndentIndent}</screenshot>");
         sb.AppendLine($"{Indent}</screenshots>");
         sb.AppendLine($"{Indent}-->");
 
-        sb.AppendLine($"{Indent}<!-- Needed for AppImage (use ${{{BuildMacros.DesktopName}}} macro) -->");
-	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">${{{BuildMacros.DesktopName}}}</launchable>");
+        sb.AppendLine($"{Indent}<!-- Needed for AppImage (use ${{{BuildMacros.DesktopId}}} macro) -->");
+	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">${{{BuildMacros.DesktopId}}}</launchable>");
 
         sb.AppendLine($"</component>");
-
 
 /*
         // Not needed with MacroAppSummary
@@ -196,24 +241,6 @@ public class BuildAssets
 	    sb.AppendLine($"{Indent}</provides>");
 */
         return sb.ToString();
-    }
-
-    private static string GetDesktopTemplate()
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("[Desktop Entry]");
-
-        sb.AppendLine($"Type=Application");
-        sb.AppendLine($"Name=${{{BuildMacros.AppName}}}");
-        sb.AppendLine($"Exec=${{{BuildMacros.LaunchExec}}}");
-        sb.AppendLine($"Icon=${{{BuildMacros.AppId}}}");
-        sb.AppendLine($"Comment=${{{BuildMacros.AppSummary}}}");
-        sb.AppendLine($"Categories=${{{BuildMacros.DesktopCategory}}}");
-        sb.AppendLine($"MimeType=${{{BuildMacros.DesktopMimeType}}}");
-        sb.AppendLine($"Terminal=${{{BuildMacros.DesktopTerminal}}}");
-        sb.Append($"Keywords=");
-
-        return sb.ToString().TrimEnd();
     }
 
     private static int GetStandardPngSize(string filename)
@@ -347,38 +374,6 @@ public class BuildAssets
         return null;
     }
 
-    private string? GetDesktopContent(string? path, BuildMacros macros)
-    {
-        if (path == ConfDecoder.PathNone)
-        {
-            return null;
-        }
-
-        if (string.IsNullOrEmpty(path))
-        {
-            // Build it
-            return macros.Expand(DesktopTemplate);
-        }
-
-        var content = ReadFileText(path) ?? "";
-
-        if (content != null && Conf.AssertFiles)
-        {
-            foreach (var line in content.Split('\n'))
-            {
-                if (line.StartsWith("Exec") && line.Contains($"${{{BuildMacros.LaunchExec}}}"))
-                {
-                    return macros.Expand(content);
-                }
-            }
-
-            path = Path.GetFileName(path);
-            throw new InvalidOperationException($"Deskop file {path} must contain line 'Exec=${{{BuildMacros.LaunchExec}}}'");
-        }
-
-        return macros.Expand(content);
-    }
-
     private string? GetAppMetaContent(string? path, BuildMacros macros)
     {
         if (!string.IsNullOrEmpty(path))
@@ -387,37 +382,6 @@ public class BuildAssets
         }
 
         return null;
-    }
-
-    private string GetRpmSpec()
-    {
-        // Can only call this after dotnet publish
-        // We don't actually need install, build sections.
-        var sb = new StringBuilder();
-        var dict = Macros.Dictionary;
-
-        sb.AppendLine($"Name: {Conf.AppBase}");
-        sb.AppendLine($"Version: {dict[BuildMacros.AppVersion]}");
-        sb.AppendLine($"Release: {dict[BuildMacros.PackRelease]}");
-        sb.AppendLine($"BuildArch: {dict[BuildMacros.BuildArch]}");
-        sb.AppendLine($"Summary: {Conf.AppSummary}");
-        sb.AppendLine($"License: {Conf.AppLicense}");
-
-        if (!string.IsNullOrEmpty(Conf.AppUrl))
-        {
-            sb.AppendLine($"Url: {Conf.AppUrl}");
-        }
-
-        // Description is mandatory, but just repeat summary
-        sb.AppendLine();
-        sb.AppendLine("%description");
-        sb.AppendLine(Conf.AppSummary);
-
-        sb.AppendLine();
-        sb.AppendLine("%files");
-        sb.AppendLine("/*");
-
-        return sb.ToString();
     }
 
     private string GetFlatpakManifestContent()

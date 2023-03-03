@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
+
     <id>${AppId}</id>
-    <metadata_license>MIT</metadata_license>
-    <project_license>${AppLicense}</project_license>
-    <content_rating type="oars-1.1" />
+    <launchable type="desktop-id">${DesktopId}</launchable>
 
     <name>${AppName}</name>
     <summary>${AppSummary}</summary>
     <developer_name>${AppVendor}</developer_name>
     <url type="homepage">${AppUrl}</url>
+    <metadata_license>MIT</metadata_license>
+    <project_license>${AppLicense}</project_license>
+
+    <content_rating type="oars-1.1" />
 
     <description>
         <p>This is a longer application description. REPLACE THIS WITH YOUR OWN.
@@ -21,14 +24,10 @@
         </release>
     </releases>
 
-    <!--
     <screenshots>
         <screenshot type="default">
-            <image>https://placeholder.co/800x450.png/F68715/000000?text=${AppBase}</image>
+            <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
         </screenshot>
     </screenshots>
-    -->
-
-    <launchable type="desktop-id">${DesktopName}</launchable>
 
 </component>

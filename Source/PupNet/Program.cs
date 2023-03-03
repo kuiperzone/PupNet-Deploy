@@ -1,36 +1,36 @@
 ﻿// -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 internal class Program
 {
     /// <summary>
     /// Gets the program name.
     /// </summary>
-    public const string CommandName = "pubpak";
+    public const string CommandName = "PupNet";
 
     /// <summary>
     /// Gets the program product name.
     /// </summary>
-    public const string ProductName = "PUBPAK for .NET";
+    public const string ProductName = "PupNet";
 
     /// <summary>
     /// Gets the program product name.
@@ -40,7 +40,7 @@ internal class Program
     /// <summary>
     /// Gets the project URL.
     /// </summary>
-    public const string ProjectUrl = "https://github.com/kuiperzone/Pubpak";
+    public const string ProjectUrl = "https://github.com/kuiperzone/PupNet";
 
     /// <summary>
     /// Gets the application version.
@@ -126,11 +126,6 @@ internal class Program
             CreateNewSingleFile(NewKind.Conf, args.Value);
         }
 
-        if (args.New == NewKind.Desktop || args.New == NewKind.All)
-        {
-            CreateNewSingleFile(NewKind.Desktop, args.Value);
-        }
-
         if (args.New == NewKind.Meta || args.New == NewKind.All)
         {
             CreateNewSingleFile(NewKind.Meta, args.Value);
@@ -150,9 +145,6 @@ internal class Program
             {
                 case NewKind.Conf:
                     fop.WriteFile(path, new ConfDecoder().ToString());
-                    break;
-                case NewKind.Desktop:
-                    fop.WriteFile(path, BuildAssets.DesktopTemplate);
                     break;
                 case NewKind.Meta:
                     fop.WriteFile(path, BuildAssets.AppMetaTemplate);

@@ -36,7 +36,7 @@ PUBPAK for .NET is licensed under the GNU General Public License v3.0 and is for
 DISCUSSION
 See the following before use:
 
-[Is Flatpak Sandboxing Flawed? Should PUBPAK Support it?](https://github.com/kuiperzone/Pubpak/discussions/1)
+[Is Flatpak Sandboxing Flawed? Should PUBPAK Support it?](https://github.com/kuiperzone/PupNet/discussions/1)
 
 ======================================================
 

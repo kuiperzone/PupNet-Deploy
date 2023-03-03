@@ -1,25 +1,25 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
 using System.Text;
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Accepts a configuration and assembles path and assets information. The build
@@ -164,10 +164,9 @@ public class PackageBuilder
                 Tree.Ops.WriteFile(path, Assets.DesktopContent);
             }
 
+            Tree.Ops.CopyFile(Assets.SourceIcon, Assets.DestIcon);
             Tree.Ops.WriteFile(Tree.AppMetaPath, Assets.AppMetaContent);
             Tree.Ops.WriteFile(Tree.FlatpakManifestPath, Assets.FlatpakManifestContent);
-            Tree.Ops.WriteFile(Tree.RpmSpecPath, Assets.RpmSpecContent);
-            Tree.Ops.CopyFile(Assets.SourceIcon, Assets.DestIcon);
 
             foreach (var item in Assets.LinuxIcons)
             {
@@ -195,6 +194,12 @@ public class PackageBuilder
             Console.WriteLine();
             Tree.Ops.AssertExists(Path.Combine(Tree.PublishBin, Tree.AppExecName));
             Tree.Ops.CopyDirectory(Tree.PublishBin, Tree.AppInstall);
+
+            if (OutputKind == PackKind.Rpm)
+            {
+                Tree.Ops.WriteFile(Tree.RpmSpecPath, Assets.GetRpmSpecContent(GetAppDirFiles()));
+            }
+
             Tree.Ops.CreateDirectory(OutputDirectory);
 
             foreach (var item in PackageCommands)
@@ -270,16 +275,16 @@ public class PackageBuilder
                 builder.AppendLine(Assets.AppMetaContent);
             }
 
-            if (Assets.FlatpakManifestContent != null)
+            if (OutputKind == PackKind.Flatpak)
             {
                 AppendHeader(builder, "FLATPAK MANIFEST");
                 builder.AppendLine(Assets.FlatpakManifestContent);
             }
 
-            if (Assets.RpmSpecContent != null)
+            if (OutputKind == PackKind.Rpm)
             {
                 AppendHeader(builder, "RPM SPEC");
-                builder.AppendLine(Assets.RpmSpecContent);
+                builder.AppendLine(Assets.GetRpmSpecContent());
             }
 
             AppendHeader(builder, "MACROS");
@@ -351,6 +356,23 @@ public class PackageBuilder
         }
 
         return version;
+    }
+
+    private string[] GetAppDirFiles()
+    {
+        var opts = new EnumerationOptions();
+        opts.RecurseSubdirectories = true;
+        opts.ReturnSpecialDirectories = false;
+        opts.IgnoreInaccessible = true;
+
+        var files = Directory.GetFiles(Tree.AppDir, "*", SearchOption.AllDirectories);
+
+        for (int n = 0; n < files.Length; ++n)
+        {
+            files[n] = Path.GetRelativePath(Tree.AppDir, files[n]);
+        }
+
+        return files;
     }
 
     private string GetOutputDirectory()
@@ -525,8 +547,11 @@ public class PackageBuilder
             // --noclean
             // --buildroot=DIRECTORY
             // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
-            var rpmbuild = Path.Combine(Tree.PackTop, "rpmbuild");
-            list.Add($"rpmbuild -bb --nobuild --nocheck --noprep --noclean \"{Tree.RpmSpecPath}\" --define \"_topdir {rpmbuild}\" --buildroot=\"{Tree.AppDir}\" --define \"_rpmdir {output}\"");
+            var cmd = $"rpmbuild -bb --nocheck --noprep --verbose \"{Tree.RpmSpecPath}\"";
+            cmd += $" --define \"_topdir {Path.Combine(Tree.PackTop, "rpmbuild")}\" --buildroot=\"{Tree.AppDir}\"";
+            cmd += $" --define \"_rpmdir {output}\" --define \"_build_id_links none\"";
+
+            list.Add(cmd);
             return list;
         }
 
@@ -539,4 +564,5 @@ public class PackageBuilder
     }
 
 }
+
 

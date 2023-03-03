@@ -2,6 +2,8 @@
 InnoSetup
 Zip
 
+BuildArch in rpm
+
 
 DONE
 File to value arg

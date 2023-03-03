@@ -1,25 +1,25 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Declares and defines macros for use in fields and file contents. When expanding, simple search-replace is
@@ -35,9 +35,6 @@ public class BuildMacros
     public const string AppLicense = nameof(AppLicense);
     public const string AppVendor = nameof(AppVendor);
     public const string AppUrl = nameof(AppUrl);
-    public const string DesktopCategory = nameof(DesktopCategory);
-    public const string DesktopMimeType = nameof(DesktopMimeType);
-    public const string DesktopTerminal = nameof(DesktopTerminal);
 
     // PackageBuilder Names - do not change as will break configs out in the wild
     public const string AppVersion = nameof(AppVersion);
@@ -50,7 +47,7 @@ public class BuildMacros
     public const string IsoDate = nameof(IsoDate);
 
     // BuildTree Names - do not change as will break configs out in the wild
-    public const string DesktopName = nameof(DesktopName);
+    public const string DesktopId = nameof(DesktopId);
     public const string AppMetaName = nameof(AppMetaName);
     public const string AppDir = nameof(AppDir);
     public const string AppShare = nameof(AppShare);
@@ -81,9 +78,6 @@ public class BuildMacros
         dict.Add(AppLicense, conf.AppLicense);
         dict.Add(AppVendor, conf.AppVendor);
         dict.Add(AppUrl, conf.AppUrl ?? "");
-        dict.Add(DesktopCategory, conf.DesktopCategory);
-        dict.Add(DesktopMimeType, conf.DesktopMimeType ?? "");
-        dict.Add(DesktopTerminal, conf.DesktopTerminal.ToString().ToLowerInvariant());
 
         dict.Add(AppVersion, builder.AppVersion ?? "");
         dict.Add(PackRelease, builder.PackRelease);
@@ -94,7 +88,7 @@ public class BuildMacros
         dict.Add(OutputPath, Path.Combine(builder.OutputDirectory, builder.OutputName));
         dict.Add(IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
 
-        dict.Add(DesktopName, tree.DesktopName);
+        dict.Add(DesktopId, tree.DesktopId);
         dict.Add(AppMetaName, tree.AppMetaName);
         dict.Add(AppDir, tree.AppDir);
         dict.Add(PublishBin, tree.PublishBin);

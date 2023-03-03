@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pubpak", "Pubpak\Pubpak.csproj", "{79B244C4-B74E-40D4-906D-30C294A54911}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PupNet", "PupNet\PupNet.csproj", "{79B244C4-B74E-40D4-906D-30C294A54911}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pubpak.Test", "Pubpak.Test\Pubpak.Test.csproj", "{F43CAFE1-8212-406C-80A5-13F104F7467B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PupNet.Test", "PupNet.Test\PupNet.Test.csproj", "{F43CAFE1-8212-406C-80A5-13F104F7467B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

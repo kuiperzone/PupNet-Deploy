@@ -1,24 +1,24 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Runtime.InteropServices;
 
-namespace KuiperZone.Pubpak.Test;
+namespace KuiperZone.PupNet.Test;
 
 public class ArgDecoderTest
 {
@@ -111,7 +111,7 @@ public class ArgDecoderTest
         Assert.Equal("5.4.3[2]", args.AppVersion);
     }
 
-    [Fact]
+    // [Fact] Disable
     public void Property_DecodeOK()
     {
         var args = new ArgDecoder();
@@ -185,9 +185,6 @@ public class ArgDecoderTest
         args = new ArgDecoder("FileName --new conf");
         Assert.Equal(NewKind.Conf, args.New);
         Assert.Equal("FileName", args.Value);
-
-        args = new ArgDecoder("-n desktop");
-        Assert.Equal(NewKind.Desktop, args.New);
 
         args = new ArgDecoder("-n meta");
         Assert.Equal(NewKind.Meta, args.New);

@@ -1,22 +1,22 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-namespace KuiperZone.Pubpak.Test;
+namespace KuiperZone.PupNet.Test;
 
 public class ConfDecoderTest
 {
@@ -56,17 +56,20 @@ public class ConfDecoderTest
     }
 
     [Fact]
-    public void DesktopCategories_Mandatory_DecodeOK()
+    public void DesktopIntegration_Mandatory_DecodeOK()
     {
-        Assert.Equal("Utility;Programming", new DummyConf(PackKind.AppImage).DesktopCategory);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.DesktopCategory)));
+        Assert.True(new DummyConf(PackKind.AppImage).StartFromDesktop);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.StartFromDesktop)));
     }
 
+
     [Fact]
-    public void DesktopTerminal_Mandatory_DecodeOK()
+    public void DesktopEntry_Mandatory_DecodeOK()
     {
-        Assert.True(new DummyConf(PackKind.AppImage).DesktopTerminal);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.DesktopTerminal)));
+        Assert.NotEmpty(new DummyConf(PackKind.AppImage).DesktopEntry);
+
+        // Mandator for AppImage
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.DesktopEntry)));
     }
 
     [Fact]

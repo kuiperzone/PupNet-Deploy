@@ -1,25 +1,25 @@
 // -----------------------------------------------------------------------------
-// PROJECT   : Pubpak
+// PROJECT   : PupNet
 // COPYRIGHT : Andy Thomas (C) 2022-23
 // LICENSE   : GPL-3.0-or-later
-// HOMEPAGE  : https://github.com/kuiperzone/Pubpak
+// HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
-// Pubpak is free software: you can redistribute it and/or modify it under
+// PupNet is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later version.
 //
-// Pubpak is distributed in the hope that it will be useful, but WITHOUT
+// PupNet is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
-// with Pubpak. If not, see <https://www.gnu.org/licenses/>.
+// with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace KuiperZone.Pubpak;
+namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Reads and decodes the configuration file. Changes the working directory to that of the config file.
@@ -74,13 +74,11 @@ public class ConfDecoder
         AppVendor = GetMandatory(nameof(AppVendor));
         AppUrl = GetOptional(nameof(AppUrl));
 
-        AppIcons = AssertAbsolute(ConfDirectory, GetConfMultiline(nameof(AppIcons), true));
-        AppMetaPath = AssertAbsolute(ConfDirectory, GetOptional(nameof(AppMetaPath)));
-
-        DesktopPath = AssertAbsolute(ConfDirectory, GetOptional(nameof(DesktopPath)));
-        DesktopCategory = GetMandatory(nameof(DesktopCategory));
-        DesktopMimeType = GetOptional(nameof(DesktopMimeType));
-        DesktopTerminal = ToBool(nameof(DesktopTerminal), GetMandatory(nameof(DesktopTerminal)));
+        CommandName = GetOptional(nameof(CommandName));
+        StartFromDesktop = ToBool(nameof(StartFromDesktop), GetMandatory(nameof(StartFromDesktop)));
+        DesktopEntry = GetConfMultiline(nameof(DesktopEntry), false);
+        Icons = AssertAbsolute(ConfDirectory, GetConfMultiline(nameof(Icons), true));
+        MetaInfo = AssertAbsolute(ConfDirectory, GetOptional(nameof(MetaInfo)));
 
         DotnetProjectPath = AssertAbsolute(ConfDirectory, GetOptional(nameof(DotnetProjectPath)));
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs));
@@ -109,11 +107,37 @@ public class ConfDecoder
             throw new ArgumentException($"{nameof(AppId)} must be in reverse DNS form, i.e. 'net.example.appname'");
         }
 
+
+        if (StartFromDesktop && DesktopEntry.Count == 0 && Args.Kind.IsLinux() && !Args.Kind.IsWindows())
+        {
+            throw new ArgumentException($"{nameof(DesktopEntry)} must provide desktop entry values for {Args.Kind}");
+        }
+
         if (DotnetProjectPath == PathNone)
+        {
+        }
+
+        if (StartFromDesktop && Args.Kind.IsLinux() && !Args.Kind.IsWindows())
         {
             if (DotnetPostPublish.Count == 0)
             {
                 throw new ArgumentException($"{nameof(DotnetPostPublish)} is mandatory where {nameof(DotnetProjectPath)} = {PathNone}");
+            }
+
+            bool assert = true;
+
+            foreach (var line in DesktopEntry)
+            {
+                if (line.StartsWith("Exec") && line.Contains($"{{{BuildMacros.LaunchExec}}}"))
+                {
+                    assert = false;
+                    break;
+                }
+            }
+
+            if (assert)
+            {
+                throw new ArgumentException($"{nameof(DesktopEntry)} must contain 'Exec=${{{BuildMacros.LaunchExec}}}'");
             }
         }
     }
@@ -131,19 +155,16 @@ public class ConfDecoder
     public string AppName { get; } = "Hello World";
     public string AppId { get; } = "net.example.helloworld";
     public string AppVersionRelease { get; } = "1.0.0[1]";
-
     public string AppSummary { get; } = "A HelloWorld application";
     public string AppLicense { get; } = "LicenseRef-Proprietary";
     public string AppVendor { get; } = "Acme Ltd";
     public string? AppUrl { get; } = "https://example.net";
 
-    public IReadOnlyCollection<string> AppIcons { get; } = Array.Empty<string>();
-    public string? AppMetaPath { get; }
-
-    public string? DesktopPath { get; }
-    public string DesktopCategory { get; } = "Utility";
-    public string? DesktopMimeType { get; }
-    public bool DesktopTerminal { get; } = true;
+    public string? CommandName { get; }
+    public bool StartFromDesktop { get; } = true;
+    public IReadOnlyCollection<string> DesktopEntry { get; } = GetDesktopTemplate();
+    public string? MetaInfo { get; }
+    public IReadOnlyCollection<string> Icons { get; } = Array.Empty<string>();
 
     public string? DotnetProjectPath { get; }
     public string? DotnetPublishArgs { get; } = "--self-contained true -p:DebugType=None -p:DebugSymbols=false";
@@ -159,7 +180,7 @@ public class ConfDecoder
     public string FlatpakPlatformSdk { get; } = "org.freedesktop.Sdk";
     public string FlatpakPlatformVersion { get; } = "22.08";
     public IReadOnlyCollection<string> FlatpakFinishArgs { get; } = new string[]
-        { "--socket=wayland", "--socket=fallback-x11", "--filesystem=host", "--share=network" };
+        { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
 
     /// <summary>
@@ -283,52 +304,49 @@ public class ConfDecoder
         c?.AppendLine($"# Optional application or vendor URL. Example: https://example.net");
         sb.AppendLine(GetHelpNameValue(nameof(AppUrl), AppUrl));
 
+
         c?.AppendLine();
-        c?.AppendLine($"# Optional icon paths. The value may include multiple filenames separated with semicolon");
-        c?.AppendLine($"# or given in multi-line form. Valid types are SVG, PNG and ICO. ICO files are ignored on Linux.");
-        c?.AppendLine($"# Note that inclusion of a scalable SVG is preferable on Linux, whereas PNGs must be one of the");
-        c?.AppendLine($"# standard sizes and include the size in the name as 'name.32.png' or name.32x32.png'.");
+        c?.AppendLine(breaker2);
+        c?.AppendLine("# INTEGRATION");
+        c?.AppendLine(breaker2);
+
+        c?.AppendLine();
+        c?.AppendLine($"# Optional command name to launch the application from the terminal. For example, if");
+        c?.AppendLine($"# {nameof(AppBase)} equals 'HelloWorld', the value here may be set to the same or the lower-case");
+        c?.AppendLine($"# 'helloworld' variant. It is not supported and ignored for portable formats such as");
+        c?.AppendLine($"# {nameof(PackKind.AppImage)} and {nameof(PackKind.Flatpak)}. Default: true");
+        sb.AppendLine(GetHelpNameValue(nameof(CommandName), CommandName));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Flag (use 'true' or 'false') which indicates whether the application can be started from");
+        c?.AppendLine($"# desktop (or has an entry in the start menu). On Linux, this means that it must have a desktop");
+        c?.AppendLine($"# file. If false, the application may be a command line utility only. Default: true");
+        sb.AppendLine(GetHelpNameValue(nameof(StartFromDesktop), StartFromDesktop));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Multi-line content for the application's desktop entry on Linux. This is mandatory on Linux");
+        c?.AppendLine($"# where {nameof(StartFromDesktop)} is true. The following macros may be used in order to automate");
+        c?.AppendLine($"# the content: ${{{BuildMacros.AppName}}}, ${{{BuildMacros.AppId}}}, ${{{BuildMacros.AppSummary}}}. Importantly,");
+        c?.AppendLine($"# the value MUST include the line 'Exec=${{{BuildMacros.LaunchExec}}}' as to reflect the install location");
+        c?.AppendLine($"# specific to the package kind. The default value is expected to be suitable for most purposes.");
+        c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
+        c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
+        sb.AppendLine(GetHelpNameValue(nameof(DesktopEntry), DesktopEntry, true));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Optional icon paths. The value may include multiple filenames separated with semicolon or");
+        c?.AppendLine($"# given in multi-line form. Valid types are SVG, PNG and ICO (ignored on Linux). Note that the");
+        c?.AppendLine($"# inclusion of a scalable SVG is preferable on Linux, whereas PNGs must be one of the standard");
+        c?.AppendLine($"# sizes and MUST include the size in the filename in the form: 'name.32.png' or name.32x32.png'.");
         c?.AppendLine($"# Example: Assets/app.svg;Assets/app.24x24.png;Assets/app.32x32.png;Assets/app.ico");
-        sb.AppendLine(GetHelpNameValue(nameof(AppIcons), AppIcons, true));
+        sb.AppendLine(GetHelpNameValue(nameof(Icons), Icons, true));
 
         c?.AppendLine();
-        c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended. The file content may embed");
-        c?.AppendLine($"# supported macros such as, such as '${{AppName}}' and '${{AppId}}' etc. to assist in automating");
-        c?.AppendLine($"# many fields. For information: https://docs.appimage.org/packaging-guide/optional/appstream.html");
+        c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
+        c?.AppendLine($"# The file content may embed supported macros such as, such as '${{AppName}}' and '${{AppId}}' etc.");
+        c?.AppendLine($"# to assist in automating fields. Refer: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Assets/metainfo.xml.");
-        sb.AppendLine(GetHelpNameValue(nameof(AppMetaPath), AppMetaPath));
-
-
-        c?.AppendLine();
-        c?.AppendLine(breaker2);
-        c?.AppendLine("# DESKTOP ENTRY");
-        c?.AppendLine(breaker2);
-
-        c?.AppendLine();
-        c?.AppendLine($"# Optional path (relative to this file) to a Linux desktop file. If empty (default), a");
-        c?.AppendLine($"# desktop file will be constructed automatically from the values given below. If a path is");
-        c?.AppendLine($"# given, its contents will override any desktop values below. Supported macros may be used");
-        c?.AppendLine($"# within the file, however, including references to the values below. IMPORTANT: The file MUST");
-        c?.AppendLine($"# include the line: 'Exec=${{{BuildMacros.LaunchExec}}}' so that the runnable application file can be");
-        c?.AppendLine($"# correctly determined according to the package kind. Note also, if this value set to '{PathNone}',");
-        c?.AppendLine($"# no desktop file is shipped with the package (disabled). This value has no effect on Windows.");
-        c?.AppendLine($"# Ref: https://www.baeldung.com/linux/desktop-entry-files");
-        sb.AppendLine(GetHelpNameValue(nameof(DesktopPath), DesktopPath));
-
-        c?.AppendLine();
-        c?.AppendLine($"# Mandatory desktop category in which the entry should be shown.");
-        c?.AppendLine($"# See https://specifications.freedesktop.org/menu-spec/latest/apa.html");
-        c?.AppendLine($"# Examples: Development;Graphics;Network;Utility etc.");
-        sb.AppendLine(GetHelpNameValue(nameof(DesktopCategory), DesktopCategory));
-
-        c?.AppendLine();
-        c?.AppendLine($"# Optional mime-type. Default is empty. Example: image/x-foo");
-        sb.AppendLine(GetHelpNameValue(nameof(DesktopMimeType), DesktopMimeType));
-
-        c?.AppendLine();
-        c?.AppendLine($"# Boolean flag which indicates whether program runs in a terminal window.");
-        c?.AppendLine($"# Use values 'true' or 'false' only.");
-        sb.AppendLine(GetHelpNameValue(nameof(DesktopTerminal), DesktopTerminal));
+        sb.AppendLine(GetHelpNameValue(nameof(MetaInfo), MetaInfo));
 
         c?.AppendLine();
         c?.AppendLine(breaker2);
@@ -344,19 +362,19 @@ public class ConfDecoder
         sb.AppendLine(GetHelpNameValue(nameof(DotnetProjectPath), DotnetProjectPath));
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional arguments suppled to 'dotnet publish'. Do NOT include '-r' (runtime), app version,");
-        c?.AppendLine($"# or '-c' (configuration) here as they will be added (see for example {nameof(AppVersionRelease)}).");
+        c?.AppendLine($"# Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version,");
+        c?.AppendLine($"# or '-c' (configuration) here as they will be added (i.e. via {nameof(AppVersionRelease)}).");
         c?.AppendLine($"# Typically you want as a minimum: '--self-contained true'. Additional useful arguments include:");
         c?.AppendLine($"# '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true -p:PublishTrimmed=true");
         c?.AppendLine($"# -p:TrimMode=link'. Refer: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPublishArgs), DotnetPublishArgs));
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional(*) post-publish (or standalone build) commands. Multiple commands may be specifed,");
-        c?.AppendLine($"# separated by semicolon or given in multi-line form. They are called after dotnet publish,");
-        c?.AppendLine($"# but before the final output is built on Linux platforms. These could, for example, copy");
-        c?.AppendLine($"# additional files into the 'bin' directory. The working directory will be the location of");
-        c?.AppendLine($"# this file. (*) Mandatory if {nameof(DotnetProjectPath)} equals '{PathNone}'.");
+        c?.AppendLine($"# Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands");
+        c?.AppendLine($"# may be specifed, separated by semicolon or given in multi-line form. They are called after");
+        c?.AppendLine($"# dotnet publish, but before the final output is built. This could, for example, copy additional");
+        c?.AppendLine($"# files into the build directory. The working directory will be the location of this file.");
+        c?.AppendLine($"# This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathNone}'.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
 
@@ -374,7 +392,7 @@ public class ConfDecoder
         c?.AppendLine();
         c?.AppendLine($"# Boolean which sets whether to include the application version in the filename of the output");
         c?.AppendLine($"# package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if '{nameof(AppVersionRelease)}' is");
-        c?.AppendLine($"# empty or the output filename is specified at command line. Default and recommended: false.");
+        c?.AppendLine($"# empty or the output filename is specified at command line.");
         sb.AppendLine(GetHelpNameValue(nameof(OutputVersion), OutputVersion));
 
         c?.AppendLine();
@@ -420,8 +438,8 @@ public class ConfDecoder
         c?.AppendLine($"# application will have extremely limited access to the host environment. This");
         c?.AppendLine($"# option may be used to grant required application permissions. Values here should");
         c?.AppendLine($"# be prefixed with '--' and separated by semicolon or given in multi-line form.");
-        c?.AppendLine($"# Permissive example: --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
-        c?.AppendLine($"# Less permissive: --socket=wayland;--socket=fallback-x11;--filesystem=home");
+        c?.AppendLine($"# Permissive example: --socket=wayland;--socket=x11;--filesystem=host;--share=network");
+        c?.AppendLine($"# Less permissive: --socket=wayland;--socket=x11;--filesystem=home");
         c?.AppendLine($"# Refer: https://docs.flatpak.org/en/latest/sandbox-permissions.html");
         sb.AppendLine(GetHelpNameValue(nameof(FlatpakFinishArgs), FlatpakFinishArgs, true));
 
@@ -479,6 +497,26 @@ public class ConfDecoder
         }
 
         throw new ArgumentException($"Use 'true' or 'false' only for conf item {name}");
+    }
+
+    private static IReadOnlyCollection<string> GetDesktopTemplate()
+    {
+        var list = new List<string>();
+        list.Add("[Desktop Entry]");
+        list.Add($"Type=Application");
+        list.Add($"Name=${{{BuildMacros.AppName}}}");
+        list.Add($"Icon=${{{BuildMacros.AppId}}}");
+        list.Add($"Comment=${{{BuildMacros.AppSummary}}}");
+        list.Add($"Exec=${{{BuildMacros.LaunchExec}}}");
+        list.Add($"Terminal=true");
+        list.Add($"Categories=Utility");
+        list.Add($"MimeType=");
+        list.Add($"Keywords=");
+
+        // NO! Do not put in here
+        //
+
+        return list;
     }
 
     private static string AssertConfPath(string? path, bool assert)

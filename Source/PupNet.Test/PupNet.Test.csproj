@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Pubpak\Pubpak.csproj" />
+    <ProjectReference Include="..\PupNet\PupNet.csproj" />
   </ItemGroup>
 
 </Project>
