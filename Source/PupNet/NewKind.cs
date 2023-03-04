@@ -34,6 +34,11 @@ public enum NewKind
     Conf,
 
     /// <summary>
+    /// Conf file
+    /// </summary>
+    Desktop,
+
+    /// <summary>
     /// AppStream metadata.
     /// </summary>
     Meta,
@@ -57,6 +62,7 @@ public static class AssetKindExtension
         switch (kind)
         {
             case NewKind.Conf: return ".conf";
+            case NewKind.Desktop: return ".desktop";
             case NewKind.Meta: return ".metainfo.xml";
             default: return "";
         }

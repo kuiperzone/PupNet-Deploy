@@ -29,6 +29,13 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
+		<None Include="$(ProjectDir)\..\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\..\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
 		<None Include="$(ProjectDir)\..\Assets\app.svg" Link="app.svg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -47,6 +54,7 @@
 		<None Include="$(ProjectDir)\..\Assets\app.48x48.png" Link="app.48x48.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+
   </ItemGroup>
 
 </Project>

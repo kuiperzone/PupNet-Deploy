@@ -28,6 +28,7 @@ public class BuildTree
     /// </summary>
     public BuildTree(ConfDecoder conf)
     {
+        Conf = conf;
         var kind = conf.Args.Kind;
 
         Root = Path.Combine(Global, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Args.Build}");
@@ -45,7 +46,7 @@ public class BuildTree
         AppShareApplications = Path.Combine(AppShare, "applications");
         AppShareIcons = Path.Combine(AppShare, "icons");
 
-        AppExecName = kind.IsWindows() ? $"{conf.AppBase}.exe" : conf.AppBase;
+        AppExecName = Conf.Args.IsWindowsRuntime() ? $"{conf.AppBase}.exe" : conf.AppBase;
 
         // Defaults for standard linux install
         AppMetaName = conf.AppId + ".metainfo.xml";
@@ -80,15 +81,23 @@ public class BuildTree
             LaunchExec = AppExecName;
         }
 
-        // Does not imply these are actually used
-        FlatpakManifestPath = Path.Combine(PackTop, conf.AppId + ".yml");
-        RpmSpecPath = Path.Combine(PackTop, conf.AppId + ".spec");
+        if (kind == PackKind.Flatpak)
+        {
+            FlatpakManifestPath = Path.Combine(PackTop, conf.AppId + ".yml");
+        }
+
+        if (kind == PackKind.Rpm)
+        {
+            RpmSpecPath = Path.Combine(PackTop, conf.AppId + ".spec");
+        }
     }
 
     /// <summary>
     /// Global root.
     /// </summary>
     public static readonly string Global = Path.Combine(Path.GetTempPath(), $"{nameof(KuiperZone)}.{nameof(PupNet)}");
+
+    public ConfDecoder Conf { get; }
 
     /// <summary>
     /// Gets application project root.
@@ -177,14 +186,14 @@ public class BuildTree
     public string AppExecPath { get; }
 
     /// <summary>
-    /// Gets flatpak manifest path. Always has value, but does not imply content exists.
+    /// Gets flatpak manifest path. Null if not flatpak.
     /// </summary>
-    public string FlatpakManifestPath { get; }
+    public string? FlatpakManifestPath { get; }
 
     /// <summary>
-    /// Gets Rpm path. Always has value, but does not imply content exists.
+    /// Gets Rpm path. Null if not rpm.
     /// </summary>
-    public string RpmSpecPath { get; }
+    public string? RpmSpecPath { get; }
 
     /// <summary>
     /// Gets the path to app when deployed, i.e.: "$/usr/bin/AppBase[.exe]" or "/opt/AppId/AppBase[.exe]" or just "AppBase[.exe]".
@@ -216,6 +225,26 @@ public class BuildTree
     public void RemoveRoot()
     {
         Ops.RemoveDirectory(Root);
+    }
+
+    /// <summary>
+    /// Gets a list of files currently under dir. Paths are relative to given directory.
+    /// </summary>
+    public string[] GetDirectoryContents(string dir)
+    {
+        var opts = new EnumerationOptions();
+        opts.RecurseSubdirectories = true;
+        opts.ReturnSpecialDirectories = false;
+        opts.IgnoreInaccessible = true;
+
+        var files = Directory.GetFiles(dir, "*", SearchOption.AllDirectories);
+
+        for (int n = 0; n < files.Length; ++n)
+        {
+            files[n] = Path.GetRelativePath(dir, files[n]);
+        }
+
+        return files;
     }
 
     /// <summary>

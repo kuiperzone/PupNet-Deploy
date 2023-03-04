@@ -45,20 +45,8 @@ public class DummyConf : ConfDecoder
         lines.Add($"{nameof(ConfDecoder.AppLicense)} = LicenseRef-LICENSE");
 
         lines.Add($"{nameof(ConfDecoder.CommandName)} = helloworld");
-        lines.Add($"{nameof(ConfDecoder.StartFromDesktop)} = true");
-        lines.Add($"{nameof(ConfDecoder.DesktopEntry)} = {{[");
-        lines.Add($"  [Desktop Entry]");
-        lines.Add($"  Type=Application");
-        lines.Add($"  Name=${{{BuildMacros.AppName}}}");
-        lines.Add($"  Icon=${{{BuildMacros.AppId}}}");
-        lines.Add($"  Exec=${{{BuildMacros.LaunchExec}}}");
-        lines.Add($"  Comment=${{{BuildMacros.AppSummary}}}");
-        lines.Add($"  Categories=Utility");
-        lines.Add($"  MimeType=");
-        lines.Add($"  Terminal=true");
-        lines.Add($"  Keywords=");
-        lines.Add($"]}}");
-
+        lines.Add($"{nameof(ConfDecoder.IsTerminal)} = true");
+        lines.Add($"{nameof(ConfDecoder.DesktopEntry)} = app.desktop");
         lines.Add($"{nameof(ConfDecoder.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
         lines.Add($"{nameof(ConfDecoder.MetaInfo)} = metainfo.xml");
 
@@ -69,7 +57,6 @@ public class DummyConf : ConfDecoder
         lines.Add($"{nameof(ConfDecoder.OutputDirectory)} = Deploy");
         lines.Add($"{nameof(ConfDecoder.OutputVersion)} = true");
 
-        lines.Add($"{nameof(ConfDecoder.AppImageCommand)} = appimagetool");
         lines.Add($"{nameof(ConfDecoder.AppImageArgs)} = -appargs");
 
         lines.Add($"{nameof(ConfDecoder.FlatpakPlatformRuntime)} = org.freedesktop.Platform");

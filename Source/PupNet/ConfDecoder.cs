@@ -75,20 +75,19 @@ public class ConfDecoder
         AppUrl = GetOptional(nameof(AppUrl));
 
         CommandName = GetOptional(nameof(CommandName));
-        StartFromDesktop = ToBool(nameof(StartFromDesktop), GetMandatory(nameof(StartFromDesktop)));
-        DesktopEntry = GetConfMultiline(nameof(DesktopEntry), false);
-        Icons = AssertAbsolute(ConfDirectory, GetConfMultiline(nameof(Icons), true));
-        MetaInfo = AssertAbsolute(ConfDirectory, GetOptional(nameof(MetaInfo)));
+        IsTerminal = GetBool(nameof(IsTerminal));
+        DesktopEntry = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DesktopEntry)), true);
+        Icons = AssertAbsolutePath(ConfDirectory, GetConfMultiline(nameof(Icons), true));
+        MetaInfo = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(MetaInfo)), false);
 
-        DotnetProjectPath = AssertAbsolute(ConfDirectory, GetOptional(nameof(DotnetProjectPath)));
+        DotnetProjectPath = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DotnetProjectPath)), true);
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs));
         DotnetPostPublish = GetConfMultiline(nameof(DotnetPostPublish), true);
 
-        OutputDirectory = GetOptional(nameof(OutputDirectory)) ?? ConfDirectory;
-        OutputVersion = ToBool(nameof(OutputVersion), GetMandatory(nameof(OutputVersion)));
+        OutputDirectory = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(OutputDirectory)), false) ?? ConfDirectory;
+        OutputVersion = GetBool(nameof(OutputVersion));
 
         AppImageArgs = GetOptional(nameof(AppImageArgs));
-        AppImageCommand = GetMandatory(nameof(AppImageCommand));
 
         FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime));
         FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk));
@@ -96,50 +95,7 @@ public class ConfDecoder
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs));
         FlatpakFinishArgs = GetConfMultiline(nameof(FlatpakFinishArgs), true, "=", "--");
 
-        // Validate
-        if (AppBase.Contains(' '))
-        {
-            throw new ArgumentException($"{nameof(AppBase)} must not contain space characters");
-        }
-
-        if (!AppId.Contains('.') || AppId.Contains(' '))
-        {
-            throw new ArgumentException($"{nameof(AppId)} must be in reverse DNS form, i.e. 'net.example.appname'");
-        }
-
-
-        if (StartFromDesktop && DesktopEntry.Count == 0 && Args.Kind.IsLinux() && !Args.Kind.IsWindows())
-        {
-            throw new ArgumentException($"{nameof(DesktopEntry)} must provide desktop entry values for {Args.Kind}");
-        }
-
-        if (DotnetProjectPath == PathNone)
-        {
-        }
-
-        if (StartFromDesktop && Args.Kind.IsLinux() && !Args.Kind.IsWindows())
-        {
-            if (DotnetPostPublish.Count == 0)
-            {
-                throw new ArgumentException($"{nameof(DotnetPostPublish)} is mandatory where {nameof(DotnetProjectPath)} = {PathNone}");
-            }
-
-            bool assert = true;
-
-            foreach (var line in DesktopEntry)
-            {
-                if (line.StartsWith("Exec") && line.Contains($"{{{BuildMacros.LaunchExec}}}"))
-                {
-                    assert = false;
-                    break;
-                }
-            }
-
-            if (assert)
-            {
-                throw new ArgumentException($"{nameof(DesktopEntry)} must contain 'Exec=${{{BuildMacros.LaunchExec}}}'");
-            }
-        }
+        AssertOK();
     }
 
     public ArgDecoder Args { get; }
@@ -161,20 +117,19 @@ public class ConfDecoder
     public string? AppUrl { get; } = "https://example.net";
 
     public string? CommandName { get; }
-    public bool StartFromDesktop { get; } = true;
-    public IReadOnlyCollection<string> DesktopEntry { get; } = GetDesktopTemplate();
+    public bool IsTerminal { get; } = true;
+    public string? DesktopEntry { get; }
     public string? MetaInfo { get; }
     public IReadOnlyCollection<string> Icons { get; } = Array.Empty<string>();
 
     public string? DotnetProjectPath { get; }
-    public string? DotnetPublishArgs { get; } = "--self-contained true -p:DebugType=None -p:DebugSymbols=false";
+    public string? DotnetPublishArgs { get; } = $"-p:Version=${{{MacroNames.AppVersion}}} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
     public IReadOnlyCollection<string> DotnetPostPublish { get; } = Array.Empty<string>();
 
     public string OutputDirectory { get; } = "Deploy";
-    public bool OutputVersion { get; }
+    public bool OutputVersion { get; } = false;
 
     public string? AppImageArgs { get; }
-    public string AppImageCommand { get; } = "appimagetool";
 
     public string FlatpakPlatformRuntime { get; } = "org.freedesktop.Platform";
     public string FlatpakPlatformSdk { get; } = "org.freedesktop.Sdk";
@@ -312,26 +267,26 @@ public class ConfDecoder
 
         c?.AppendLine();
         c?.AppendLine($"# Optional command name to launch the application from the terminal. For example, if");
-        c?.AppendLine($"# {nameof(AppBase)} equals 'HelloWorld', the value here may be set to the same or the lower-case");
-        c?.AppendLine($"# 'helloworld' variant. It is not supported and ignored for portable formats such as");
-        c?.AppendLine($"# {nameof(PackKind.AppImage)} and {nameof(PackKind.Flatpak)}. Default: true");
+        c?.AppendLine($"# {nameof(AppBase)} equals 'HelloWorld', the value here may be set to the same or a lower-case");
+        c?.AppendLine($"# 'helloworld' variant. If empty, the application name will not be in the path and cannont be");
+        c?.AppendLine($"# started from the command line. This value is not supported and ignored for {nameof(PackKind.AppImage)}");
+        c?.AppendLine($"# and {nameof(PackKind.Flatpak)} and will be ignored. Default is empty.");
         sb.AppendLine(GetHelpNameValue(nameof(CommandName), CommandName));
 
         c?.AppendLine();
-        c?.AppendLine($"# Flag (use 'true' or 'false') which indicates whether the application can be started from");
-        c?.AppendLine($"# desktop (or has an entry in the start menu). On Linux, this means that it must have a desktop");
-        c?.AppendLine($"# file. If false, the application may be a command line utility only. Default: true");
-        sb.AppendLine(GetHelpNameValue(nameof(StartFromDesktop), StartFromDesktop));
+        c?.AppendLine($"# Flag (use 'true' or 'false') which indicates whether the application runs in the terminal.");
+        sb.AppendLine(GetHelpNameValue(nameof(IsTerminal), IsTerminal));
 
         c?.AppendLine();
-        c?.AppendLine($"# Multi-line content for the application's desktop entry on Linux. This is mandatory on Linux");
-        c?.AppendLine($"# where {nameof(StartFromDesktop)} is true. The following macros may be used in order to automate");
-        c?.AppendLine($"# the content: ${{{BuildMacros.AppName}}}, ${{{BuildMacros.AppId}}}, ${{{BuildMacros.AppSummary}}}. Importantly,");
-        c?.AppendLine($"# the value MUST include the line 'Exec=${{{BuildMacros.LaunchExec}}}' as to reflect the install location");
-        c?.AppendLine($"# specific to the package kind. The default value is expected to be suitable for most purposes.");
+        c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
+        c?.AppendLine($"# generated automatically from known application information. A file may be supplied instead to");
+        c?.AppendLine($"# provide for mime-types and internationalisation. If supplied, the file MUST contain the line:");
+        c?.AppendLine($"# 'Exec=${{{MacroNames.LaunchExec}}}' in order to use the correct install location. Other macros");
+        c?.AppendLine($"# may be used to help automate some content, and include: ${{{MacroNames.AppName}}}, ${{{MacroNames.AppId}}},");
+        c?.AppendLine($"# ${{{MacroNames.AppSummary}}} etc. If required that no desktop be installed, set value to: '{PathNone}'");
         c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
         c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
-        sb.AppendLine(GetHelpNameValue(nameof(DesktopEntry), DesktopEntry, true));
+        sb.AppendLine(GetHelpNameValue(nameof(DesktopEntry), DesktopEntry));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional icon paths. The value may include multiple filenames separated with semicolon or");
@@ -343,7 +298,7 @@ public class ConfDecoder
 
         c?.AppendLine();
         c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
-        c?.AppendLine($"# The file content may embed supported macros such as, such as '${{AppName}}' and '${{AppId}}' etc.");
+        c?.AppendLine($"# The file content may embed supported macros such as, such as '${{APP_NAME}}' and '${{APP_ID}}' etc.");
         c?.AppendLine($"# to assist in automating fields. Refer: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Assets/metainfo.xml.");
         sb.AppendLine(GetHelpNameValue(nameof(MetaInfo), MetaInfo));
@@ -364,9 +319,10 @@ public class ConfDecoder
         c?.AppendLine();
         c?.AppendLine($"# Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version,");
         c?.AppendLine($"# or '-c' (configuration) here as they will be added (i.e. via {nameof(AppVersionRelease)}).");
-        c?.AppendLine($"# Typically you want as a minimum: '--self-contained true'. Additional useful arguments include:");
-        c?.AppendLine($"# '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true -p:PublishTrimmed=true");
-        c?.AppendLine($"# -p:TrimMode=link'. Refer: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
+        c?.AppendLine($"# Typically you want as a minimum: '-p:Version=${{{MacroNames.AppVersion}}} --self-contained true'. Additional");
+        c?.AppendLine($"# useful arguments include: '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true");
+        c?.AppendLine($"# -p:PublishTrimmed=true -p:TrimMode=link'.");
+        c?.AppendLine($"# Refer: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPublishArgs), DotnetPublishArgs));
 
         c?.AppendLine();
@@ -391,8 +347,8 @@ public class ConfDecoder
 
         c?.AppendLine();
         c?.AppendLine($"# Boolean which sets whether to include the application version in the filename of the output");
-        c?.AppendLine($"# package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if '{nameof(AppVersionRelease)}' is");
-        c?.AppendLine($"# empty or the output filename is specified at command line.");
+        c?.AppendLine($"# package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if the output filename");
+        c?.AppendLine($"# is specified at command line.");
         sb.AppendLine(GetHelpNameValue(nameof(OutputVersion), OutputVersion));
 
         c?.AppendLine();
@@ -404,12 +360,6 @@ public class ConfDecoder
         c?.AppendLine($"# Additional arguments for use with appimagetool. Useful for signing. Default is empty.");
         c?.AppendLine($"# See appimagetool --help. Example: --sign");
         sb.AppendLine(GetHelpNameValue(nameof(AppImageArgs), AppImageArgs));
-
-        c?.AppendLine();
-        c?.AppendLine($"# The appimagetool command. Default is 'appimagetool' which is expected to be found");
-        c?.AppendLine($"# in $PATH. If the tool is not in path or has different name, a full path can be given");
-        c?.AppendLine($"# here. Example: /home/user/Apps/appimagetool-x86_64.AppImage");
-        sb.AppendLine(GetHelpNameValue(nameof(AppImageCommand), AppImageCommand));
 
 
         c?.AppendLine();
@@ -484,41 +434,6 @@ public class ConfDecoder
         return sb.ToString();
     }
 
-    private static bool ToBool(string name, string value)
-    {
-        if (value.Equals("true", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        if (value.Equals("false", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        throw new ArgumentException($"Use 'true' or 'false' only for conf item {name}");
-    }
-
-    private static IReadOnlyCollection<string> GetDesktopTemplate()
-    {
-        var list = new List<string>();
-        list.Add("[Desktop Entry]");
-        list.Add($"Type=Application");
-        list.Add($"Name=${{{BuildMacros.AppName}}}");
-        list.Add($"Icon=${{{BuildMacros.AppId}}}");
-        list.Add($"Comment=${{{BuildMacros.AppSummary}}}");
-        list.Add($"Exec=${{{BuildMacros.LaunchExec}}}");
-        list.Add($"Terminal=true");
-        list.Add($"Categories=Utility");
-        list.Add($"MimeType=");
-        list.Add($"Keywords=");
-
-        // NO! Do not put in here
-        //
-
-        return list;
-    }
-
     private static string AssertConfPath(string? path, bool assert)
     {
         if (string.IsNullOrEmpty(path))
@@ -560,7 +475,7 @@ public class ConfDecoder
         return runtime;
     }
 
-    private static string? AssertValue(string name, string? value, bool multi, int maxlen = int.MaxValue)
+    private static string? AssertConfValue(string name, string? value, bool multi, int maxlen = int.MaxValue)
     {
         if (!string.IsNullOrWhiteSpace(value))
         {
@@ -581,7 +496,34 @@ public class ConfDecoder
         return null;
     }
 
-    private string? AssertAbsolute(string? source, string? path, bool allowNone = true)
+    private void AssertOK()
+    {
+        // Validate
+        if (AppBase.Contains(' '))
+        {
+            throw new ArgumentException($"{nameof(AppBase)} must not contain space characters");
+        }
+
+        if (CommandName != null && CommandName.Contains(' '))
+        {
+            throw new ArgumentException($"{nameof(CommandName)} must not contain space characters");
+        }
+
+        if (!AppId.Contains('.') || AppId.Contains(' '))
+        {
+            throw new ArgumentException($"{nameof(AppId)} must be in reverse DNS form, i.e. 'net.example.appname'");
+        }
+
+        if (Args.Kind.IsLinux() && !Args.Kind.IsWindows())
+        {
+            if (DotnetProjectPath == PathNone && DotnetPostPublish.Count == 0)
+            {
+                throw new ArgumentException($"{nameof(DotnetPostPublish)} is mandatory where {nameof(DotnetProjectPath)} = {PathNone}");
+            }
+        }
+    }
+
+    private string? AssertAbsolutePath(string? source, string? path, bool allowNone)
     {
         if (!string.IsNullOrEmpty(path))
         {
@@ -607,7 +549,7 @@ public class ConfDecoder
         return null;
     }
 
-    private IReadOnlyCollection<string> AssertAbsolute(string? source, IReadOnlyCollection<string> paths)
+    private IReadOnlyCollection<string> AssertAbsolutePath(string? source, IReadOnlyCollection<string> paths)
     {
         if (paths.Count != 0)
         {
@@ -615,7 +557,7 @@ public class ConfDecoder
 
             foreach (var item in paths)
             {
-                list.Add(AssertAbsolute(source, item, false) ?? "");
+                list.Add(AssertAbsolutePath(source, item, false) ?? "");
             }
 
             return list;
@@ -662,14 +604,32 @@ public class ConfDecoder
     private string? GetOptional(string name, bool multi = false)
     {
         Reader.Values.TryGetValue(name, out string? value);
-        return AssertValue(name, value, multi);
+        return AssertConfValue(name, value, multi);
     }
 
     private string GetMandatory(string name, bool multi = false)
     {
         Reader.Values.TryGetValue(name, out string? value);
 
-        return AssertValue(name, value, multi) ??
+        return AssertConfValue(name, value, multi) ??
             throw new ArgumentException($"Mandatory value required for {name}");
     }
+
+    private bool GetBool(string name)
+    {
+        var value = GetMandatory(name);
+
+        if (value.Equals("true", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (value.Equals("false", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        throw new ArgumentException($"Use 'true' or 'false' only in conf for {name}");
+    }
+
 }

@@ -23,7 +23,7 @@ public class ConfDecoderTest
     [Fact]
     public void AppBase_Mandatory_DecodeOK()
     {
-        Assert.Equal("helloworld", new DummyConf(PackKind.AppImage).AppBase);
+        Assert.Equal("HelloWorld", new DummyConf(PackKind.AppImage).AppBase);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppBase)));
     }
 
@@ -56,20 +56,18 @@ public class ConfDecoderTest
     }
 
     [Fact]
-    public void DesktopIntegration_Mandatory_DecodeOK()
+    public void IsTerminal_Mandatory_DecodeOK()
     {
-        Assert.True(new DummyConf(PackKind.AppImage).StartFromDesktop);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.StartFromDesktop)));
+        Assert.True(new DummyConf(PackKind.AppImage).IsTerminal);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.IsTerminal)));
     }
 
 
     [Fact]
-    public void DesktopEntry_Mandatory_DecodeOK()
+    public void DesktopEntry_Optional_DecodeOK()
     {
-        Assert.NotEmpty(new DummyConf(PackKind.AppImage).DesktopEntry);
-
-        // Mandator for AppImage
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.DesktopEntry)));
+        Assert.Equal("app.desktop", new DummyConf(PackKind.AppImage).DesktopEntry);
+        Assert.Null(new DummyConf(PackKind.AppImage, nameof(ConfDecoder.DesktopEntry)).DesktopEntry);
     }
 
     [Fact]
@@ -98,13 +96,6 @@ public class ConfDecoderTest
     {
         Assert.True(new DummyConf(PackKind.AppImage).OutputVersion);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.OutputVersion)));
-    }
-
-    [Fact]
-    public void AppImageCommand_Mandatory_DecodeOK()
-    {
-        Assert.Equal("appimagetool", new DummyConf(PackKind.AppImage).AppImageCommand);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppImageCommand)));
     }
 
     [Fact]

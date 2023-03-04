@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop">
 
-    <id>${AppId}</id>
-    <launchable type="desktop-id">${DesktopId}</launchable>
+    <id>${APP_ID}</id>
+    <launchable type="desktop-id">${DESKTOP_ID}</launchable>
 
-    <name>${AppName}</name>
-    <summary>${AppSummary}</summary>
-    <developer_name>${AppVendor}</developer_name>
-    <url type="homepage">${AppUrl}</url>
+    <name>${APP_NAME}</name>
+    <summary>${APP_SUMMARY}</summary>
+    <developer_name>${APP_VENDOR}</developer_name>
+    <url type="homepage">${APP_URL}</url>
     <metadata_license>MIT</metadata_license>
-    <project_license>${AppLicense}</project_license>
+    <project_license>${APP_LICENSE}</project_license>
 
     <content_rating type="oars-1.1" />
 
@@ -19,7 +19,7 @@
     </description>
 
     <releases>
-        <release version="${AppVersion}" date="${IsoDate}">
+        <release version="${APP_VERSION}" date="${ISO_DATE}">
             <description><p>The latest release.</p></description>
         </release>
     </releases>

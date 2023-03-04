@@ -328,22 +328,17 @@ public class ArgDecoder
         sb.AppendLine();
         sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [value]");
         sb.AppendLine($"{indent}Creates a new empty conf or asset file for new project. A base file name may optionally");
-        sb.AppendLine($"{indent}be given. Valid values are : {NewKind.Conf}, {NewKind.Meta} and {NewKind.All}.");
-        sb.AppendLine($"{indent}Example: {indent}{Program.CommandName} basename -{NewShortArg} {NewKind.Conf}");
+        sb.AppendLine($"{indent}be given. Valid values are : {NewKind.Conf}, {NewKind.Desktop}, {NewKind.Meta} and {NewKind.All}.");
+        sb.AppendLine($"{indent}Example: {indent}{Program.CommandName} basename -{NewShortArg} {NewKind.All}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [flag]");
         sb.AppendLine($"{indent}Show help information.");
         sb.AppendLine();
         sb.AppendLine($"{indent}--{VersionLongArg} [flag]");
-        sb.AppendLine($"{indent}Show version. Maybe be used in conjunction with --{VerboseLongArg}.");
-
+        sb.AppendLine($"{indent}Show version information.");
         sb.AppendLine();
-        sb.AppendLine("Macro Reference:");
-        sb.AppendLine("The following macros (with example values) are supported. See online help.");
-        sb.AppendLine();
-        sb.AppendLine(new BuildMacros().ToString());
-
-        sb.AppendLine();
+        sb.AppendLine($"{indent}--{AboutLongArg} [flag]");
+        sb.Append($"{indent}Show about information.");
 
         return sb.ToString();
     }

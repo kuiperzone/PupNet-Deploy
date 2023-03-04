@@ -86,6 +86,24 @@ internal class Program
                 Console.WriteLine($"{ProductName} is distributed in the hope that it will be useful, but WITHOUT");
                 Console.WriteLine($"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS");
                 Console.WriteLine($"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.");
+
+                Console.WriteLine();
+                Console.WriteLine("AppImageKit:");
+                Console.WriteLine("Copyright (c) 2004-20 Simon Peter");
+
+                if (BuildAssets.AppImageTool != null)
+                {
+                    try
+                    {
+                        var ops = new FileOps();
+                        ops.DisplayPath = false;
+                        ops.Exec($"{BuildAssets.AppImageTool} --version");
+                    }
+                    catch
+                    {
+                    }
+                }
+
                 Console.WriteLine();
                 return 0;
             }
@@ -95,7 +113,14 @@ internal class Program
                 Console.WriteLine($"{ProductName} {Version}");
                 Console.WriteLine();
                 Console.WriteLine(ArgDecoder.GetHelperText());
+
                 Console.WriteLine();
+                Console.WriteLine("Macro Reference:");
+                Console.WriteLine("The following macros (with example values) are supported. See online help.");
+                Console.WriteLine();
+                Console.WriteLine(new BuildMacros().ToString());
+                Console.WriteLine();
+
                 return 0;
             }
 
@@ -126,6 +151,11 @@ internal class Program
             CreateNewSingleFile(NewKind.Conf, args.Value);
         }
 
+        if (args.New == NewKind.Desktop || args.New == NewKind.All)
+        {
+            CreateNewSingleFile(NewKind.Desktop, args.Value);
+        }
+
         if (args.New == NewKind.Meta || args.New == NewKind.All)
         {
             CreateNewSingleFile(NewKind.Meta, args.Value);
@@ -145,6 +175,9 @@ internal class Program
             {
                 case NewKind.Conf:
                     fop.WriteFile(path, new ConfDecoder().ToString());
+                    break;
+                case NewKind.Desktop:
+                    fop.WriteFile(path, BuildAssets.GetDesktopTemplate(true));
                     break;
                 case NewKind.Meta:
                     fop.WriteFile(path, BuildAssets.AppMetaTemplate);
@@ -169,7 +202,7 @@ internal class Program
 
             if (!def.EndsWith(ext))
             {
-                return bas + kind.GetFileExt();
+                return bas + ext;
             }
 
             return bas;

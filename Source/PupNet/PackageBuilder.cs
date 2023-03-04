@@ -48,18 +48,9 @@ public class PackageBuilder
         Args = conf.Args;
         Tree = new(conf);
 
-        OutputKind = Args.Kind;
-        BuildTarget = Args.Build;
-        BuildArch = Conf.GetBuildArch();
-        DotnetRuntime = Args.Runtime;
-        AppVersion = SplitVersion(conf.AppVersionRelease, out string temp);
-        PackRelease = temp;
-        OutputDirectory = GetOutputDirectory();
-        OutputName = GetOutputName(OutputKind);
-
         // MACROS
         // Items below may use macros
-        Macros = new(this);
+        Macros = new(Tree);
         Assets = new(Conf, Tree, Macros);
         PublishCommands = GetPublishCommands(Macros);
         PackageCommands = GetPackageCommands();
@@ -79,46 +70,6 @@ public class PackageBuilder
     /// Gets the directory build tree.
     /// </summary>
     public BuildTree Tree { get; }
-
-    /// <summary>
-    /// Gets package output kinds.
-    /// </summary>
-    public PackKind OutputKind { get; }
-
-    /// <summary>
-    /// Release or Debug.
-    /// </summary>
-    public string BuildTarget { get; }
-
-    /// <summary>
-    /// Target arch.
-    /// </summary>
-    public string BuildArch { get; }
-
-    /// <summary>
-    /// Gets the dotnet runtime.
-    /// </summary>
-    public string DotnetRuntime { get; }
-
-    /// <summary>
-    /// Gets the application version. This is the configured version, excluding any Release suffix.
-    /// </summary>
-    public string? AppVersion { get; }
-
-    /// <summary>
-    /// Gets the package release. This is the suffix of the configured version.
-    /// </summary>
-    public string PackRelease { get; } = "1";
-
-    /// <summary>
-    /// Gets output directory.
-    /// </summary>
-    public string OutputDirectory { get; }
-
-    /// <summary>
-    /// Gets output filename.
-    /// </summary>
-    public string OutputName { get; }
 
     /// <summary>
     /// Gets a dictionary of macros.
@@ -155,7 +106,7 @@ public class PackageBuilder
             // Conditional writes
             Tree.Ops.WriteFile(Tree.DesktopPath, Assets.DesktopContent);
 
-            if (OutputKind == PackKind.AppImage)
+            if (Macros.OutputKind == PackKind.AppImage)
             {
                 // We need a bodge fix to get AppImage to pass validation.
                 // In effect, we need two .desktop files. One at root, and one under applications.
@@ -166,7 +117,6 @@ public class PackageBuilder
 
             Tree.Ops.CopyFile(Assets.SourceIcon, Assets.DestIcon);
             Tree.Ops.WriteFile(Tree.AppMetaPath, Assets.AppMetaContent);
-            Tree.Ops.WriteFile(Tree.FlatpakManifestPath, Assets.FlatpakManifestContent);
 
             foreach (var item in Assets.LinuxIcons)
             {
@@ -179,15 +129,9 @@ public class PackageBuilder
                 Environment.SetEnvironmentVariable(item.Key, item.Value);
             }
 
-            if (Args.Arch != null && OutputKind == PackKind.AppImage)
-            {
-                // Used by AppImage
-                Environment.SetEnvironmentVariable("ARCH", Conf.Args.Arch);
-            }
-
             foreach (var item in PublishCommands)
             {
-                Console.WriteLine();
+                Console.WriteLine(item);
                 Tree.Ops.Exec(item);
             }
 
@@ -195,12 +139,29 @@ public class PackageBuilder
             Tree.Ops.AssertExists(Path.Combine(Tree.PublishBin, Tree.AppExecName));
             Tree.Ops.CopyDirectory(Tree.PublishBin, Tree.AppInstall);
 
-            if (OutputKind == PackKind.Rpm)
+            AddConditionalRunLink();
+
+            // Specs after all files are assembled
+            Tree.Ops.WriteFile(Tree.FlatpakManifestPath, Assets.FlatpakManifestContent);
+            Tree.Ops.WriteFile(Tree.RpmSpecPath, Assets.GetRpmSpecContent(true));
+            Tree.Ops.CreateDirectory(Macros.OutputDirectory);
+
+            if (Args.IsVerbose)
             {
-                Tree.Ops.WriteFile(Tree.RpmSpecPath, Assets.GetRpmSpecContent(GetAppDirFiles()));
+                Console.WriteLine();
+                Console.WriteLine("Packaged Files:");
+
+                foreach (var item in Tree.GetDirectoryContents(Tree.AppDir))
+                {
+                    Console.WriteLine(item);
+                }
             }
 
-            Tree.Ops.CreateDirectory(OutputDirectory);
+            if (Args.Arch != null && Macros.OutputKind == PackKind.AppImage)
+            {
+                // Used by AppImage
+                Environment.SetEnvironmentVariable("ARCH", Conf.Args.Arch);
+            }
 
             foreach (var item in PackageCommands)
             {
@@ -208,12 +169,13 @@ public class PackageBuilder
                 Tree.Ops.Exec(item);
             }
 
-            if (OutputKind == PackKind.Zip)
+            if (Macros.OutputKind == PackKind.Zip)
             {
                 Console.WriteLine();
             }
 
             Console.WriteLine();
+            Console.WriteLine("OUTPUT: " + Path.Combine(Macros.OutputDirectory, Macros.OutputName));
         }
     }
 
@@ -235,16 +197,16 @@ public class PackageBuilder
         AppendHeader(builder, "APPLICATION");
         AppendPair(builder, nameof(Conf.AppBase), Conf.AppBase);
         AppendPair(builder, nameof(Conf.AppId), Conf.AppId);
-        AppendPair(builder, nameof(AppVersion), AppVersion);
-        AppendPair(builder, nameof(PackRelease), PackRelease);
+        AppendPair(builder, nameof(Macros.AppVersion), Macros.AppVersion);
+        AppendPair(builder, nameof(Macros.PackRelease), Macros.PackRelease);
 
         AppendHeader(builder, "OUTPUT");
-        AppendPair(builder, nameof(OutputKind), OutputKind.ToString().ToLowerInvariant());
-        AppendPair(builder, nameof(DotnetRuntime), DotnetRuntime);
-        AppendPair(builder, nameof(Args.Arch), Args.Arch ?? $"Auto ({BuildArch})");
-        AppendPair(builder, nameof(BuildTarget), BuildTarget);
-        AppendPair(builder, nameof(OutputDirectory), OutputDirectory);
-        AppendPair(builder, nameof(OutputName), OutputName);
+        AppendPair(builder, nameof(Macros.OutputKind), Macros.OutputKind.ToString().ToLowerInvariant());
+        AppendPair(builder, nameof(Macros.DotnetRuntime), Macros.DotnetRuntime);
+        AppendPair(builder, nameof(Args.Arch), Args.Arch ?? $"Auto ({Macros.BuildArch})");
+        AppendPair(builder, nameof(Macros.BuildTarget), Macros.BuildTarget);
+        AppendPair(builder, nameof(Macros.OutputDirectory), Macros.OutputDirectory);
+        AppendPair(builder, nameof(Macros.OutputName), Macros.OutputName);
 
         if (verbose)
         {
@@ -275,16 +237,16 @@ public class PackageBuilder
                 builder.AppendLine(Assets.AppMetaContent);
             }
 
-            if (OutputKind == PackKind.Flatpak)
+            if (Macros.OutputKind == PackKind.Flatpak)
             {
                 AppendHeader(builder, "FLATPAK MANIFEST");
                 builder.AppendLine(Assets.FlatpakManifestContent);
             }
 
-            if (OutputKind == PackKind.Rpm)
+            if (Macros.OutputKind == PackKind.Rpm)
             {
                 AppendHeader(builder, "RPM SPEC");
-                builder.AppendLine(Assets.GetRpmSpecContent());
+                builder.AppendLine(Assets.GetRpmSpecContent(false));
             }
 
             AppendHeader(builder, "MACROS");
@@ -334,93 +296,30 @@ public class PackageBuilder
         builder.AppendLine(value);
     }
 
-    private static string? SplitVersion(string? version, out string release)
+    private void AddConditionalRunLink()
     {
-        release = "1";
-
-        if (!string.IsNullOrEmpty(version))
+        if (Macros.OutputKind == PackKind.AppImage)
         {
-            int p0 = version.IndexOf("[");
-            var len = version.IndexOf("]") - p0 - 1;
+            // IMPORTANT - Create AppRun link
+            // ln -s {target} {link}
+            var cmd = $"ln -s \"{Tree.LaunchExec}\" \"{Path.Combine(Tree.AppDir, "AppRun")}\"";
+            Tree.Ops.Exec(cmd);
+        }
+        else
+        if (!string.IsNullOrEmpty(Conf.CommandName) && Tree.AppBin != Tree.AppInstall && Macros.OutputKind.IsLinux())
+        {
+            var path = Path.Combine(Tree.AppBin, Conf.CommandName);
 
-            if (p0 > 0 && len > 0)
+            // Note
+            // Rpm and Deb etc only. These get installed to /opt, but put 'link file' in /usr/bin
+            var script = $"#!/bin/sh\nexec {Tree.LaunchExec} \"$@\"";
+
+            if (!File.Exists(path))
             {
-                var temp = version.Substring(p0 + 1, len).Trim();
-                version = version.Substring(0, p0).Trim();
-
-                if (temp.Length != 0)
-                {
-                    release = temp;
-                }
+                Tree.Ops.WriteFile(path, script);
+                Tree.Ops.Exec($"chmod a+x {path}");
             }
         }
-
-        return version;
-    }
-
-    private string[] GetAppDirFiles()
-    {
-        var opts = new EnumerationOptions();
-        opts.RecurseSubdirectories = true;
-        opts.ReturnSpecialDirectories = false;
-        opts.IgnoreInaccessible = true;
-
-        var files = Directory.GetFiles(Tree.AppDir, "*", SearchOption.AllDirectories);
-
-        for (int n = 0; n < files.Length; ++n)
-        {
-            files[n] = Path.GetRelativePath(Tree.AppDir, files[n]);
-        }
-
-        return files;
-    }
-
-    private string GetOutputDirectory()
-    {
-        var argDir = Path.GetDirectoryName(Args.Output);
-
-        if (argDir != null)
-        {
-            if (Path.IsPathFullyQualified(argDir))
-            {
-                return argDir;
-            }
-
-            return Path.Combine(Conf.OutputDirectory, argDir);
-        }
-
-        return Conf.OutputDirectory;
-    }
-
-    private string GetOutputName(PackKind kind)
-    {
-        var output = Path.GetFileName(Args.Output);
-
-        if (output != null)
-        {
-            return output;
-        }
-
-        output = Conf.AppBase;
-
-        if (Conf.OutputVersion && !string.IsNullOrEmpty(AppVersion))
-        {
-            output += $"-{AppVersion}-{PackRelease}";
-        }
-
-        output += $".{BuildArch}";
-
-        if (kind == PackKind.AppImage)
-        {
-            return output + ".AppImage";
-        }
-
-        if (kind == PackKind.WinSetup)
-        {
-            return output + ".exe";
-        }
-
-        return output + "." + kind.ToString().ToLowerInvariant();
     }
 
     private List<string> GetPublishCommands(BuildMacros macros)
@@ -442,25 +341,19 @@ public class PackageBuilder
             if (!string.IsNullOrEmpty(Conf.DotnetProjectPath) && Conf.DotnetProjectPath != ".")
             {
                 builder.Append(" ");
-                builder.Append(Conf.DotnetProjectPath);
+                builder.Append($"\"{Conf.DotnetProjectPath}\"");
             }
 
-            if (!string.IsNullOrEmpty(DotnetRuntime) && !args.Contains("-r ") && !args.Contains("--runtime "))
+            if (!string.IsNullOrEmpty(Macros.DotnetRuntime) && !args.Contains("-r ") && !args.Contains("--runtime "))
             {
                 builder.Append(" -r ");
-                builder.Append(DotnetRuntime);
+                builder.Append(Macros.DotnetRuntime);
             }
 
             if (!string.IsNullOrEmpty(Args.Build) && !args.Contains("-c ") && !args.Contains("--configuration"))
             {
                 builder.Append(" -c ");
                 builder.Append(Args.Build);
-            }
-
-            if (!string.IsNullOrEmpty(AppVersion) && !args.Contains("-p:Version") && !args.Contains("--property:Version"))
-            {
-                builder.Append(" -p:Version=");
-                builder.Append(AppVersion);
             }
 
             if (!string.IsNullOrEmpty(Args.Property))
@@ -475,10 +368,10 @@ public class PackageBuilder
                 builder.Append(Args.Property);
             }
 
-            if (!string.IsNullOrEmpty(Conf.DotnetPublishArgs))
+            if (!string.IsNullOrEmpty(args))
             {
                 builder.Append(" ");
-                builder.Append(Conf.DotnetPublishArgs);
+                builder.Append(args);
             }
 
             builder.Append(" -o \"");
@@ -499,15 +392,17 @@ public class PackageBuilder
     private List<string> GetPackageCommands()
     {
         var list = new List<string>();
-        var output = Path.Combine(OutputDirectory, OutputName);
+        var output = Path.Combine(Macros.OutputDirectory, Macros.OutputName);
 
-        if (OutputKind == PackKind.AppImage)
+        if (Macros.OutputKind == PackKind.AppImage)
         {
-            // IMPORTANT - Create AppRun link
-            // ln -s {target} {link}
-            list.Add($"ln -s \"{Tree.LaunchExec}\" \"{Path.Combine(Tree.AppDir, "AppRun")}\"");
+            // Path to embedded
+            if (BuildAssets.AppImageTool == null)
+            {
+                throw new InvalidOperationException($"{PackKind.AppImage} not supported on {ConfDecoder.GetOSArch()}");
+            }
 
-            list.Add($"{Conf.AppImageCommand} {Conf.AppImageArgs} \"{Tree.AppDir}\" \"{output}\"");
+            list.Add($"{BuildAssets.AppImageTool} {Conf.AppImageArgs} \"{Tree.AppDir}\" \"{output}\"");
 
             if (Args.IsRun)
             {
@@ -517,7 +412,7 @@ public class PackageBuilder
             return list;
         }
 
-        if (OutputKind == PackKind.Flatpak)
+        if (Macros.OutputKind == PackKind.Flatpak)
         {
             var temp = Path.Combine(Tree.PackTop, "build");
             var state = Path.Combine(Tree.PackTop, "state");
@@ -539,15 +434,10 @@ public class PackageBuilder
             return list;
         }
 
-        if (OutputKind == PackKind.Rpm)
+        if (Macros.OutputKind == PackKind.Rpm)
         {
-            // --nobuild
-            // --nocheck
-            // --noprep
-            // --noclean
-            // --buildroot=DIRECTORY
             // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
-            var cmd = $"rpmbuild -bb --nocheck --noprep --verbose \"{Tree.RpmSpecPath}\"";
+            var cmd = $"rpmbuild -bb \"{Tree.RpmSpecPath}\"";
             cmd += $" --define \"_topdir {Path.Combine(Tree.PackTop, "rpmbuild")}\" --buildroot=\"{Tree.AppDir}\"";
             cmd += $" --define \"_rpmdir {output}\" --define \"_build_id_links none\"";
 
@@ -555,12 +445,18 @@ public class PackageBuilder
             return list;
         }
 
-        if (OutputKind == PackKind.Zip)
+        if (Macros.OutputKind == PackKind.Deb)
+        {
+
+            return list;
+        }
+
+        if (Macros.OutputKind == PackKind.Zip)
         {
             return list;
         }
 
-        throw new NotImplementedException($"Not implemented {OutputKind}");
+        throw new NotImplementedException($"Not implemented {Macros.OutputKind}");
     }
 
 }
