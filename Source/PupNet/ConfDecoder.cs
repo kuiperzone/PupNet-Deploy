@@ -64,8 +64,8 @@ public class ConfDecoder
         AssertFiles = assertFiles;
         ConfDirectory = assertFiles ? Path.GetDirectoryName(reader.Filepath)! : "";
 
-        AppBase = GetMandatory(nameof(AppBase));
-        AppName = GetMandatory(nameof(AppName));
+        AppBaseName = GetMandatory(nameof(AppBaseName));
+        AppFriendlyName = GetMandatory(nameof(AppFriendlyName));
         AppId = GetMandatory(nameof(AppId));
         AppVersionRelease = GetMandatory(nameof(AppVersionRelease));
 
@@ -74,7 +74,7 @@ public class ConfDecoder
         AppVendor = GetMandatory(nameof(AppVendor));
         AppUrl = GetOptional(nameof(AppUrl));
 
-        CommandName = GetOptional(nameof(CommandName));
+        StartCommand = GetOptional(nameof(StartCommand));
         IsTerminal = GetBool(nameof(IsTerminal));
         DesktopEntry = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DesktopEntry)), true);
         Icons = AssertAbsolutePath(ConfDirectory, GetConfMultiline(nameof(Icons), true));
@@ -107,8 +107,8 @@ public class ConfDecoder
     /// </summary>
     public string ConfDirectory { get; }
 
-    public string AppBase { get; } = "HelloWorld";
-    public string AppName { get; } = "Hello World";
+    public string AppBaseName { get; } = "HelloWorld";
+    public string AppFriendlyName { get; } = "Hello World";
     public string AppId { get; } = "net.example.helloworld";
     public string AppVersionRelease { get; } = "1.0.0[1]";
     public string AppSummary { get; } = "A HelloWorld application";
@@ -116,7 +116,7 @@ public class ConfDecoder
     public string AppVendor { get; } = "Acme Ltd";
     public string? AppUrl { get; } = "https://example.net";
 
-    public string? CommandName { get; }
+    public string? StartCommand { get; }
     public bool IsTerminal { get; } = true;
     public string? DesktopEntry { get; }
     public string? MetaInfo { get; }
@@ -223,12 +223,13 @@ public class ConfDecoder
         c?.AppendLine();
         c?.AppendLine("# Mandatory application base name. This MUST BE the base name of the main executable");
         c?.AppendLine("# file. It should NOT include any directory part or extension, i.e. do not append");
-        c?.AppendLine("# '.exe' or '.dll'. It should not contain a space character. Example: HelloWorld");
-        sb.AppendLine(GetHelpNameValue(nameof(AppBase), AppBase));
+        c?.AppendLine("# '.exe' or '.dll'. It should not contain spaces or non-alphanumeric characters except '-'.");
+        c?.AppendLine("# Example: HelloWorld");
+        sb.AppendLine(GetHelpNameValue(nameof(AppBaseName), AppBaseName));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory application friendly name. Example: Hello World");
-        sb.AppendLine(GetHelpNameValue(nameof(AppName), AppName));
+        sb.AppendLine(GetHelpNameValue(nameof(AppFriendlyName), AppFriendlyName));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory application ID in reverse DNS form. Example: net.example.helloworld");
@@ -242,13 +243,13 @@ public class ConfDecoder
         sb.AppendLine(GetHelpNameValue(nameof(AppVersionRelease), AppVersionRelease));
 
         c?.AppendLine();
-        c?.AppendLine($"# Mandatory single line application description. Example: A Hello World application");
+        c?.AppendLine($"# Mandatory single line application description. Example: A really good Hello World application");
         sb.AppendLine(GetHelpNameValue(nameof(AppSummary), AppSummary));
 
         c?.AppendLine();
-        c?.AppendLine($"# Mandatory application license name. Ideally, this should be one of the recognised");
-        c?.AppendLine($"# SPDX license identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For");
-        c?.AppendLine($"# a properietary or custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'.");
+        c?.AppendLine($"# Mandatory application license name. This should be one of the recognised SPDX license");
+        c?.AppendLine($"# identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a properietary or");
+        c?.AppendLine($"# custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE', or similar.");
         sb.AppendLine(GetHelpNameValue(nameof(AppLicense), AppLicense));
 
         c?.AppendLine();
@@ -266,12 +267,12 @@ public class ConfDecoder
         c?.AppendLine(breaker2);
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional command name to launch the application from the terminal. For example, if");
-        c?.AppendLine($"# {nameof(AppBase)} equals 'HelloWorld', the value here may be set to the same or a lower-case");
-        c?.AppendLine($"# 'helloworld' variant. If empty, the application name will not be in the path and cannont be");
-        c?.AppendLine($"# started from the command line. This value is not supported and ignored for {nameof(PackKind.AppImage)}");
-        c?.AppendLine($"# and {nameof(PackKind.Flatpak)} and will be ignored. Default is empty.");
-        sb.AppendLine(GetHelpNameValue(nameof(CommandName), CommandName));
+        c?.AppendLine($"# Optional command name to start the application from the terminal. If, for example, {nameof(AppBaseName)}");
+        c?.AppendLine($"# is 'HelloWorld', the value here may be set to the same or a lower-case 'helloworld' variant.");
+        c?.AppendLine($"# If empty, the application name will not be in the path and cannot be started from the command");
+        c?.AppendLine($"# line. This value is not supported for {nameof(PackKind.AppImage)} and {nameof(PackKind.Flatpak)}");
+        c?.AppendLine($"# and will be ignored. Default is empty.");
+        sb.AppendLine(GetHelpNameValue(nameof(StartCommand), StartCommand));
 
         c?.AppendLine();
         c?.AppendLine($"# Flag (use 'true' or 'false') which indicates whether the application runs in the terminal.");
@@ -281,8 +282,8 @@ public class ConfDecoder
         c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
         c?.AppendLine($"# generated automatically from known application information. A file may be supplied instead to");
         c?.AppendLine($"# provide for mime-types and internationalisation. If supplied, the file MUST contain the line:");
-        c?.AppendLine($"# 'Exec=${{{MacroNames.LaunchExec}}}' in order to use the correct install location. Other macros");
-        c?.AppendLine($"# may be used to help automate some content, and include: ${{{MacroNames.AppName}}}, ${{{MacroNames.AppId}}},");
+        c?.AppendLine($"# 'Exec=${{{MacroNames.DesktopExec}}}' in order to use the correct install location. Other macros");
+        c?.AppendLine($"# may be used to help automate some content, and include: ${{{MacroNames.AppFriendlyName}}}, ${{{MacroNames.AppId}}},");
         c?.AppendLine($"# ${{{MacroNames.AppSummary}}} etc. If required that no desktop be installed, set value to: '{PathNone}'");
         c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
         c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
@@ -298,7 +299,7 @@ public class ConfDecoder
 
         c?.AppendLine();
         c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
-        c?.AppendLine($"# The file content may embed supported macros such as, such as '${{APP_NAME}}' and '${{APP_ID}}' etc.");
+        c?.AppendLine($"# The file content may embed supported macros such as, such as {MacroNames.AppFriendlyName} and {MacroNames.AppId} etc.");
         c?.AppendLine($"# to assist in automating fields. Refer: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Assets/metainfo.xml.");
         sb.AppendLine(GetHelpNameValue(nameof(MetaInfo), MetaInfo));
@@ -499,14 +500,14 @@ public class ConfDecoder
     private void AssertOK()
     {
         // Validate
-        if (AppBase.Contains(' '))
+        if (AppBaseName.Contains(' '))
         {
-            throw new ArgumentException($"{nameof(AppBase)} must not contain space characters");
+            throw new ArgumentException($"{nameof(AppBaseName)} must not contain space characters");
         }
 
-        if (CommandName != null && CommandName.Contains(' '))
+        if (StartCommand != null && StartCommand.Contains(' '))
         {
-            throw new ArgumentException($"{nameof(CommandName)} must not contain space characters");
+            throw new ArgumentException($"{nameof(StartCommand)} must not contain space characters");
         }
 
         if (!AppId.Contains('.') || AppId.Contains(' '))

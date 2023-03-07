@@ -46,7 +46,7 @@ public class BuildTree
         AppShareApplications = Path.Combine(AppShare, "applications");
         AppShareIcons = Path.Combine(AppShare, "icons");
 
-        AppExecName = Conf.Args.IsWindowsRuntime() ? $"{conf.AppBase}.exe" : conf.AppBase;
+        AppExecName = Conf.Args.IsWindowsRuntime() ? $"{conf.AppBaseName}.exe" : conf.AppBaseName;
 
         // Defaults for standard linux install
         AppMetaName = conf.AppId + ".metainfo.xml";

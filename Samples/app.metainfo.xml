@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
+<component type="desktop-application">
 
     <id>${APP_ID}</id>
-    <launchable type="desktop-id">${DESKTOP_ID}</launchable>
-
-    <name>${APP_NAME}</name>
+    <name>hellopuppy</name>
     <summary>${APP_SUMMARY}</summary>
     <developer_name>${APP_VENDOR}</developer_name>
     <url type="homepage">${APP_URL}</url>
@@ -29,5 +27,7 @@
             <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
         </screenshot>
     </screenshots>
+
+    <launchable type="desktop-id">${DESKTOP_NAME}</launchable>
 
 </component>

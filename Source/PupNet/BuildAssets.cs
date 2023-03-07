@@ -48,7 +48,14 @@ public class BuildAssets
 
         if (SourceIcon != null)
         {
-            DestIcon = Path.Combine(Tree.AppDir, Conf.AppId + Path.GetExtension(SourceIcon));
+            if (kind == PackKind.AppImage)
+            {
+                DestIcon = Path.Combine(Tree.AppDir, Conf.AppId + Path.GetExtension(SourceIcon));
+            }
+            else
+            {
+                // DestIcon = MapSourceIconToBuild(SourceIcon);
+            }
         }
 
         LinuxIcons = GetLinuxIconPaths(icons);
@@ -73,7 +80,7 @@ public class BuildAssets
 
                     foreach (var line in temp.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (line.StartsWith("Exec") && line.Contains($"{{{MacroNames.LaunchExec}}}"))
+                        if (line.StartsWith("Exec") && line.Contains($"{{{MacroNames.DesktopExec}}}"))
                         {
                             // OK
                             assert = false;
@@ -83,7 +90,7 @@ public class BuildAssets
 
                     if (assert)
                     {
-                        throw new ArgumentException($"{nameof(ConfDecoder.DesktopEntry)} must contain 'Exec=${{{MacroNames.LaunchExec}}}'");
+                        throw new ArgumentException($"{nameof(ConfDecoder.DesktopEntry)} must contain 'Exec=${{{MacroNames.DesktopExec}}}'");
                     }
                 }
             }
@@ -103,10 +110,11 @@ public class BuildAssets
         var list = new List<string>();
         list.Add("[Desktop Entry]");
         list.Add($"Type=Application");
-        list.Add($"Name=${{{MacroNames.AppName}}}");
+        list.Add($"Name=${{{MacroNames.AppFriendlyName}}}");
         list.Add($"Icon=${{{MacroNames.AppId}}}");
         list.Add($"Comment=${{{MacroNames.AppSummary}}}");
-        list.Add($"Exec=${{{MacroNames.LaunchExec}}}");
+        list.Add($"Exec=${{{MacroNames.DesktopExec}}}");
+        list.Add($"TryExec=${{{MacroNames.DesktopExec}}}");
         list.Add($"Terminal={terminal.ToString().ToLowerInvariant()}");
         list.Add($"Categories=Utility");
         list.Add($"MimeType=");
@@ -180,7 +188,7 @@ public class BuildAssets
             var sb = new StringBuilder();
             var dict = Macros.Dictionary;
 
-            sb.AppendLine($"Name: {Conf.AppBase}");
+            sb.AppendLine($"Name: {Conf.AppBaseName}");
             sb.AppendLine($"Version: {Macros.AppVersion}");
             sb.AppendLine($"Release: {Macros.PackRelease}");
             sb.AppendLine($"BuildArch: {Macros.BuildArch}");
@@ -288,13 +296,13 @@ public class BuildAssets
 
         var sb = new StringBuilder();
         sb.AppendLine($"<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        sb.AppendLine($"<component type=\"desktop\">");
-        sb.AppendLine($"{Indent}<id>${{{MacroNames.AppId}}}.desktop</id>");
+        sb.AppendLine($"<component type=\"desktop-application\">");
+        sb.AppendLine($"{Indent}<id>${{{MacroNames.AppId}}}</id>");
         sb.AppendLine($"{Indent}<metadata_license>MIT</metadata_license>");
         sb.AppendLine($"{Indent}<project_license>${{{MacroNames.AppLicense}}}</project_license>");
         sb.AppendLine($"{Indent}<content_rating type=\"oars-1.1\" />");
         sb.AppendLine();
-        sb.AppendLine($"{Indent}<name>${{{MacroNames.AppName}}}</name>");
+        sb.AppendLine($"{Indent}<name>${{{MacroNames.AppFriendlyName}}}</name>");
         sb.AppendLine($"{Indent}<summary>${{{MacroNames.AppSummary}}}</summary>");
         sb.AppendLine($"{Indent}<developer_name>${{{MacroNames.AppVendor}}}</developer_name>");
         sb.AppendLine($"{Indent}<url type=\"homepage\">${{{MacroNames.AppUrl}}}</url>");
@@ -319,24 +327,20 @@ public class BuildAssets
         sb.AppendLine($"{Indent}</screenshots>");
         sb.AppendLine($"{Indent}-->");
 
-        sb.AppendLine($"{Indent}<!-- Needed for AppImage (use ${{{MacroNames.DesktopId}}} macro) -->");
-	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">${{{MacroNames.DesktopId}}}</launchable>");
+        sb.AppendLine($"{Indent}<!-- Do not change the ID -->");
+	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">${{{MacroNames.DesktopName}}}</launchable>");
 
         sb.AppendLine($"</component>");
 
-/*
-        // Not needed with MacroAppSummary
-        // These are problematic because the values MUST use MacroDesktopId as value is output kind dependent.
-        sb.AppendLine($"{Indent}<!-- Do not change this -->");
-	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">${{{BuildMacros.DesktopName}}}</launchable>");
-        sb.AppendLine();
+        return sb.ToString();
+
+        /* Needed?
         sb.AppendLine();
         sb.AppendLine($"{Indent}<provides>");
-        sb.AppendLine($"{IndentIndent}<!-- Do not change this -->");
-		sb.AppendLine($"{IndentIndent}<id>${{{Macros.DesktopId}}}</id>");
+        sb.AppendLine($"{Indent}<!-- Do not change the ID -->");
+		sb.AppendLine($"{IndentIndent}<id>${{{MacroNames.DesktopId}}}</id>");
 	    sb.AppendLine($"{Indent}</provides>");
-*/
-        return sb.ToString();
+        */
     }
 
     private static int GetStandardPngSize(string filename)
@@ -374,38 +378,33 @@ public class BuildAssets
 
     private static string? GetSourceIcon(PackKind kind, IReadOnlyCollection<string> paths)
     {
+        int max = 0;
         string? rslt = null;
 
-        // Currently only used Windows and AppImage
-        if (kind == PackKind.WinSetup || kind == PackKind.AppImage)
+        foreach (var item in paths)
         {
-            int max = 0;
+            var ext = Path.GetExtension(item).ToLowerInvariant();
 
-            foreach (var item in paths)
+            if (kind == PackKind.WinSetup && ext == ".ico")
             {
-                var ext = Path.GetExtension(item).ToLowerInvariant();
+                // Only need this
+                return item;
+            }
 
-                if (kind == PackKind.WinSetup && ext == ".ico")
+            if (kind == PackKind.AppImage)
+            {
+                if (ext == ".svg")
                 {
-                    // Only need this
                     return item;
                 }
 
-                if (kind == PackKind.AppImage)
+                // Get biggest PNG
+                int size = GetStandardPngSize(item);
+
+                if (size > max)
                 {
-                    if (ext == ".svg")
-                    {
-                        return item;
-                    }
-
-                    // Get biggest PNG
-                    int size = GetStandardPngSize(item);
-
-                    if (size > max)
-                    {
-                        max = size;
-                        rslt = item;
-                    }
+                    max = size;
+                    rslt = item;
                 }
             }
         }
@@ -413,7 +412,7 @@ public class BuildAssets
         return rslt;
     }
 
-    private string? MapIconSourceToBuild(string sourcePath)
+    private string? MapSourceIconToBuild(string sourcePath)
     {
         var ext = Path.GetExtension(sourcePath).ToLowerInvariant();
 
@@ -441,7 +440,7 @@ public class BuildAssets
         {
             foreach (var item in sources)
             {
-                var dest = MapIconSourceToBuild(item);
+                var dest = MapSourceIconToBuild(item);
 
                 if (dest != null)
                 {
@@ -480,7 +479,7 @@ public class BuildAssets
         sb.AppendLine($"runtime: {Conf.FlatpakPlatformRuntime}");
         sb.AppendLine($"runtime-version: '{Conf.FlatpakPlatformVersion}'");
         sb.AppendLine($"sdk: {Conf.FlatpakPlatformSdk}");
-        sb.AppendLine($"command: {Conf.AppBase}");
+        sb.AppendLine($"command: {Conf.AppBaseName}");
         sb.AppendLine($"modules:");
         sb.AppendLine($"  - name: {Conf.AppId}");
         sb.AppendLine($"    buildsystem: simple");

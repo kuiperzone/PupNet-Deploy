@@ -24,8 +24,8 @@ namespace KuiperZone.PupNet;
 public static class MacroNames
 {
     // ConfDecoder Names - do not change as will break configs out in the wild
-    public const string AppBase = "APP_BASE";
-    public const string AppName = "APP_NAME";
+    public const string AppBaseName = "APP_BASE_NAME";
+    public const string AppFriendlyName = "APP_FRIENDLY_NAME";
     public const string AppId = "APP_ID";
     public const string AppSummary = "APP_SUMMARY";
     public const string AppLicense = "APP_LICENSE";
@@ -43,12 +43,12 @@ public static class MacroNames
     public const string IsoDate = "ISO_DATE";
 
     // BuildTree Names - do not change as will break configs out in the wild
-    public const string DesktopId = "DESKTOP_ID";
-    public const string AppMetaName = "APP_META_NAME";
-    public const string AppDir = "APP_DIR";
-    public const string AppShare = "APP_SHARE";
-    public const string PublishBin = "PUBLISH_BIN";
-    public const string LaunchExec = "LAUNCH_EXEC";
+    public const string DesktopName = "DESKTOP_NAME";
+    public const string MetaInfoName = "METAINFO_NAME";
+    public const string BuildRootDir = "BUILD_ROOT_DIR";
+    public const string BuildShareDir = "BUILD_SHARE_DIR";
+    public const string PublishBinDir = "PUBLISH_BIN_DIR";
+    public const string DesktopExec = "DESKTOP_EXEC";
 }
 
 /// <summary>
@@ -85,8 +85,8 @@ public class BuildMacros
 
         var dict = new SortedDictionary<string, string>();
 
-        dict.Add(MacroNames.AppBase, Conf.AppBase);
-        dict.Add(MacroNames.AppName, Conf.AppName);
+        dict.Add(MacroNames.AppBaseName, Conf.AppBaseName);
+        dict.Add(MacroNames.AppFriendlyName, Conf.AppFriendlyName);
         dict.Add(MacroNames.AppId, Conf.AppId);
         dict.Add(MacroNames.AppSummary, Conf.AppSummary);
         dict.Add(MacroNames.AppLicense, Conf.AppLicense);
@@ -102,12 +102,12 @@ public class BuildMacros
         dict.Add(MacroNames.OutputPath, Path.Combine(OutputDirectory, OutputName));
         dict.Add(MacroNames.IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
 
-        dict.Add(MacroNames.DesktopId, tree.DesktopId);
-        dict.Add(MacroNames.AppMetaName, tree.AppMetaName);
-        dict.Add(MacroNames.AppDir, tree.AppDir);
-        dict.Add(MacroNames.PublishBin, tree.PublishBin);
-        dict.Add(MacroNames.AppShare, tree.AppShare);
-        dict.Add(MacroNames.LaunchExec, tree.LaunchExec);
+        dict.Add(MacroNames.DesktopName, tree.DesktopId);
+        dict.Add(MacroNames.MetaInfoName, tree.AppMetaName);
+        dict.Add(MacroNames.BuildRootDir, tree.AppDir);
+        dict.Add(MacroNames.PublishBinDir, tree.PublishBin);
+        dict.Add(MacroNames.BuildShareDir, tree.AppShare);
+        dict.Add(MacroNames.DesktopExec, tree.LaunchExec);
 
         Dictionary = dict;
     }
@@ -257,7 +257,7 @@ public class BuildMacros
             return output;
         }
 
-        output = Conf.AppBase;
+        output = Conf.AppBaseName;
 
         if (Conf.OutputVersion && !string.IsNullOrEmpty(AppVersion))
         {

@@ -195,7 +195,7 @@ public class PackageBuilder
         var builder = new StringBuilder();
 
         AppendHeader(builder, "APPLICATION");
-        AppendPair(builder, nameof(Conf.AppBase), Conf.AppBase);
+        AppendPair(builder, nameof(Conf.AppBaseName), Conf.AppBaseName);
         AppendPair(builder, nameof(Conf.AppId), Conf.AppId);
         AppendPair(builder, nameof(Macros.AppVersion), Macros.AppVersion);
         AppendPair(builder, nameof(Macros.PackRelease), Macros.PackRelease);
@@ -306,9 +306,9 @@ public class PackageBuilder
             Tree.Ops.Exec(cmd);
         }
         else
-        if (!string.IsNullOrEmpty(Conf.CommandName) && Tree.AppBin != Tree.AppInstall && Macros.OutputKind.IsLinux())
+        if (!string.IsNullOrEmpty(Conf.StartCommand) && Tree.AppBin != Tree.AppInstall && Macros.OutputKind.IsLinux())
         {
-            var path = Path.Combine(Tree.AppBin, Conf.CommandName);
+            var path = Path.Combine(Tree.AppBin, Conf.StartCommand);
 
             // Note
             // Rpm and Deb etc only. These get installed to /opt, but put 'link file' in /usr/bin

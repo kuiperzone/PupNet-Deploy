@@ -60,11 +60,11 @@ public class ConfirmPrompt
 
         if (key == ConsoleKey.Y)
         {
-            Console.WriteLine("YES");
+            Console.WriteLine("Y");
             return true;
         }
 
-        Console.WriteLine("NO");
+        Console.WriteLine("N");
         return false;
     }
 

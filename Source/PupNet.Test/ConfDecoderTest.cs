@@ -23,8 +23,8 @@ public class ConfDecoderTest
     [Fact]
     public void AppBase_Mandatory_DecodeOK()
     {
-        Assert.Equal("HelloWorld", new DummyConf(PackKind.AppImage).AppBase);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppBase)));
+        Assert.Equal("HelloWorld", new DummyConf(PackKind.AppImage).AppBaseName);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppBaseName)));
     }
 
     [Fact]
@@ -37,8 +37,8 @@ public class ConfDecoderTest
     [Fact]
     public void AppName_Mandatory_DecodeOK()
     {
-        Assert.Equal("Hello World", new DummyConf(PackKind.AppImage).AppName);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppName)));
+        Assert.Equal("Hello World", new DummyConf(PackKind.AppImage).AppFriendlyName);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfDecoder.AppFriendlyName)));
     }
 
     [Fact]

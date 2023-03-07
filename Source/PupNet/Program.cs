@@ -130,10 +130,14 @@ internal class Program
             Console.WriteLine();
 
             new PackageBuilder(decoder).Run();
+
+            Console.WriteLine();
             return 0;
         }
         catch (Exception e)
         {
+            Console.WriteLine();
+            Console.WriteLine("FAILED");
 #if DEBUG
             Console.WriteLine(e);
 #else

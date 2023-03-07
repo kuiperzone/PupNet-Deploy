@@ -35,8 +35,8 @@ public class DummyConf : ConfDecoder
         var lines = new List<string>();
 
         // Quote variations
-        lines.Add($"{nameof(ConfDecoder.AppBase)} = 'HelloWorld'");
-        lines.Add($"{nameof(ConfDecoder.AppName)} = Hello World");
+        lines.Add($"{nameof(ConfDecoder.AppBaseName)} = 'HelloWorld'");
+        lines.Add($"{nameof(ConfDecoder.AppFriendlyName)} = Hello World");
         lines.Add($"{nameof(ConfDecoder.AppId)} = \"net.example.helloword\"");
         lines.Add($"{nameof(ConfDecoder.AppSummary)} = Test application only");
         lines.Add($"{nameof(ConfDecoder.AppVendor)} = KuiperZone");
@@ -44,7 +44,7 @@ public class DummyConf : ConfDecoder
         lines.Add($"{nameof(ConfDecoder.AppVersionRelease)} = 5.4.3[3]");
         lines.Add($"{nameof(ConfDecoder.AppLicense)} = LicenseRef-LICENSE");
 
-        lines.Add($"{nameof(ConfDecoder.CommandName)} = helloworld");
+        lines.Add($"{nameof(ConfDecoder.StartCommand)} = helloworld");
         lines.Add($"{nameof(ConfDecoder.IsTerminal)} = true");
         lines.Add($"{nameof(ConfDecoder.DesktopEntry)} = app.desktop");
         lines.Add($"{nameof(ConfDecoder.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
