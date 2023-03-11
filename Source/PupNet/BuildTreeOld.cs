@@ -21,17 +21,17 @@ namespace KuiperZone.PupNet;
 /// <summary>
 /// Determines temporary build directory tree.
 /// </summary>
-public class BuildTree
+public class BuildTreeOld
 {
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BuildTree(ConfDecoder conf)
+    public BuildTreeOld(ConfigurationReader conf)
     {
         Conf = conf;
-        var kind = conf.Args.Kind;
+        var kind = conf.Arguments.Kind;
 
-        Root = Path.Combine(Global, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Args.Build}");
+        Root = Path.Combine(Global, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Arguments.Build}");
         Ops = new(Root);
 
         PublishBin = Path.Combine(Root, "Publish");
@@ -46,7 +46,7 @@ public class BuildTree
         AppShareApplications = Path.Combine(AppShare, "applications");
         AppShareIcons = Path.Combine(AppShare, "icons");
 
-        AppExecName = Conf.Args.IsWindowsRuntime() ? $"{conf.AppBaseName}.exe" : conf.AppBaseName;
+        AppExecName = Conf.Arguments.IsWindowsRuntime() ? $"{conf.AppBaseName}.exe" : conf.AppBaseName;
 
         // Defaults for standard linux install
         AppMetaName = conf.AppId + ".metainfo.xml";
@@ -97,7 +97,7 @@ public class BuildTree
     /// </summary>
     public static readonly string Global = Path.Combine(Path.GetTempPath(), $"{nameof(KuiperZone)}.{nameof(PupNet)}");
 
-    public ConfDecoder Conf { get; }
+    public ConfigurationReader Conf { get; }
 
     /// <summary>
     /// Gets application project root.

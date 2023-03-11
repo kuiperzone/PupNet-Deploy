@@ -25,7 +25,7 @@ namespace KuiperZone.PupNet;
 /// <summary>
 /// Declares and decodes arguments.
 /// </summary>
-public class ArgDecoder
+public class ArgumentReader
 {
     public const string KindShortArg = "k";
     public const string KindLongArg = "kind";
@@ -81,7 +81,7 @@ public class ArgDecoder
     /// <summary>
     /// Static constructor.
     /// </summary>
-    static ArgDecoder()
+    static ArgumentReader()
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -127,7 +127,7 @@ public class ArgDecoder
     /// <summary>
     /// Default constructor. Values are defaults only.
     /// </summary>
-    public ArgDecoder()
+    public ArgumentReader()
         : this(new ArgumentParser(""))
     {
     }
@@ -135,7 +135,7 @@ public class ArgDecoder
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgDecoder(string[] args)
+    public ArgumentReader(string[] args)
         : this(new ArgumentParser(args))
     {
     }
@@ -143,7 +143,7 @@ public class ArgDecoder
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgDecoder(string args)
+    public ArgumentReader(string args)
         : this(new ArgumentParser(args))
     {
     }
@@ -151,7 +151,7 @@ public class ArgDecoder
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgDecoder(ArgumentParser args)
+    public ArgumentReader(ArgumentParser args)
     {
         _string = args.ToString();
 
@@ -292,7 +292,7 @@ public class ArgDecoder
         sb.AppendLine();
         sb.AppendLine($"{indent}-{AppVersionShortArg}, --{AppVersionLongArg} value");
         sb.AppendLine($"{indent}Specifies application version-release in form 'VERSION[RELEASE]', where value in square");
-        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfDecoder.AppVersionRelease)} in conf file.");
+        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.AppVersionRelease)} in conf file.");
         sb.AppendLine($"{indent}Example: 1.2.3[1].");
 
         /*

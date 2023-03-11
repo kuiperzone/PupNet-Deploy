@@ -20,13 +20,13 @@ using System.Runtime.InteropServices;
 
 namespace KuiperZone.PupNet.Test;
 
-public class ArgDecoderTest
+public class ArgumentReaderTest
 {
     [Fact]
     public void Version_DecodeOK()
     {
         // Also test verbose here
-        var args = new ArgDecoder("--version --verbose");
+        var args = new ArgumentReader("--version --verbose");
         Assert.True(args.ShowVersion);
         Assert.True(args.IsVerbose);
     }
@@ -34,10 +34,10 @@ public class ArgDecoderTest
     [Fact]
     public void Help_DecodeOK()
     {
-        var args = new ArgDecoder("-h");
+        var args = new ArgumentReader("-h");
         Assert.True(args.ShowHelp);
 
-        args = new ArgDecoder("--help");
+        args = new ArgumentReader("--help");
         Assert.True(args.ShowHelp);
     }
 
@@ -45,10 +45,10 @@ public class ArgDecoderTest
     public void Value_DecodeOK()
     {
         // Default
-        var args = new ArgDecoder("f1.conf");
+        var args = new ArgumentReader("f1.conf");
         Assert.Equal("f1.conf", args.Value);
 
-        args = new ArgDecoder("f2.conf");
+        args = new ArgumentReader("f2.conf");
         Assert.Equal("f2.conf", args.Value);
     }
 
@@ -56,31 +56,31 @@ public class ArgDecoderTest
     public void RuntimeId_DecodeOK()
     {
         // Default - changes depending on system
-        var args = new ArgDecoder();
-        Assert.Equal(ArgDecoder.DefaultRuntime, args.Runtime);
+        var args = new ArgumentReader();
+        Assert.Equal(ArgumentReader.DefaultRuntime, args.Runtime);
 
-        args = new ArgDecoder("-r test1");
+        args = new ArgumentReader("-r test1");
         Assert.Equal("test1", args.Runtime);
 
-        args = new ArgDecoder("--runtime test2");
+        args = new ArgumentReader("--runtime test2");
         Assert.Equal("test2", args.Runtime);
     }
 
     [Fact]
     public void Kind_DecodeOK()
     {
-        var args = new ArgDecoder();
-        Assert.Equal(ArgDecoder.DefaultKind, args.Kind);
+        var args = new ArgumentReader();
+        Assert.Equal(ArgumentReader.DefaultKind, args.Kind);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            args = new ArgDecoder("-k rpm");
+            args = new ArgumentReader("-k rpm");
             Assert.Equal(PackKind.Rpm, args.Kind);
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            args = new ArgDecoder("-k zip");
+            args = new ArgumentReader("-k zip");
             Assert.Equal(PackKind.Zip, args.Kind);
         }
     }
@@ -90,103 +90,103 @@ public class ArgDecoderTest
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            Assert.Throws<ArgumentException>(() => new ArgDecoder("-k winsetup"));
+            Assert.Throws<ArgumentException>(() => new ArgumentReader("-k winsetup"));
         }
         else
         {
-            Assert.Throws<ArgumentException>(() => new ArgDecoder("-k deb"));
+            Assert.Throws<ArgumentException>(() => new ArgumentReader("-k deb"));
         }
     }
 
     [Fact]
     public void AppVersion_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.Null(args.AppVersion);
 
-        args = new ArgDecoder("-v 5.4.3[2]");
+        args = new ArgumentReader("-v 5.4.3[2]");
         Assert.Equal("5.4.3[2]", args.AppVersion);
 
-        args = new ArgDecoder("--app-version 5.4.3[2]");
+        args = new ArgumentReader("--app-version 5.4.3[2]");
         Assert.Equal("5.4.3[2]", args.AppVersion);
     }
 
     // [Fact] Disable
     public void Property_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.Null(args.Property);
 
-        args = new ArgDecoder("-p DEBUG");
+        args = new ArgumentReader("-p DEBUG");
         Assert.Equal("DEBUG", args.Property);
 
-        args = new ArgDecoder("--property DEBUG");
+        args = new ArgumentReader("--property DEBUG");
         Assert.Equal("DEBUG", args.Property);
     }
 
     [Fact]
     public void Output_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.Null(args.Output);
 
-        args = new ArgDecoder("-o OutputName");
+        args = new ArgumentReader("-o OutputName");
         Assert.Equal("OutputName", args.Output);
 
-        args = new ArgDecoder("--output OutputName");
+        args = new ArgumentReader("--output OutputName");
         Assert.Equal("OutputName", args.Output);
     }
 
     [Fact]
     public void Arch_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.Null(args.Arch);
 
-        args = new ArgDecoder("-a arch1");
+        args = new ArgumentReader("-a arch1");
         Assert.Equal("arch1", args.Arch);
 
-        args = new ArgDecoder("--arch arch2");
+        args = new ArgumentReader("--arch arch2");
         Assert.Equal("arch2", args.Arch);
     }
 
     [Fact]
     public void Run_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.False(args.IsRun);
 
-        args = new ArgDecoder("-u");
+        args = new ArgumentReader("-u");
         Assert.True(args.IsRun);
 
-        args = new ArgDecoder("--run");
+        args = new ArgumentReader("--run");
         Assert.True(args.IsRun);
     }
 
     [Fact]
     public void SkipYes_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.False(args.IsSkipYes);
 
-        args = new ArgDecoder("-y");
+        args = new ArgumentReader("-y");
         Assert.True(args.IsSkipYes);
 
-        args = new ArgDecoder("--skip-yes");
+        args = new ArgumentReader("--skip-yes");
         Assert.True(args.IsSkipYes);
     }
 
     [Fact]
     public void New_DecodeOK()
     {
-        var args = new ArgDecoder();
+        var args = new ArgumentReader();
         Assert.Equal(NewKind.None, args.New);
 
-        args = new ArgDecoder("FileName --new conf");
+        args = new ArgumentReader("FileName --new conf");
         Assert.Equal(NewKind.Conf, args.New);
         Assert.Equal("FileName", args.Value);
 
-        args = new ArgDecoder("-n meta");
+        args = new ArgumentReader("-n meta");
         Assert.Equal(NewKind.Meta, args.New);
     }
 }

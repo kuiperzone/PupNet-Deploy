@@ -23,7 +23,7 @@ public class PackageBuilderTest
     [Fact]
     public void AppImage_DecodesOK()
     {
-        var builder = new PackageBuilder(new DummyConf(PackKind.AppImage));
+        var builder = new BuildHost(new DummyConf(PackKind.AppImage));
 
         AssertOK(builder);
     }
@@ -31,7 +31,7 @@ public class PackageBuilderTest
     [Fact]
     public void Flatpak_DecodesOK()
     {
-        var builder = new PackageBuilder(new DummyConf(PackKind.Flatpak));
+        var builder = new BuildHost(new DummyConf(PackKind.Flatpak));
 
         AssertOK(builder);
     }
@@ -39,12 +39,12 @@ public class PackageBuilderTest
     [Fact]
     public void Rpm_DecodesOK()
     {
-        var builder = new PackageBuilder(new DummyConf(PackKind.Rpm));
+        var builder = new BuildHost(new DummyConf(PackKind.Rpm));
 
         AssertOK(builder);
     }
 
-    private void AssertOK(PackageBuilder builder)
+    private void AssertOK(BuildHost builder)
     {
         Console.WriteLine(builder.ToString(true));
     }

@@ -47,6 +47,27 @@ public class FileOps
     public bool DisplayPath { get; set; } = true;
 
     /// <summary>
+    /// Gets a list of files currently under dir, including sub-paths.
+    /// Paths are relative to given directory. Does not pick up symlinks.
+    /// </summary>
+    public static string[] ListFiles(string dir, string filter = "*")
+    {
+        var opts = new EnumerationOptions();
+        opts.RecurseSubdirectories = true;
+        opts.ReturnSpecialDirectories = false;
+        opts.IgnoreInaccessible = true;
+
+        var files = Directory.GetFiles(dir, filter, System.IO.SearchOption.AllDirectories);
+
+        for (int n = 0; n < files.Length; ++n)
+        {
+            files[n] = Path.GetRelativePath(dir, files[n]);
+        }
+
+        return files;
+    }
+
+    /// <summary>
     /// Asserts file exist. Does nothing if file is null.
     /// </summary>
     public void AssertExists(string? filepath)
@@ -186,7 +207,7 @@ public class FileOps
     /// <summary>
     /// Runs the command.
     /// </summary>
-    public void Exec(string cmd)
+    public void Execute(string cmd)
     {
         WriteLine(cmd);
         ExecInternal(cmd);

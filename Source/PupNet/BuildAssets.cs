@@ -30,18 +30,18 @@ namespace KuiperZone.PupNet;
 public class BuildAssets
 {
     private readonly static string AssemblyDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
-            throw new InvalidOperationException("Failed to get EntryAssembly location");
+        throw new InvalidOperationException("Failed to get EntryAssembly location");
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BuildAssets(ConfDecoder conf, BuildTree tree, BuildMacros macros)
+    public BuildAssets(ConfigurationReader conf, PackageBuilder tree, BuildMacros macros)
     {
         Conf = conf;
         Tree = tree;
         Macros = macros;
 
-        var kind = Conf.Args.Kind;
+        var kind = Conf.Arguments.Kind;
 
         var icons = Conf.Icons.Count != 0 ? Conf.Icons : DefaultIcons;
         SourceIcon = GetSourceIcon(kind, icons);
@@ -80,7 +80,7 @@ public class BuildAssets
 
                     foreach (var line in temp.Split('\n', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
                     {
-                        if (line.StartsWith("Exec") && line.Contains($"{{{MacroNames.DesktopExec}}}"))
+                        if (line.StartsWith("Exec") && line.Contains($"{{{MacroNames.DeployExec}}}"))
                         {
                             // OK
                             assert = false;
@@ -90,7 +90,7 @@ public class BuildAssets
 
                     if (assert)
                     {
-                        throw new ArgumentException($"{nameof(ConfDecoder.DesktopEntry)} must contain 'Exec=${{{MacroNames.DesktopExec}}}'");
+                        throw new ArgumentException($"{nameof(ConfigurationReader.DesktopEntry)} must contain 'Exec=${{{MacroNames.DeployExec}}}'");
                     }
                 }
             }
@@ -113,8 +113,8 @@ public class BuildAssets
         list.Add($"Name=${{{MacroNames.AppFriendlyName}}}");
         list.Add($"Icon=${{{MacroNames.AppId}}}");
         list.Add($"Comment=${{{MacroNames.AppSummary}}}");
-        list.Add($"Exec=${{{MacroNames.DesktopExec}}}");
-        list.Add($"TryExec=${{{MacroNames.DesktopExec}}}");
+        list.Add($"Exec=${{{MacroNames.DeployExec}}}");
+        list.Add($"TryExec=${{{MacroNames.DeployExec}}}");
         list.Add($"Terminal={terminal.ToString().ToLowerInvariant()}");
         list.Add($"Categories=Utility");
         list.Add($"MimeType=");
@@ -146,12 +146,12 @@ public class BuildAssets
     /// <summary>
     /// Gets the configuration.
     /// </summary>
-    public ConfDecoder Conf { get; }
+    public ConfigurationReader Conf { get; }
 
     /// <summary>
     /// Gets the build tree.
     /// </summary>
-    public BuildTree Tree { get; }
+    public PackageBuilder Tree { get; }
 
     /// <summary>
     /// Gets the macros tree.
@@ -182,7 +182,7 @@ public class BuildAssets
     /// </summary>
     public string? GetRpmSpecContent(bool includeFiles)
     {
-        if (Conf.Args.Kind == PackKind.Rpm)
+        if (Conf.Arguments.Kind == PackKind.Rpm)
         {
             // We don't actually need install, build sections.
             var sb = new StringBuilder();
@@ -385,27 +385,24 @@ public class BuildAssets
         {
             var ext = Path.GetExtension(item).ToLowerInvariant();
 
-            if (kind == PackKind.WinSetup && ext == ".ico")
+            if (kind.IsWindows() && ext == ".ico")
             {
                 // Only need this
                 return item;
             }
 
-            if (kind == PackKind.AppImage)
+            if (!kind.IsWindows() && ext == ".svg")
             {
-                if (ext == ".svg")
-                {
-                    return item;
-                }
+                return item;
+            }
 
-                // Get biggest PNG
-                int size = GetStandardPngSize(item);
+            // Get biggest PNG
+            int size = GetStandardPngSize(item);
 
-                if (size > max)
-                {
-                    max = size;
-                    rslt = item;
-                }
+            if (size > max)
+            {
+                max = size;
+                rslt = item;
             }
         }
 
@@ -436,7 +433,7 @@ public class BuildAssets
         // Empty on windows
         var dict = new Dictionary<string, string>();
 
-        if (Conf.Args.Kind.IsLinux())
+        if (Conf.Arguments.Kind.IsLinux())
         {
             foreach (var item in sources)
             {
@@ -454,7 +451,7 @@ public class BuildAssets
 
     private string? ReadFileText(string? path)
     {
-        if (path != null && !path.Equals(ConfDecoder.PathNone, StringComparison.OrdinalIgnoreCase) &&
+        if (path != null && !path.Equals(ConfigurationReader.PathNone, StringComparison.OrdinalIgnoreCase) &&
             (Conf.AssertFiles || File.Exists(path)))
         {
             var content = File.ReadAllText(path).Trim().ReplaceLineEndings("\n");

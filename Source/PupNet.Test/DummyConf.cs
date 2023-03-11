@@ -18,14 +18,14 @@
 
 namespace KuiperZone.PupNet.Test;
 
-public class DummyConf : ConfDecoder
+public class DummyConf : ConfigurationReader
 {
     public DummyConf(PackKind kind, string? omit = null)
-        : base(new ArgDecoder("-k " + kind), Create(omit))
+        : base(new ArgumentReader("-k " + kind), Create(omit))
     {
     }
 
-    public DummyConf(ArgDecoder args)
+    public DummyConf(ArgumentReader args)
         : base(args, Create())
     {
     }
@@ -35,35 +35,35 @@ public class DummyConf : ConfDecoder
         var lines = new List<string>();
 
         // Quote variations
-        lines.Add($"{nameof(ConfDecoder.AppBaseName)} = 'HelloWorld'");
-        lines.Add($"{nameof(ConfDecoder.AppFriendlyName)} = Hello World");
-        lines.Add($"{nameof(ConfDecoder.AppId)} = \"net.example.helloword\"");
-        lines.Add($"{nameof(ConfDecoder.AppSummary)} = Test application only");
-        lines.Add($"{nameof(ConfDecoder.AppVendor)} = KuiperZone");
-        lines.Add($"{nameof(ConfDecoder.AppUrl)} = https://kuiper.zone");
-        lines.Add($"{nameof(ConfDecoder.AppVersionRelease)} = 5.4.3[3]");
-        lines.Add($"{nameof(ConfDecoder.AppLicense)} = LicenseRef-LICENSE");
+        lines.Add($"{nameof(ConfigurationReader.AppBaseName)} = 'HelloWorld'");
+        lines.Add($"{nameof(ConfigurationReader.AppFriendlyName)} = Hello World");
+        lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloword\"");
+        lines.Add($"{nameof(ConfigurationReader.AppSummary)} = Test application only");
+        lines.Add($"{nameof(ConfigurationReader.AppVendor)} = KuiperZone");
+        lines.Add($"{nameof(ConfigurationReader.AppUrl)} = https://kuiper.zone");
+        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[3]");
+        lines.Add($"{nameof(ConfigurationReader.AppLicense)} = LicenseRef-LICENSE");
 
-        lines.Add($"{nameof(ConfDecoder.StartCommand)} = helloworld");
-        lines.Add($"{nameof(ConfDecoder.IsTerminal)} = true");
-        lines.Add($"{nameof(ConfDecoder.DesktopEntry)} = app.desktop");
-        lines.Add($"{nameof(ConfDecoder.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
-        lines.Add($"{nameof(ConfDecoder.MetaInfo)} = metainfo.xml");
+        lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
+        lines.Add($"{nameof(ConfigurationReader.IsTerminal)} = true");
+        lines.Add($"{nameof(ConfigurationReader.DesktopEntry)} = app.desktop");
+        lines.Add($"{nameof(ConfigurationReader.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
+        lines.Add($"{nameof(ConfigurationReader.MetaInfo)} = metainfo.xml");
 
-        lines.Add($"{nameof(ConfDecoder.DotnetProjectPath)} = HelloProject");
-        lines.Add($"{nameof(ConfDecoder.DotnetPublishArgs)} = --self-contained true");
-        lines.Add($"{nameof(ConfDecoder.DotnetPostPublish)} = PostPublishCommand.sh");
+        lines.Add($"{nameof(ConfigurationReader.DotnetProjectPath)} = HelloProject");
+        lines.Add($"{nameof(ConfigurationReader.DotnetPublishArgs)} = --self-contained true");
+        lines.Add($"{nameof(ConfigurationReader.DotnetPostPublish)} = PostPublishCommand.sh");
 
-        lines.Add($"{nameof(ConfDecoder.OutputDirectory)} = Deploy");
-        lines.Add($"{nameof(ConfDecoder.OutputVersion)} = true");
+        lines.Add($"{nameof(ConfigurationReader.OutputDirectory)} = Deploy");
+        lines.Add($"{nameof(ConfigurationReader.OutputVersion)} = true");
 
-        lines.Add($"{nameof(ConfDecoder.AppImageArgs)} = -appargs");
+        lines.Add($"{nameof(ConfigurationReader.AppImageArgs)} = -appargs");
 
-        lines.Add($"{nameof(ConfDecoder.FlatpakPlatformRuntime)} = org.freedesktop.Platform");
-        lines.Add($"{nameof(ConfDecoder.FlatpakPlatformSdk)} = org.freedesktop.Sdk");
-        lines.Add($"{nameof(ConfDecoder.FlatpakPlatformVersion)} = \"18.00\"");
-        lines.Add($"{nameof(ConfDecoder.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
-        lines.Add($"{nameof(ConfDecoder.FlatpakBuilderArgs)} = -flatargs");
+        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformRuntime)} = org.freedesktop.Platform");
+        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformSdk)} = org.freedesktop.Sdk");
+        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformVersion)} = \"18.00\"");
+        lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
+        lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
 
         Remove(lines, omit);
 

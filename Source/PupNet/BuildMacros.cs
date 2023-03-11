@@ -21,156 +21,84 @@ using System.Text;
 
 namespace KuiperZone.PupNet;
 
-public static class MacroNames
-{
-    // ConfDecoder Names - do not change as will break configs out in the wild
-    public const string AppBaseName = "APP_BASE_NAME";
-    public const string AppFriendlyName = "APP_FRIENDLY_NAME";
-    public const string AppId = "APP_ID";
-    public const string AppSummary = "APP_SUMMARY";
-    public const string AppLicense = "APP_LICENSE";
-    public const string AppVendor = "APP_VENDOR";
-    public const string AppUrl = "APP_URL";
-
-    // PackageBuilder Names - do not change as will break configs out in the wild
-    public const string AppVersion = "APP_VERSION";
-    public const string PackRelease = "PACK_RELEASE";
-    public const string OutputKind = "OUTPUT_KIND";
-    public const string DotnetRuntime = "DOTNET_RUNTIME";
-    public const string BuildArch = "BUILD_ARCH";
-    public const string BuildTarget = "BUILD_TARGET";
-    public const string OutputPath = "OUTPUT_PATH";
-    public const string IsoDate = "ISO_DATE";
-
-    // BuildTree Names - do not change as will break configs out in the wild
-    public const string DesktopName = "DESKTOP_NAME";
-    public const string MetaInfoName = "METAINFO_NAME";
-    public const string BuildRootDir = "BUILD_ROOT_DIR";
-    public const string BuildShareDir = "BUILD_SHARE_DIR";
-    public const string PublishBinDir = "PUBLISH_BIN_DIR";
-    public const string DesktopExec = "DESKTOP_EXEC";
-}
-
 /// <summary>
 /// Declares and defines macros for use in fields and file contents. When expanding, simple search-replace is
 /// used. Therefore important to specify ${NAME}, and not $NAME.
 /// </summary>
 public class BuildMacros
 {
-    /// <summary>
-    /// Default constructor. Example values.
-    /// </summary>
-    public BuildMacros()
-        : this(new BuildTree(new ConfDecoder()))
-    {
-    }
+    private readonly SortedDictionary<string, string> _sorted = new();
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BuildMacros(BuildTree tree)
+    public BuildMacros(PackageBuilder builder)
     {
-        Conf = tree.Conf;
-        Args = tree.Conf.Args;
+        var args = builder.Arguments;
+        var conf = builder.Configuration;
 
-        OutputKind = Args.Kind;
-        BuildTarget = Args.Build;
-        BuildArch = Conf.GetBuildArch();
-        DotnetRuntime = Args.Runtime;
-        AppVersion = SplitVersion(Conf.AppVersionRelease, out string temp);
-        PackRelease = temp;
+        Builder = builder;
 
-        OutputDirectory = GetOutputDirectory();
-        OutputName = GetOutputName(OutputKind);
+        var dict = new Dictionary<MacroId, string>();
 
-        var dict = new SortedDictionary<string, string>();
+        dict.Add(MacroId.AppBaseName, conf.AppBaseName);
+        dict.Add(MacroId.AppFriendlyName, conf.AppFriendlyName);
+        dict.Add(MacroId.AppId, conf.AppId);
+        dict.Add(MacroId.AppSummary, conf.AppSummary);
+        dict.Add(MacroId.AppLicense, conf.AppLicense);
+        dict.Add(MacroId.AppVendor, conf.AppVendor);
+        dict.Add(MacroId.AppUrl, conf.AppUrl ?? "");
 
-        dict.Add(MacroNames.AppBaseName, Conf.AppBaseName);
-        dict.Add(MacroNames.AppFriendlyName, Conf.AppFriendlyName);
-        dict.Add(MacroNames.AppId, Conf.AppId);
-        dict.Add(MacroNames.AppSummary, Conf.AppSummary);
-        dict.Add(MacroNames.AppLicense, Conf.AppLicense);
-        dict.Add(MacroNames.AppVendor, Conf.AppVendor);
-        dict.Add(MacroNames.AppUrl, Conf.AppUrl ?? "");
+        dict.Add(MacroId.AppVersion, builder.AppVersion);
+        dict.Add(MacroId.PackRelease, builder.PackRelease);
+        dict.Add(MacroId.PackKind, builder.PackKind.ToString().ToLowerInvariant());
+        dict.Add(MacroId.DotnetRuntime, args.Runtime);
+        dict.Add(MacroId.BuildArch, conf.GetBuildArch());
+        dict.Add(MacroId.BuildTarget, args.Build);
+        dict.Add(MacroId.OutputPath, Path.Combine(builder.OutputDirectory, builder.OutputName));
+        dict.Add(MacroId.IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
 
-        dict.Add(MacroNames.AppVersion, AppVersion);
-        dict.Add(MacroNames.PackRelease, PackRelease);
-        dict.Add(MacroNames.OutputKind, OutputKind.ToString().ToLowerInvariant());
-        dict.Add(MacroNames.DotnetRuntime, DotnetRuntime);
-        dict.Add(MacroNames.BuildArch, BuildArch);
-        dict.Add(MacroNames.BuildTarget, BuildTarget);
-        dict.Add(MacroNames.OutputPath, Path.Combine(OutputDirectory, OutputName));
-        dict.Add(MacroNames.IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
+        dict.Add(MacroId.BuildRoot, builder.BuildRoot);
+        dict.Add(MacroId.BuildShare, builder.BuildUsrShare ?? "");
+        dict.Add(MacroId.PublishBin, builder.PublishBin);
+        dict.Add(MacroId.DesktopExec, builder.DesktopExec);
 
-        dict.Add(MacroNames.DesktopName, tree.DesktopId);
-        dict.Add(MacroNames.MetaInfoName, tree.AppMetaName);
-        dict.Add(MacroNames.BuildRootDir, tree.AppDir);
-        dict.Add(MacroNames.PublishBinDir, tree.PublishBin);
-        dict.Add(MacroNames.BuildShareDir, tree.AppShare);
-        dict.Add(MacroNames.DesktopExec, tree.LaunchExec);
-
+        // For lookup
         Dictionary = dict;
+
+        foreach (var item in Dictionary)
+        {
+            // For operations
+            _sorted.Add(item.Key.ToVar(), item.Value);
+        }
     }
 
-    public ArgDecoder Args { get; }
-    public ConfDecoder Conf { get; }
-
     /// <summary>
-    /// Gets package output kinds.
+    /// Gets the builder instance.
     /// </summary>
-    public PackKind OutputKind { get; }
-
-    /// <summary>
-    /// Release or Debug.
-    /// </summary>
-    public string BuildTarget { get; }
-
-    /// <summary>
-    /// Target arch.
-    /// </summary>
-    public string BuildArch { get; }
-
-    /// <summary>
-    /// Gets the dotnet runtime.
-    /// </summary>
-    public string DotnetRuntime { get; }
-
-    /// <summary>
-    /// Gets the application version. This is the configured version, excluding any Release suffix.
-    /// </summary>
-    public string AppVersion { get; }
-
-    /// <summary>
-    /// Gets the package release. This is the suffix of the configured version.
-    /// </summary>
-    public string PackRelease { get; } = "1";
-
-    /// <summary>
-    /// Gets output directory.
-    /// </summary>
-    public string OutputDirectory { get; }
-
-    /// <summary>
-    /// Gets output filename.
-    /// </summary>
-    public string OutputName { get; }
+    public PackageBuilder Builder { get; }
 
     /// <summary>
     /// Gets a dictionary of macros.
     /// </summary>
-    public IReadOnlyDictionary<string, string> Dictionary { get; }
+    public IReadOnlyDictionary<MacroId, string> Dictionary { get; }
 
     /// <summary>
     /// Expand all macros in text content. Simple search replace. Case sensitive.
     /// </summary>
     [return: NotNullIfNotNull("content")]
-    public string? Expand(string? content)
+    public string? Expand(string? content, ICollection<string>? warnings = null)
     {
-        if (!string.IsNullOrEmpty(content))
+        if (!string.IsNullOrEmpty(content) && content.Contains("${"))
         {
-            foreach (var item in Dictionary)
+            foreach (var item in _sorted)
             {
-                content = content.Replace("${" + item.Key + "}", item.Value);
+                content = content.Replace(item.Key, item.Value);
+            }
+
+            if (warnings != null)
+            {
+                AddInvalidMacros(content, warnings);
             }
         }
 
@@ -180,13 +108,13 @@ public class BuildMacros
     /// <summary>
     /// Expand all macros in text content items.
     /// </summary>
-    public IReadOnlyCollection<string> Expand(IEnumerable<string> content)
+    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, ICollection<string>? warnings = null)
     {
         var list = new List<string>();
 
         foreach (var item in content)
         {
-            list.Add(Expand(item)!);
+            list.Add(Expand(item, warnings));
         }
 
         return list;
@@ -199,84 +127,42 @@ public class BuildMacros
     {
         var builder = new StringBuilder();
 
-        foreach (var item in Dictionary)
+        foreach (var item in _sorted)
         {
-            builder.AppendLine($"${{{item.Key}}}={item.Value}");
+            builder.AppendLine($"{item.Key} = {item.Value}");
         }
 
         return builder.ToString().Trim();
     }
 
-    private static string SplitVersion(string version, out string release)
+    private static void AddInvalidMacros(string content, ICollection<string> warnings)
     {
-        release = "1";
+        int p0 = content.IndexOf("${");
 
-        if (!string.IsNullOrEmpty(version))
+        if (p0 > -1)
         {
-            int p0 = version.IndexOf("[");
-            var len = version.IndexOf("]") - p0 - 1;
+            string s = content.Substring(p0, Math.Max(content.Length - p0, 5)) + "...";
 
-            if (p0 > 0 && len > 0)
+            // Find terminator
+            int temp = content.IndexOf("${", p0 + 1);
+            int p1 = content.IndexOf("}", p0 + 1);
+
+            if (p1 > p0 && (temp < 0 || p1 < temp))
             {
-                var temp = version.Substring(p0 + 1, len).Trim();
-                version = version.Substring(0, p0).Trim();
-
-                if (temp.Length != 0)
-                {
-                    release = temp;
-                }
-            }
-        }
-
-        return version;
-    }
-
-    private string GetOutputDirectory()
-    {
-        var argDir = Path.GetDirectoryName(Args.Output);
-
-        if (argDir != null)
-        {
-            if (Path.IsPathFullyQualified(argDir))
-            {
-                return argDir;
+                // abc ${INV}
+                // 0123456789
+                int cnt = p1 - p0 + 1;
+                s = content.Substring(p0, cnt);
             }
 
-            return Path.Combine(Conf.OutputDirectory, argDir);
-        }
+            s = $"Invalid macro {s}";
 
-        return Conf.OutputDirectory;
+            if (!warnings.Contains(s))
+            {
+                warnings.Add(s);
+            }
+        }
     }
 
-    private string GetOutputName(PackKind kind)
-    {
-        var output = Path.GetFileName(Args.Output);
-
-        if (output != null)
-        {
-            return output;
-        }
-
-        output = Conf.AppBaseName;
-
-        if (Conf.OutputVersion && !string.IsNullOrEmpty(AppVersion))
-        {
-            output += $"-{AppVersion}-{PackRelease}";
-        }
-
-        output += $".{BuildArch}";
-
-        if (kind == PackKind.AppImage)
-        {
-            return output + ".AppImage";
-        }
-
-        if (kind == PackKind.WinSetup)
-        {
-            return output + ".exe";
-        }
-
-        return output + "." + kind.ToString().ToLowerInvariant();
-    }
 }
 

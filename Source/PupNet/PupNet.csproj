@@ -54,6 +54,9 @@
 		<None Include="$(ProjectDir)\..\Assets\app.48x48.png" Link="app.48x48.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Include="$(ProjectDir)\..\Assets\app.64x64.png" Link="app.64x64.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 
   </ItemGroup>
 

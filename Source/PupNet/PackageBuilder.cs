@@ -17,165 +17,286 @@
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
-using System.Text;
 
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Accepts a configuration and assembles path and assets information. The build
-/// process is run using the Run() method. Most path and content information is
-/// public for test and inspection.
+/// A base class for package build operations. It defines a temporary build directory structure under which the
+/// application is to be published by dotnet, along with other assets such a desktop and AppStream metadata files
+/// and icons. The subclass is to define package specific values and operations by overriding key members.
 /// </summary>
-public class PackageBuilder
+public abstract class PackageBuilder
 {
-    private readonly static string AssemblyDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
-            throw new InvalidOperationException("Failed to get EntryAssembly location");
-
     /// <summary>
     /// Constructor.
     /// </summary>
-    public PackageBuilder(ArgDecoder args)
-        : this(new ConfDecoder(args))
+    public PackageBuilder(ConfigurationReader conf, PackKind kind, string buildRootName = "AppDir")
     {
-    }
+        PackKind = kind;
+        Arguments = conf.Arguments;
+        Configuration = conf;
+        IsWindowsPackage = PackKind.IsWindows();
 
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public PackageBuilder(ConfDecoder conf)
-    {
-        Conf = conf;
-        Args = conf.Args;
-        Tree = new(conf);
+        AppVersion = SplitVersion(conf.AppVersionRelease, out string temp);
+        PackRelease = temp;
 
-        // MACROS
-        // Items below may use macros
-        Macros = new(Tree);
-        Assets = new(Conf, Tree, Macros);
-        PublishCommands = GetPublishCommands(Macros);
-        PackageCommands = GetPackageCommands();
-    }
+        OutputDirectory = GetOutputDirectory(Configuration);
+        OutputName = GetOutputName(Configuration, PackKind, AppVersion, PackRelease);
 
-    /// <summary>
-    /// Gets configuration.
-    /// </summary>
-    public ArgDecoder Args { get; }
+        PackRoot = Path.Combine(GlobalRoot, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Arguments.Build}-{PackKind}");
+        BuildRoot = Path.Combine(PackRoot, buildRootName);
+        Operations = new(PackRoot);
 
-    /// <summary>
-    /// Gets configuration.
-    /// </summary>
-    public ConfDecoder Conf { get; }
+        IconPaths = GetShareIconPaths(Configuration.Icons);
 
-    /// <summary>
-    /// Gets the directory build tree.
-    /// </summary>
-    public BuildTree Tree { get; }
-
-    /// <summary>
-    /// Gets a dictionary of macros.
-    /// </summary>
-    public BuildMacros Macros { get; }
-
-    /// <summary>
-    /// Gets runtime assets.
-    /// </summary>
-    public BuildAssets Assets { get; }
-
-    /// <summary>
-    /// Gets publish commands.
-    /// </summary>
-    public IReadOnlyCollection<string> PublishCommands { get; }
-
-    /// <summary>
-    /// Gets the package commands.
-    /// </summary>
-    public IReadOnlyCollection<string> PackageCommands { get; }
-
-    public void Run()
-    {
-        Console.WriteLine(ToString());
-        Console.WriteLine();
-
-        if (Conf.Args.IsSkipYes || new ConfirmPrompt().Wait())
+        if (IconPaths.Count == 0)
         {
-            Console.WriteLine();
+            // Always has some linux icons
+            IconPaths = GetShareIconPaths(DefaultIcons);
+        }
 
-            Tree.Create();
-            Console.WriteLine();
+        PrimeIconSource = GetSourceIcon(PackKind, Configuration.Icons);
+    }
 
-            // Conditional writes
-            Tree.Ops.WriteFile(Tree.DesktopPath, Assets.DesktopContent);
+    /// <summary>
+    /// Global temporary directory.
+    /// </summary>
+    public static readonly string GlobalRoot = Path.Combine(Path.GetTempPath(), $"{nameof(KuiperZone)}.{nameof(PupNet)}");
 
-            if (Macros.OutputKind == PackKind.AppImage)
+    /// <summary>
+    /// Gets the EntryAssembly directory.
+    /// </summary>
+    public readonly static string AssemblyDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
+        throw new InvalidOperationException("Failed to get EntryAssembly location");
+
+    /// <summary>
+    /// Known and accepted PNG icon sizes.
+    /// </summary>
+    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256 });
+
+    /// <summary>
+    /// Gets default source icons.
+    /// </summary>
+    public static IReadOnlyCollection<string> DefaultIcons { get; } = GetDefaultIcons();
+
+    /// <summary>
+    /// Gets the output package kind.
+    /// </summary>
+    public PackKind PackKind { get; }
+
+    /// <summary>
+    /// Gets a reference to the arguments.
+    /// </summary>
+    public ArgumentReader Arguments { get; }
+
+    /// <summary>
+    /// Gets a reference to the configuration.
+    /// </summary>
+    public ConfigurationReader Configuration { get; }
+
+    /// <summary>
+    /// Gets a "file operations" instance.
+    /// </summary>
+    public FileOps Operations { get; }
+
+    /// <summary>
+    /// Gets whether output is for Windows.
+    /// </summary>
+    public bool IsWindowsPackage { get; }
+
+    /// <summary>
+    /// Gets the application version. This is the configured version, excluding any Release suffix.
+    /// </summary>
+    public string AppVersion { get; }
+
+    /// <summary>
+    /// Gets the package release.
+    /// </summary>
+    public string PackRelease { get; }
+
+    /// <summary>
+    /// Gets output directory.
+    /// </summary>
+    public string OutputDirectory { get; }
+
+    /// <summary>
+    /// Gets output filename.
+    /// </summary>
+    public string OutputName { get; }
+
+    /// <summary>
+    /// Gets the package root for this build instance. This will be a temporary top level build directory.
+    /// </summary>
+    public string PackRoot { get; }
+
+    /// <summary>
+    /// Gets the app root directory, i.e. "${PackRoot}/AppDir".
+    /// </summary>
+    public string BuildRoot { get; }
+
+    /// <summary>
+    /// Gets the application executable filename (no directory part). I.e. "Configuration.AppBase[.exe]".
+    /// </summary>
+    public string AppExecName
+    {
+        get { return Arguments.IsWindowsRuntime() ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
+    }
+
+    /// <summary>
+    /// Gets the build usr/bin directory, "${BuildRoot}/usr/bin". We do not necessarily publish here.
+    /// See <see cref="AppBin"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// </summary>
+    public string? BuildUsrBin
+    {
+        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "bin"); }
+    }
+
+    /// <summary>
+    /// Gets the build share directory, i.e. "${BuildRoot}/usr/share". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// </summary>
+    public string? BuildUsrShare
+    {
+        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share"); }
+    }
+
+    /// <summary>
+    /// Gets the app metainfo directory, i.e. "${BuildRoot}/usr/share/metainfo". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// </summary>
+    public string? BuildShareMeta
+    {
+        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "metainfo"); }
+    }
+
+    /// <summary>
+    /// Gets the build metainfo directory, i.e. "${BuildRoot}/usr/share/applications". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// </summary>
+    public string? BuildShareApplications
+    {
+        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "applications"); }
+    }
+
+    /// <summary>
+    /// Gets the build icons directory, i.e. "${BuildRoot}/usr/share/icons". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// </summary>
+    public string? BuildShareIcons
+    {
+        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "icons"); }
+    }
+
+    /// <summary>
+    /// Gets the desktop build file path. Null if no desktop file.
+    /// </summary>
+    public string? DesktopPath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Configuration.DesktopEntry) && BuildShareApplications != null)
             {
-                // We need a bodge fix to get AppImage to pass validation.
-                // In effect, we need two .desktop files. One at root, and one under applications.
-                // See: https://github.com/AppImage/AppImageKit/issues/603
-                var path = Path.Combine(Tree.AppDir, Conf.AppId + ".desktop");
-                Tree.Ops.WriteFile(path, Assets.DesktopContent);
+                return Path.Combine(BuildShareApplications, Configuration.AppId + ".desktop");
             }
 
-            Tree.Ops.CopyFile(Assets.SourceIcon, Assets.DestIcon);
-            Tree.Ops.WriteFile(Tree.AppMetaPath, Assets.AppMetaContent);
+            return null;
+        }
+    }
 
-            foreach (var item in Assets.LinuxIcons)
+    /// <summary>
+    /// Gets the AppStream build file path. Null if no metainfo file.
+    /// </summary>
+    public string? MetaInfoPath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(Configuration.MetaInfo) && BuildShareMeta != null)
             {
-                Tree.Ops.CopyFile(item.Key, item.Value, true);
+                return Path.Combine(BuildShareMeta, Configuration.AppId + ".metainfo.xml");
             }
 
-            foreach (var item in Macros.Dictionary)
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Gets the source path of the "prime" icon, i.e. the single icon considered to be the most generally suitable.
+    /// On Linux this is the first SVG file encountered, or the largest PNG otherwise. On Windows, it is an ICO file.
+    /// </summary>
+    public string? PrimeIconSource { get; }
+
+    /// <summary>
+    /// Gets the destination build path for <see cref="PrimeIconSource"/>.
+    /// </summary>
+    public virtual string? PrimeIconPath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(PrimeIconSource))
             {
-                // We set variable to be used by any executed processes
-                Environment.SetEnvironmentVariable(item.Key, item.Value);
+                return Path.Combine(PackRoot, Configuration.AppId + Path.GetExtension(PrimeIconSource));
             }
 
-            foreach (var item in PublishCommands)
-            {
-                Console.WriteLine(item);
-                Tree.Ops.Exec(item);
-            }
+            return null;
+        }
+    }
 
-            Console.WriteLine();
-            Tree.Ops.AssertExists(Path.Combine(Tree.PublishBin, Tree.AppExecName));
-            Tree.Ops.CopyDirectory(Tree.PublishBin, Tree.AppInstall);
+    /// <summary>
+    /// A sequence of source icon paths (key) and their destinations (value) under <see cref="PackageBuilder.BuildShareIcons"/>.
+    /// Defaults are used if the configuration supplies none. Empty on Windows.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> IconPaths { get; }
 
-            AddConditionalRunLink();
+    /// <summary>
+    /// Gets the path to the runnable binary when deployed, i.e. the path we use in the desktop file for the Exec
+    /// field. Typically: "/usr/bin/${AppExecName}" or "/opt/AppId/${AppExecName}".
+    /// </summary>
+    public abstract string DesktopExec{ get; }
 
-            // Specs after all files are assembled
-            Tree.Ops.WriteFile(Tree.FlatpakManifestPath, Assets.FlatpakManifestContent);
-            Tree.Ops.WriteFile(Tree.RpmSpecPath, Assets.GetRpmSpecContent(true));
-            Tree.Ops.CreateDirectory(Macros.OutputDirectory);
+    /// <summary>
+    /// Gets the application bin directory to which the dotnet (or C++) build must publish to. It must be under
+    /// <see cref="BuildRoot"/> and may typically be equal to <see cref="BuildUsrBin"/>, or "${BuildRoot}/opt/AppId".
+    /// </summary>
+    public abstract string PublishBin { get; }
 
-            if (Args.IsVerbose)
-            {
-                Console.WriteLine();
-                Console.WriteLine("Packaged Files:");
+    /// <summary>
+    /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written. If null, no file is saved.
+    /// </summary>
+    public abstract string? ManifestPath { get; }
 
-                foreach (var item in Tree.GetDirectoryContents(Tree.AppDir))
-                {
-                    Console.WriteLine(item);
-                }
-            }
+    /// <summary>
+    /// Gets the "manifest file" specific to the package kind. For RPM, this is the "Spec file" content.
+    /// For Flatpak, it is the "manifest". It may contain macros, which will be expanded. It may be null if not used.
+    /// </summary>
+    public abstract string? ManifestContent { get; }
 
-            if (Args.Arch != null && Macros.OutputKind == PackKind.AppImage)
-            {
-                // Used by AppImage
-                Environment.SetEnvironmentVariable("ARCH", Conf.Args.Arch);
-            }
+    /// <summary>
+    /// Gets a sequence of commends needed to build the package. It may contain macros which will be
+    /// expanded prior to calling.
+    /// </summary>
+    public abstract IReadOnlyCollection<string> PackageCommands { get; }
 
-            foreach (var item in PackageCommands)
-            {
-                Console.WriteLine();
-                Tree.Ops.Exec(item);
-            }
+    /// <summary>
+    /// Builds the package. Prior to calling this method, the application will be published to the <see cref="PublishBin"/>.
+    /// The base implementation writes the "desktop" and "metainfo" (expanded) content to standard Linux locations under
+    /// <see cref="BuildShareApplications"/> and <see cref="BuildShareMeta"/> respectively. It does nothing for these
+    /// for Windows packages or if the respective string is null or empty. It writes <see cref="ManifestContent"/> to
+    /// <see cref="ManifestPath"/>, and copies <see cref="IconPaths"/> to their respective destinations. Moreover, it
+    /// copies <see cref="PrimeIconSource"/> to <see cref="PrimeIconPath"/>. It then calls <see cref="FileOps.Execute(string)"/>
+    /// against each item in <see cref="PackageCommands"/>. May be overridden to perform additional or other operations.
+    /// </summary>
+    public virtual void BuildPackage(string? desktop, string? metainfo)
+    {
+        Operations.WriteFile(DesktopPath, desktop);
+        Operations.WriteFile(MetaInfoPath, metainfo);
+        Operations.WriteFile(ManifestPath, ManifestContent);
 
-            if (Macros.OutputKind == PackKind.Zip)
-            {
-                Console.WriteLine();
-            }
+        Operations.CopyFile(PrimeIconSource, PrimeIconPath);
 
-            Console.WriteLine();
-            Console.WriteLine("OUTPUT: " + Path.Combine(Macros.OutputDirectory, Macros.OutputName));
+        foreach (var item in IconPaths)
+        {
+            Operations.CopyFile(item.Key, item.Value, true);
+        }
+
+        foreach (var item in PackageCommands)
+        {
+            Operations.Execute(item);
         }
     }
 
@@ -184,281 +305,206 @@ public class PackageBuilder
     /// </summary>
     public override string ToString()
     {
-        return ToString(Args.IsVerbose);
+        return PackRoot;
     }
 
-    /// <summary>
-    /// Provides console output.
-    /// </summary>
-    public string ToString(bool verbose)
+    private static string SplitVersion(string version, out string release)
     {
-        var builder = new StringBuilder();
+        release = "1";
 
-        AppendHeader(builder, "APPLICATION");
-        AppendPair(builder, nameof(Conf.AppBaseName), Conf.AppBaseName);
-        AppendPair(builder, nameof(Conf.AppId), Conf.AppId);
-        AppendPair(builder, nameof(Macros.AppVersion), Macros.AppVersion);
-        AppendPair(builder, nameof(Macros.PackRelease), Macros.PackRelease);
-
-        AppendHeader(builder, "OUTPUT");
-        AppendPair(builder, nameof(Macros.OutputKind), Macros.OutputKind.ToString().ToLowerInvariant());
-        AppendPair(builder, nameof(Macros.DotnetRuntime), Macros.DotnetRuntime);
-        AppendPair(builder, nameof(Args.Arch), Args.Arch ?? $"Auto ({Macros.BuildArch})");
-        AppendPair(builder, nameof(Macros.BuildTarget), Macros.BuildTarget);
-        AppendPair(builder, nameof(Macros.OutputDirectory), Macros.OutputDirectory);
-        AppendPair(builder, nameof(Macros.OutputName), Macros.OutputName);
-
-        if (verbose)
+        if (!string.IsNullOrEmpty(version))
         {
-            AppendHeader(builder, "CONF");
-            builder.AppendLine(Conf.ToString(false));
-        }
+            int p0 = version.IndexOf("[");
+            var len = version.IndexOf("]") - p0 - 1;
 
-        if (Assets.DesktopContent != null)
-        {
-            AppendHeader(builder, "DESKTOP");
-            builder.AppendLine(Assets.DesktopContent);
-        }
-
-        if (verbose)
-        {
-            AppendHeader(builder, "META PATHS");
-            builder.AppendLine(Path.GetRelativePath(Tree.PackTop, Tree.DesktopPath));
-            builder.AppendLine(Path.GetRelativePath(Tree.PackTop, Tree.AppMetaPath));
-
-            foreach (var item in Assets.LinuxIcons)
+            if (p0 > 0 && len > 0)
             {
-                builder.AppendLine(Path.GetRelativePath(Tree.PackTop, item.Value));
-            }
+                var temp = version.Substring(p0 + 1, len).Trim();
+                version = version.Substring(0, p0).Trim();
 
-            if (Assets.AppMetaContent != null)
-            {
-                AppendHeader(builder, "APP METADATA");
-                builder.AppendLine(Assets.AppMetaContent);
+                if (temp.Length != 0)
+                {
+                    release = temp;
+                }
             }
-
-            if (Macros.OutputKind == PackKind.Flatpak)
-            {
-                AppendHeader(builder, "FLATPAK MANIFEST");
-                builder.AppendLine(Assets.FlatpakManifestContent);
-            }
-
-            if (Macros.OutputKind == PackKind.Rpm)
-            {
-                AppendHeader(builder, "RPM SPEC");
-                builder.AppendLine(Assets.GetRpmSpecContent(false));
-            }
-
-            AppendHeader(builder, "MACROS");
-            builder.AppendLine(Macros.ToString());
         }
 
-        AppendHeader(builder, "PROJECT BUILD", false);
-
-        foreach (var item in PublishCommands)
-        {
-            builder.AppendLine();
-            builder.AppendLine(item);
-        }
-
-        AppendHeader(builder, "PACKAGE BUILD", false);
-
-        foreach (var item in PackageCommands)
-        {
-            builder.AppendLine();
-            builder.AppendLine(item);
-        }
-
-        return builder.ToString().Trim();
+        return version;
     }
 
-    private static void AppendHeader(StringBuilder builder, string title, bool spacer = true)
+    private static string GetOutputDirectory(ConfigurationReader conf)
     {
-        if (builder.Length != 0)
+        var output = Path.GetDirectoryName(conf.Arguments.Output);
+
+        if (output != null)
         {
-            builder.AppendLine();
-        }
-
-        builder.AppendLine(new string('=', 40));
-        builder.AppendLine(title);
-        builder.AppendLine(new string('=', 40));
-
-        if (spacer)
-        {
-            builder.AppendLine();
-        }
-    }
-
-    private static void AppendPair(StringBuilder builder, string name, string? value)
-    {
-        builder.Append(name);
-        builder.Append(": ");
-        builder.AppendLine(value);
-    }
-
-    private void AddConditionalRunLink()
-    {
-        if (Macros.OutputKind == PackKind.AppImage)
-        {
-            // IMPORTANT - Create AppRun link
-            // ln -s {target} {link}
-            var cmd = $"ln -s \"{Tree.LaunchExec}\" \"{Path.Combine(Tree.AppDir, "AppRun")}\"";
-            Tree.Ops.Exec(cmd);
-        }
-        else
-        if (!string.IsNullOrEmpty(Conf.StartCommand) && Tree.AppBin != Tree.AppInstall && Macros.OutputKind.IsLinux())
-        {
-            var path = Path.Combine(Tree.AppBin, Conf.StartCommand);
-
-            // Note
-            // Rpm and Deb etc only. These get installed to /opt, but put 'link file' in /usr/bin
-            var script = $"#!/bin/sh\nexec {Tree.LaunchExec} \"$@\"";
-
-            if (!File.Exists(path))
+            if (Path.IsPathFullyQualified(output))
             {
-                Tree.Ops.WriteFile(path, script);
-                Tree.Ops.Exec($"chmod a+x {path}");
+                return output;
             }
+
+            return Path.Combine(conf.OutputDirectory, output);
         }
+
+        return conf.OutputDirectory;
     }
 
-    private List<string> GetPublishCommands(BuildMacros macros)
+    private static string GetOutputName(ConfigurationReader conf, PackKind kind, string version, string release)
     {
+        var output = Path.GetFileName(conf.Arguments.Output);
+
+        if (output != null)
+        {
+            return output;
+        }
+
+        output = conf.AppBaseName;
+
+        if (conf.OutputVersion && !string.IsNullOrEmpty(version))
+        {
+            output += $"-{version}-{release}";
+        }
+
+        output += $".{conf.GetBuildArch()}";
+
+        if (kind == PackKind.AppImage)
+        {
+            return output + ".AppImage";
+        }
+
+        if (kind == PackKind.WinSetup)
+        {
+            return output + ".exe";
+        }
+
+        return output + "." + kind.ToString().ToLowerInvariant();
+    }
+
+    private static IReadOnlyCollection<string> GetDefaultIcons()
+    {
+        // Default icon in assembly directory
         var list = new List<string>();
 
-        if (Conf.DotnetProjectPath != ConfDecoder.PathNone)
-        {
-            var args = macros.Expand(Conf.DotnetPublishArgs) ?? "";
-
-            if (args.Contains("-o ") || args.Contains("--output "))
-            {
-                // Cannot be allowed
-                throw new ArgumentException($"Option -o, --output cannot be specified in {nameof(Conf.DotnetProjectPath)}");
-            }
-
-            var builder = new StringBuilder("dotnet publish");
-
-            if (!string.IsNullOrEmpty(Conf.DotnetProjectPath) && Conf.DotnetProjectPath != ".")
-            {
-                builder.Append(" ");
-                builder.Append($"\"{Conf.DotnetProjectPath}\"");
-            }
-
-            if (!string.IsNullOrEmpty(Macros.DotnetRuntime) && !args.Contains("-r ") && !args.Contains("--runtime "))
-            {
-                builder.Append(" -r ");
-                builder.Append(Macros.DotnetRuntime);
-            }
-
-            if (!string.IsNullOrEmpty(Args.Build) && !args.Contains("-c ") && !args.Contains("--configuration"))
-            {
-                builder.Append(" -c ");
-                builder.Append(Args.Build);
-            }
-
-            if (!string.IsNullOrEmpty(Args.Property))
-            {
-                builder.Append(" -");
-
-                if (!Args.Property.StartsWith("p:"))
-                {
-                    builder.Append("p:");
-                }
-
-                builder.Append(Args.Property);
-            }
-
-            if (!string.IsNullOrEmpty(args))
-            {
-                builder.Append(" ");
-                builder.Append(args);
-            }
-
-            builder.Append(" -o \"");
-            builder.Append(Tree.PublishBin);
-            builder.Append("\"");
-
-            list.Add(builder.ToString());
-        }
-
-        foreach (var item in Macros.Expand(Conf.DotnetPostPublish))
-        {
-            list.Add(item);
-        }
+        list.Add(Path.Combine(AssemblyDirectory, "app.svg"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.icon"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.16x16.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.24x24.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.32x32.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.48x48.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "app.64x64.png"));
 
         return list;
     }
 
-    private List<string> GetPackageCommands()
+    private static int GetStandardPngSize(string filename)
     {
-        var list = new List<string>();
-        var output = Path.Combine(Macros.OutputDirectory, Macros.OutputName);
+        // Where filename = name.32.png, or name.32x32.png
+        var ext = Path.GetExtension(filename);
 
-        if (Macros.OutputKind == PackKind.AppImage)
+        if (ext.Equals(".png", StringComparison.OrdinalIgnoreCase))
         {
-            // Path to embedded
-            if (BuildAssets.AppImageTool == null)
+            // Loose any directory
+            filename = Path.GetFileName(filename);
+
+            // Interior extension, i.e. the value
+            ext = Path.GetExtension(Path.GetFileNameWithoutExtension(filename));
+
+            // Accept "64x64" but key off first value
+            int pos = ext.IndexOf('x', StringComparison.OrdinalIgnoreCase);
+
+            if (pos > 0)
             {
-                throw new InvalidOperationException($"{PackKind.AppImage} not supported on {ConfDecoder.GetOSArch()}");
+                ext = ext.Substring(1, pos - 1);
             }
 
-            list.Add($"{BuildAssets.AppImageTool} {Conf.AppImageArgs} \"{Tree.AppDir}\" \"{output}\"");
-
-            if (Args.IsRun)
+            if (int.TryParse(ext, out int size) && StandardIconSizes.Contains(size))
             {
-                list.Add(output);
+                return size;
             }
 
-            return list;
+            var sizes = string.Join(',', StandardIconSizes);
+            throw new ArgumentException($"Icon {filename} must be of form 'name.size.png', where size = {sizes} only");
         }
 
-        if (Macros.OutputKind == PackKind.Flatpak)
+        return 0;
+    }
+
+    private static string? GetSourceIcon(PackKind kind, IReadOnlyCollection<string> paths)
+    {
+        int max = 0;
+        string? rslt = null;
+
+        foreach (var item in paths)
         {
-            var temp = Path.Combine(Tree.PackTop, "build");
-            var state = Path.Combine(Tree.PackTop, "state");
-            var repo = Path.Combine(Tree.PackTop, "repo");
+            var ext = Path.GetExtension(item).ToLowerInvariant();
 
-            var cmd = $"flatpak-builder {Conf.FlatpakBuilderArgs}";
-
-            if (Args.Arch != null)
+            if (kind.IsWindows() && ext == ".ico")
             {
-                // Explicit only (otherwise leave it to utility to determine)
-                cmd += $" --arch ${Args.Arch}";
+                // Only need this
+                return item;
             }
 
-            cmd += $" --repo=\"{repo}\" --force-clean \"{temp}\" --state-dir \"{state}\" \"{Tree.FlatpakManifestPath}\"";
-            list.Add(cmd);
+            if (!kind.IsWindows() && ext == ".svg")
+            {
+                // Or this for non-windows
+                return item;
+            }
 
-            list.Add($"flatpak build-bundle \"{repo}\" \"{output}\" {Conf.AppId}");
+            // Get biggest PNG
+            int size = GetStandardPngSize(item);
 
-            return list;
+            if (size > max)
+            {
+                max = size;
+                rslt = item;
+            }
         }
 
-        if (Macros.OutputKind == PackKind.Rpm)
+        return rslt;
+    }
+
+    private string? MapSourceIconToSharePath(string sourcePath)
+    {
+        if (BuildShareIcons != null)
         {
-            // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
-            var cmd = $"rpmbuild -bb \"{Tree.RpmSpecPath}\"";
-            cmd += $" --define \"_topdir {Path.Combine(Tree.PackTop, "rpmbuild")}\" --buildroot=\"{Tree.AppDir}\"";
-            cmd += $" --define \"_rpmdir {output}\" --define \"_build_id_links none\"";
+            var ext = Path.GetExtension(sourcePath).ToLowerInvariant();
 
-            list.Add(cmd);
-            return list;
+            if (ext.Equals(".svg", StringComparison.OrdinalIgnoreCase))
+            {
+                return Path.Combine(BuildShareIcons, "hicolor", "scalable", "apps", Configuration.AppId) + ".svg";
+            }
+
+            int size = GetStandardPngSize(sourcePath);
+
+            if (size > 0)
+            {
+                return Path.Combine(BuildShareIcons, "hicolor", $"{size}x{size}", "apps", Configuration.AppId) + ".png";
+            }
         }
 
-        if (Macros.OutputKind == PackKind.Deb)
+        return null;
+    }
+
+    private IReadOnlyDictionary<string, string> GetShareIconPaths(IReadOnlyCollection<string> sources)
+    {
+        // Empty on windows
+        var dict = new Dictionary<string, string>();
+
+        if (BuildShareIcons != null)
         {
+            foreach (var item in sources)
+            {
+                var dest = MapSourceIconToSharePath(item);
 
-            return list;
+                if (dest != null)
+                {
+                    dict.TryAdd(item, dest);
+                }
+            }
         }
 
-        if (Macros.OutputKind == PackKind.Zip)
-        {
-            return list;
-        }
-
-        throw new NotImplementedException($"Not implemented {Macros.OutputKind}");
+        return dict;
     }
 
 }
-
 

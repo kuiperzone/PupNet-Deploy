@@ -24,7 +24,7 @@ namespace KuiperZone.PupNet;
 /// <summary>
 /// Reads and decodes the configuration file. Changes the working directory to that of the config file.
 /// </summary>
-public class ConfDecoder
+public class ConfigurationReader
 {
     /// <summary>
     /// Explicitly no path.
@@ -34,9 +34,9 @@ public class ConfDecoder
     /// <summary>
     /// Default constructor. No arguments.
     /// </summary>
-    public ConfDecoder()
+    public ConfigurationReader()
     {
-        Args = new();
+        Arguments = new();
         Reader = new();
         ConfDirectory = "";
     }
@@ -44,7 +44,7 @@ public class ConfDecoder
     /// <summary>
     /// Constructor. Reads from file.
     /// </summary>
-    public ConfDecoder(ArgDecoder args, bool assertFiles = true)
+    public ConfigurationReader(ArgumentReader args, bool assertFiles = true)
         : this(args, new IniReader(AssertConfPath(args.Value, assertFiles)), assertFiles)
     {
     }
@@ -52,14 +52,14 @@ public class ConfDecoder
     /// <summary>
     /// Constructor with content. For unit test.
     /// </summary>
-    public ConfDecoder(ArgDecoder args, string[] content, bool assertFiles = false)
+    public ConfigurationReader(ArgumentReader args, string[] content, bool assertFiles = false)
         : this(args, new IniReader(content), assertFiles)
     {
     }
 
-    private ConfDecoder(ArgDecoder args, IniReader reader, bool assertFiles)
+    private ConfigurationReader(ArgumentReader args, IniReader reader, bool assertFiles)
     {
-        Args = args;
+        Arguments = args;
         Reader = reader;
         AssertFiles = assertFiles;
         ConfDirectory = assertFiles ? Path.GetDirectoryName(reader.Filepath)! : "";
@@ -77,12 +77,12 @@ public class ConfDecoder
         StartCommand = GetOptional(nameof(StartCommand));
         IsTerminal = GetBool(nameof(IsTerminal));
         DesktopEntry = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DesktopEntry)), true);
-        Icons = AssertAbsolutePath(ConfDirectory, GetConfMultiline(nameof(Icons), true));
+        Icons = AssertAbsolutePath(ConfDirectory, GetMultiCollection(nameof(Icons)));
         MetaInfo = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(MetaInfo)), false);
 
         DotnetProjectPath = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DotnetProjectPath)), true);
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs));
-        DotnetPostPublish = GetConfMultiline(nameof(DotnetPostPublish), true);
+        DotnetPostPublish = GetMultiCollection(nameof(DotnetPostPublish));
 
         OutputDirectory = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(OutputDirectory)), false) ?? ConfDirectory;
         OutputVersion = GetBool(nameof(OutputVersion));
@@ -93,13 +93,17 @@ public class ConfDecoder
         FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk));
         FlatpakPlatformVersion = GetMandatory(nameof(FlatpakPlatformVersion));
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs));
-        FlatpakFinishArgs = GetConfMultiline(nameof(FlatpakFinishArgs), true, "=", "--");
+        FlatpakFinishArgs = GetMultiCollection(nameof(FlatpakFinishArgs), "=", "--");
 
         AssertOK();
     }
 
-    public ArgDecoder Args { get; }
     public IniReader Reader { get; }
+    public ArgumentReader Arguments { get; }
+
+    /// <summary>
+    /// Gets whether to assert files exist. Only false for unit testing.
+    /// </summary>
     public bool AssertFiles { get; }
 
     /// <summary>
@@ -123,7 +127,7 @@ public class ConfDecoder
     public IReadOnlyCollection<string> Icons { get; } = Array.Empty<string>();
 
     public string? DotnetProjectPath { get; }
-    public string? DotnetPublishArgs { get; } = $"-p:Version=${{{MacroNames.AppVersion}}} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
+    public string? DotnetPublishArgs { get; } = $"-p:Version={MacroId.AppVersion.ToVar()} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
     public IReadOnlyCollection<string> DotnetPostPublish { get; } = Array.Empty<string>();
 
     public string OutputDirectory { get; } = "Deploy";
@@ -174,16 +178,16 @@ public class ConfDecoder
     /// </summary>
     public string GetBuildArch()
     {
-        if (Args.Arch != null)
+        if (Arguments.Arch != null)
         {
             // Provided explicitly
-            return Args.Arch;
+            return Arguments.Arch;
         }
 
-        if (DotnetProjectPath != ConfDecoder.PathNone)
+        if (DotnetProjectPath != ConfigurationReader.PathNone)
         {
             // Map from dotnet RID
-            return GetRuntimeArch(Args.Runtime);
+            return GetRuntimeArch(Arguments.Runtime);
         }
 
         return GetOSArch();
@@ -282,9 +286,9 @@ public class ConfDecoder
         c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
         c?.AppendLine($"# generated automatically from known application information. A file may be supplied instead to");
         c?.AppendLine($"# provide for mime-types and internationalisation. If supplied, the file MUST contain the line:");
-        c?.AppendLine($"# 'Exec=${{{MacroNames.DesktopExec}}}' in order to use the correct install location. Other macros");
-        c?.AppendLine($"# may be used to help automate some content, and include: ${{{MacroNames.AppFriendlyName}}}, ${{{MacroNames.AppId}}},");
-        c?.AppendLine($"# ${{{MacroNames.AppSummary}}} etc. If required that no desktop be installed, set value to: '{PathNone}'");
+        c?.AppendLine($"# 'Exec={MacroId.DesktopExec.ToVar()}' in order to use the correct install location. Other macros");
+        c?.AppendLine($"# may be used to help automate some content, and include: {MacroId.AppFriendlyName.ToVar()}, {MacroId.AppId.ToVar()},");
+        c?.AppendLine($"# {MacroId.AppSummary.ToVar()} etc. If required that no desktop be installed, set value to: '{PathNone}'");
         c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
         c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
         sb.AppendLine(GetHelpNameValue(nameof(DesktopEntry), DesktopEntry));
@@ -299,7 +303,7 @@ public class ConfDecoder
 
         c?.AppendLine();
         c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
-        c?.AppendLine($"# The file content may embed supported macros such as, such as {MacroNames.AppFriendlyName} and {MacroNames.AppId} etc.");
+        c?.AppendLine($"# The file content may embed supported macros such as, such as {MacroId.AppFriendlyName.ToVar()} and {MacroId.AppId.ToVar()} etc.");
         c?.AppendLine($"# to assist in automating fields. Refer: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Assets/metainfo.xml.");
         sb.AppendLine(GetHelpNameValue(nameof(MetaInfo), MetaInfo));
@@ -320,7 +324,7 @@ public class ConfDecoder
         c?.AppendLine();
         c?.AppendLine($"# Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version,");
         c?.AppendLine($"# or '-c' (configuration) here as they will be added (i.e. via {nameof(AppVersionRelease)}).");
-        c?.AppendLine($"# Typically you want as a minimum: '-p:Version=${{{MacroNames.AppVersion}}} --self-contained true'. Additional");
+        c?.AppendLine($"# Typically you want as a minimum: '-p:Version={MacroId.AppVersion.ToVar()} --self-contained true'. Additional");
         c?.AppendLine($"# useful arguments include: '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true");
         c?.AppendLine($"# -p:PublishTrimmed=true -p:TrimMode=link'.");
         c?.AppendLine($"# Refer: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
@@ -441,7 +445,7 @@ public class ConfDecoder
         {
             if (assert)
             {
-                throw new ArgumentException($"Specify .conf file to use (directory does not contain exactly one file).");
+                throw new ArgumentException($"Specify .conf file (directory does not contain exactly one file).");
             }
 
             // Dummy only (not in production)
@@ -515,7 +519,7 @@ public class ConfDecoder
             throw new ArgumentException($"{nameof(AppId)} must be in reverse DNS form, i.e. 'net.example.appname'");
         }
 
-        if (Args.Kind.IsLinux() && !Args.Kind.IsWindows())
+        if (Arguments.Kind.IsLinux() && !Arguments.Kind.IsWindows())
         {
             if (DotnetProjectPath == PathNone && DotnetPostPublish.Count == 0)
             {
@@ -567,20 +571,15 @@ public class ConfDecoder
         return Array.Empty<string>();
     }
 
-    private IReadOnlyCollection<string> GetConfMultiline(string name, bool allowSemiColon, string? mustContain = null, string? mustStart = null)
+    private IReadOnlyCollection<string> GetMultiCollection(string name, string? mustContain = null, string? mustStart = null)
     {
         var value = GetOptional(name, true);
 
         if (value != null)
         {
-            char sep = '\n';
             value = value.ReplaceLineEndings("\n");
 
-            if (allowSemiColon && !value.Contains('\n'))
-            {
-                sep = ';';
-            }
-
+            char sep = value.Contains('\n') ? '\n' : ';';
             var list = value.Split(sep, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
             foreach (var item in list)

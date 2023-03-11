@@ -57,7 +57,7 @@ internal class Program
     {
         try
         {
-            var decoder = new ArgDecoder(args);
+            var decoder = new ArgumentReader(args);
 
             if (decoder.New != NewKind.None)
             {
@@ -97,7 +97,7 @@ internal class Program
                     {
                         var ops = new FileOps();
                         ops.DisplayPath = false;
-                        ops.Exec($"{BuildAssets.AppImageTool} --version");
+                        ops.Execute($"{BuildAssets.AppImageTool} --version");
                     }
                     catch
                     {
@@ -112,7 +112,7 @@ internal class Program
             {
                 Console.WriteLine($"{ProductName} {Version}");
                 Console.WriteLine();
-                Console.WriteLine(ArgDecoder.GetHelperText());
+                Console.WriteLine(ArgumentReader.GetHelperText());
 
                 Console.WriteLine();
                 Console.WriteLine("Macro Reference:");
@@ -129,7 +129,7 @@ internal class Program
             Console.WriteLine($"Conf File: {decoder.Value ?? "[None]"}");
             Console.WriteLine();
 
-            new PackageBuilder(decoder).Run();
+            new BuildHost(decoder).Run();
 
             Console.WriteLine();
             return 0;
@@ -148,7 +148,7 @@ internal class Program
         }
     }
 
-    private static void CreateNewFiles(ArgDecoder args)
+    private static void CreateNewFiles(ArgumentReader args)
     {
         if (args.New == NewKind.Conf || args.New == NewKind.All)
         {
@@ -178,7 +178,7 @@ internal class Program
             switch (kind)
             {
                 case NewKind.Conf:
-                    fop.WriteFile(path, new ConfDecoder().ToString());
+                    fop.WriteFile(path, new ConfigurationReader().ToString());
                     break;
                 case NewKind.Desktop:
                     fop.WriteFile(path, BuildAssets.GetDesktopTemplate(true));
