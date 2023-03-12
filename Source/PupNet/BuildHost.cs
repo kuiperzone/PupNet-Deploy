@@ -16,62 +16,61 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Reflection;
 using System.Text;
 
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// A base class for package builds. Defines build directory structure.
+/// Handles Console interaction, publishes the dotnet application and creates and executes a concrete instance of
+/// <see cref="PackageBuilder"/>.
 /// </summary>
-public abstract class BuildHost
+public class BuildHost
 {
-    private IReadOnlyDictionary<MacroId, string> _macros;
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    public BuildHost(ArgumentReader args)
+        : this(new ConfigurationReader(args))
+    {
+    }
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BuildHost(BuildRoot root)
+    public BuildHost(ConfigurationReader conf)
     {
-        PackageKind = conf.Args.Kind;
-        Arguments = conf.Args;
+        Arguments = conf.Arguments;
         Configuration = conf;
-        Tree = new PackageBuilder(Configuration, buildRootName);
+        Builder = new BuilderFactory().Create(Configuration);
+        Macros = new BuildMacros(Builder);
 
+        var warnings = new List<string>();
 
-        var icons = Configuration.Icons.Count != 0 ? Configuration.Icons : DefaultIcons;
-        IconPaths = GetIconPaths(icons);
-        SourceIcon = GetSourceIcon(PackageKind, icons);
-
-        PublishCommands = GetPublishCommands();
-
-        if (!PackageKind.IsWindows())
+        if (!Builder.IsWindowsPackage)
         {
-            DesktopContent = ReadFile(Configuration.DesktopEntry);
-            MetaInfoContent = ReadFile(Configuration.MetaInfo);
+            ExpandedDesktop = Macros.Expand(Configuration.ReadFile(Configuration.DesktopEntry), warnings, Path.GetFileName(Configuration.DesktopEntry));
+            ExpandedMetaInfo = Macros.Expand(Configuration.ReadFile(Configuration.MetaInfo), warnings, Path.GetFileName(Configuration.MetaInfo));
+
+            if (ExpandedDesktop == null)
+            {
+                warnings.Add("Installation does not provide a desktop file");
+            }
+
+            if (ExpandedMetaInfo == null)
+            {
+                warnings.Add("Installation does not provide AppStream metadata");
+            }
         }
+
+        PublishCommands = Macros.Expand(GetPublishCommands(Builder), warnings, "dotnet publish");
+
+        if (Arguments.IsRun && !Builder.SupportsRunOnBuild)
+        {
+            warnings.Add($"{Builder.PackKind} does not support the post-build run option");
+        }
+
+        Warnings = warnings;
     }
-
-    /// <summary>
-    /// Gets the EntryAssembly directory.
-    /// </summary>
-    public readonly static string AssemblyDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ??
-        throw new InvalidOperationException("Failed to get EntryAssembly location");
-
-    /// <summary>
-    /// Known and accepted PNG icon sizes.
-    /// </summary>
-    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256 });
-
-    /// <summary>
-    /// Gets default source icons.
-    /// </summary>
-    public static IReadOnlyCollection<string> DefaultIcons { get; } = GetDefaultIcons();
-
-    /// <summary>
-    /// Gets the packaging kind.
-    /// </summary>
-    public PackKind PackageKind { get; }
 
     /// <summary>
     /// Gets a reference to the arguments.
@@ -84,213 +83,143 @@ public abstract class BuildHost
     public ConfigurationReader Configuration { get; }
 
     /// <summary>
-    /// Get the build directory tree.
+    /// Get the concrete package builder.
     /// </summary>
-    public PackageBuilder Tree { get; }
+    public PackageBuilder Builder { get; }
 
     /// <summary>
-    /// Gets available macros.
+    /// Get the macro expander.
     /// </summary>
-    public IReadOnlyDictionary<MacroId, string> Macros
-    {
-        get
-        {
-            if (_macros == null)
-            {
-                var dict = new SortedDictionary<MacroId, string>();
-
-                dict.Add(MacroId.AppBaseName, Configuration.AppBaseName);
-                dict.Add(MacroId.AppFriendlyName, Configuration.AppFriendlyName);
-                dict.Add(MacroId.AppId, Configuration.AppId);
-                dict.Add(MacroId.AppSummary, Configuration.AppSummary);
-                dict.Add(MacroId.AppLicense, Configuration.AppLicense);
-                dict.Add(MacroId.AppVendor, Configuration.AppVendor);
-                dict.Add(MacroId.AppUrl, Configuration.AppUrl ?? "");
-
-                dict.Add(MacroId.AppVersion, AppVersion);
-                dict.Add(MacroId.PackRelease, PackRelease);
-                dict.Add(MacroId.PackKind, PackageKind.ToString().ToLowerInvariant());
-                dict.Add(MacroId.DotnetRuntime, DotnetRuntime);
-                dict.Add(MacroId.BuildArch, BuildArch);
-                dict.Add(MacroId.BuildTarget, BuildTarget);
-                dict.Add(MacroId.OutputPath, Path.Combine(OutputDirectory, OutputName));
-                dict.Add(MacroId.IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
-
-                dict.Add(MacroId.DesktopName, Path.GetFileName(DesktopBuildPath) ?? "");
-                dict.Add(MacroId.MetaInfoName, Path.GetFileName(MetaInfoBuildPath) ?? "");
-                dict.Add(MacroId.BuildRoot, Tree.BuildRoot);
-                dict.Add(MacroId.BuildShare, Tree.BuildUsrShare ?? "");
-                dict.Add(MacroId.PublishBin, PublishBin);
-                dict.Add(MacroId.DesktopExec, DeployExecPath);
-
-                _macros = dict;
-            }
-
-            return _macros;
-        }
-    }
+    public BuildMacros Macros { get; }
 
     /// <summary>
-    /// Gets the path of the "source" icon, i.e. the single icon considered to be the most generally suitable.
-    /// On Linux this is the first SVG file encountered, or the largest PNG otherwise. On Windows, it is an ICO file.
+    /// Gets expanded desktop entry content.
     /// </summary>
-    public string? SourceIcon { get; }
+    public string? ExpandedDesktop { get; }
 
     /// <summary>
-    /// A sequence of source icon paths (key) and their destinations (value) under <see cref="PackageBuilder.BuildShareIcons"/>.
-    /// Defaults are used if the configuration supplies none. Empty on Windows.
+    /// Gets expanded desktop entry content.
     /// </summary>
-    public IReadOnlyDictionary<string, string> IconPaths { get; }
+    public string? ExpandedMetaInfo { get; }
 
     /// <summary>
-    /// Gets the application executable filename (no directory part). I.e. "Configuration.AppBase[.exe]".
-    /// </summary>
-    public string AppExecName
-    {
-        get { return Arguments.IsWindowsRuntime() ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
-    }
-
-    /// <summary>
-    /// Gets the application executable path , i.e. "${AppBin}/AppBase[.exe]".
-    /// </summary>
-    public string PublishExecPath
-    {
-        get { return Path.Combine(PublishBin, AppExecName); }
-    }
-
-    /// <summary>
-    /// Gets the app bin directory, which may be either: "${Tree.UsrBin}" or "${Tree.BuildRoot}/opt/AppId".
-    /// NOTE. This is where we must publish to.
-    /// </summary>
-    public abstract string PublishBin { get; }
-
-    /// <summary>
-    /// Gets the path to the runnable binary when deployed, i.e.: "/usr/bin/${AppExecName}" or "/opt/AppId/${AppExecName}".
-    /// </summary>
-    public abstract string DeployExecPath{ get; }
-
-    /// <summary>
-    /// Gets the command to publish the application, including any post-publish commands. May contain macros.
+    /// Gets expanded publish commands, including post publish.
     /// </summary>
     public IReadOnlyCollection<string> PublishCommands { get; }
 
     /// <summary>
-    /// Gets the desktop file contents. May contain macros. Null for windows.
+    /// Gets any warning pre-build.
     /// </summary>
-    public string? DesktopContent { get; }
+    public IReadOnlyCollection<string> Warnings { get; }
 
     /// <summary>
-    /// Gets the destination build path for the desktop file file. Not used (null) for Windows.
-    /// Default is "${Tree.ShareApplications}/${AppId}.desktop".
+    /// Runs the build process. Returns true if complete, or false if cancelled.
     /// </summary>
-    public abstract string? DesktopBuildPath { get; }
-
-    /// <summary>
-    /// Gets the metainfo file contents. May contain macros.
-    /// </summary>
-    public string? MetaInfoContent { get; }
-
-    /// <summary>
-    /// Gets the destination build path for the metainfo file. Null for Windows.
-    /// Default is "${Tree.ShareMeta}/${AppId}.metainfo.xml".
-    /// </summary>
-    public string? MetaInfoBuildPath
+    public bool Run()
     {
-        get
+        Console.WriteLine(ToString());
+        Console.WriteLine();
+
+        if (Arguments.IsSkipYes || new ConfirmPrompt().Wait())
         {
-            if (Tree.BuildShareMeta != null)
+            Builder.Create(ExpandedDesktop, ExpandedMetaInfo);
+
+            foreach (var item in Macros.Dictionary)
             {
-                return Path.Combine(Tree.BuildShareMeta, Configuration.AppId) + ".metainfo.xml";
+                // We set variable to be used by any executed processes
+                Environment.SetEnvironmentVariable(item.Key.ToName(), item.Value);
             }
 
-            return null;
+            Console.WriteLine();
+            Console.WriteLine("Build Project");
+            Builder.Operations.Execute(PublishCommands);
+
+            if (Arguments.IsVerbose)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Build Files:");
+
+                foreach (var item in Builder.ListBuild())
+                {
+                    Console.WriteLine(item);
+                }
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Build Package");
+            Builder.BuildPackage();
+
+            return true;
         }
+
+        return false;
     }
 
     /// <summary>
-    /// Gets a package "manifest file". For RPM this is the SPEC file contents. For Flatpak, it is the manifest.
-    /// May contain macros.
+    /// Overrides and returns pre-build action summary.
     /// </summary>
-    public abstract string? ManifestContent { get; }
-
-    /// <summary>
-    /// Gets a sequence of commends needed to build the package. May contain macros.
-    /// </summary>
-    public abstract IReadOnlyCollection<string> PackageCommands { get; }
-
-    /// <summary>
-    /// Gets multi-line summary string.
-    /// </summary>
-    public string GetSummary(BuildMacros macros)
+    public override string ToString()
     {
-        return GetSummary(macros, Arguments.IsVerbose);
+        return ToString(Arguments.IsVerbose);
     }
 
     /// <summary>
-    /// Gets multi-line summary string. Overload.
+    /// Returns pre-build action summary.
     /// </summary>
-    public string GetSummary(BuildMacros macros, bool verbose)
+    public string ToString(bool verbose)
     {
         var sb = new StringBuilder();
 
         AppendHeader(sb, "APPLICATION");
         AppendPair(sb, nameof(Configuration.AppBaseName), Configuration.AppBaseName);
         AppendPair(sb, nameof(Configuration.AppId), Configuration.AppId);
-        AppendPair(sb, nameof(AppVersion), AppVersion);
-        AppendPair(sb, nameof(PackRelease), PackRelease);
+        AppendPair(sb, nameof(Builder.AppVersion), Builder.AppVersion);
+        AppendPair(sb, nameof(Builder.PackRelease), Builder.PackRelease);
 
         AppendHeader(sb, "OUTPUT");
-        AppendPair(sb, nameof(PackageKind), PackageKind.ToString().ToLowerInvariant());
-        AppendPair(sb, nameof(DotnetRuntime), DotnetRuntime);
-        AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({BuildArch})");
-        AppendPair(sb, nameof(BuildTarget), BuildTarget);
-        AppendPair(sb, nameof(OutputDirectory), OutputDirectory);
-        AppendPair(sb, nameof(OutputName), OutputName);
+        AppendPair(sb, nameof(Builder.PackKind), Builder.PackKind.ToString().ToLowerInvariant());
+        AppendPair(sb, nameof(Arguments.Runtime), Arguments.Runtime);
+        AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Configuration.GetBuildArch()})");
+        AppendPair(sb, nameof(Arguments.Build), Arguments.Build);
+        AppendPair(sb, nameof(Builder.OutputName), Builder.OutputName);
+        AppendPair(sb, nameof(Builder.OutputDirectory), Builder.OutputDirectory);
 
         if (verbose)
         {
             AppendSection(sb, "CONFIGURATION", Configuration.ToString(false));
         }
 
-        AppendSection(sb, "DESKTOP", macros.Expand(DesktopContent));
+        AppendSection(sb, "DESKTOP", ExpandedDesktop);
 
         if (verbose)
         {
             var temp = new StringBuilder();
 
-            if (DesktopBuildPath != null)
+            foreach (var item in Builder.IconPaths)
             {
-                temp.AppendLine(Path.GetRelativePath(Tree.BuildRoot, DesktopBuildPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, item.Value));
             }
 
-            if (MetaInfoBuildPath != null)
+            if (Builder.DesktopPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Tree.BuildRoot, MetaInfoBuildPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.DesktopPath));
             }
 
-            foreach (var item in IconPaths)
+            if (Builder.MetaInfoPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Tree.BuildRoot, item.Value));
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.MetaInfoPath));
             }
 
-            AppendSection(sb, "ASSETS", temp.ToString());
-
-            AppendSection(sb, "METAINFO", macros.Expand(MetaInfoContent));
-            AppendSection(sb, "MANIFEST", macros.Expand(ManifestContent));
+            AppendSection(sb, "ASSETS", temp.ToString().TrimEnd());
+            AppendSection(sb, "METAINFO", ExpandedMetaInfo);
+            AppendSection(sb, "MANIFEST", Builder.ManifestContent);
         }
 
-        AppendSection(sb, "PROJECT BUILD", macros.Expand(PublishCommands));
-        AppendSection(sb, "PACKAGE BUILD", macros.Expand(PackageCommands));
+        AppendSection(sb, "BUILD PROJECT", PublishCommands);
+        AppendSection(sb, "BUILD PACKAGE", Builder.PackageCommands);
+        AppendSection(sb, "WARNINGS", Warnings);
 
         return sb.ToString().Trim();
-    }
-
-    /// <summary>
-    /// Overrides
-    /// </summary>
-    public override string ToString()
-    {
-        return Tree.ToString();
     }
 
     private static void AppendHeader(StringBuilder sb, string title, bool spacer = true)
@@ -340,144 +269,69 @@ public abstract class BuildHost
         }
     }
 
-    private static string SplitVersion(string version, out string release)
+    private static IReadOnlyCollection<string> GetPublishCommands(PackageBuilder builder)
     {
-        release = "1";
-
-        if (!string.IsNullOrEmpty(version))
-        {
-            int p0 = version.IndexOf("[");
-            var len = version.IndexOf("]") - p0 - 1;
-
-            if (p0 > 0 && len > 0)
-            {
-                var temp = version.Substring(p0 + 1, len).Trim();
-                version = version.Substring(0, p0).Trim();
-
-                if (temp.Length != 0)
-                {
-                    release = temp;
-                }
-            }
-        }
-
-        return version;
-    }
-
-
-    private string? ReadFile(string? path)
-    {
-        if (path != null && !path.Equals(ConfigurationReader.PathNone, StringComparison.OrdinalIgnoreCase) &&
-            (Configuration.AssertFiles || File.Exists(path)))
-        {
-            var content = File.ReadAllText(path).Trim().ReplaceLineEndings("\n");
-
-            if (string.IsNullOrEmpty(content))
-            {
-                throw new InvalidOperationException("File is empty " + path);
-            }
-
-            return content;
-        }
-
-        return null;
-    }
-
-    private string? ReadOrJoin(IReadOnlyCollection<string> value)
-    {
-        if (value.Count == 0)
-        {
-            return null;
-        }
-
-        if (value.Count == 1)
-        {
-            foreach (var item in value)
-            {
-                if (item.Length != 0)
-                {
-                    return ReadFile(item);
-                }
-            }
-        }
-
-        return string.Join('\n', value);
-    }
-
-    private string? GetDesktopContent()
-    {
-        return null;
-    }
-
-    private string? GetMetaInfoContent()
-    {
-        return null;
-    }
-
-    private IReadOnlyCollection<string> GetPublishCommands()
-    {
+        // Returns unexpanded
         var list = new List<string>();
+        var conf = builder.Configuration;
 
-        if (Configuration.DotnetProjectPath != ConfigurationReader.PathNone)
+        if (conf.DotnetProjectPath != ConfigurationReader.PathNone)
         {
-            var builder = new StringBuilder("dotnet publish");
+            var sb = new StringBuilder("dotnet publish");
+            var pa = conf.DotnetPublishArgs;
 
-            var args = Configuration.DotnetPublishArgs;
-
-            if (!string.IsNullOrEmpty(Configuration.DotnetProjectPath) && Configuration.DotnetProjectPath != ".")
+            if (!string.IsNullOrEmpty(conf.DotnetProjectPath) && conf.DotnetProjectPath != ".")
             {
-                builder.Append(" ");
-                builder.Append($"\"{Configuration.DotnetProjectPath}\"");
+                sb.Append($" \"{conf.DotnetProjectPath}\"");
             }
 
-            if (args != null)
+            if (pa != null)
             {
-                if (args.Contains("-o ") || args.Contains("--output "))
+                if (pa.Contains("-o ") || pa.Contains("--output "))
                 {
                     // Cannot be allowed
-                    throw new ArgumentException($"The -o, --output option cannot be used in {nameof(Configuration.DotnetPublishArgs)}");
+                    throw new ArgumentException($"The -o, --output option cannot be used in {nameof(conf.DotnetPublishArgs)}");
                 }
 
-                if (!string.IsNullOrEmpty(Arguments.Runtime) && !args.Contains("-r ") && !args.Contains("--runtime "))
+                if (!string.IsNullOrEmpty(conf.Arguments.Runtime) && !pa.Contains("-r ") && !pa.Contains("--runtime "))
                 {
-                    builder.Append(" -r ");
-                    builder.Append(Arguments.Runtime);
+                    sb.Append(" -r ");
+                    sb.Append(conf.Arguments.Runtime);
                 }
 
-                if (!string.IsNullOrEmpty(Arguments.Build) && !args.Contains("-c ") && !args.Contains("--configuration"))
+                if (!string.IsNullOrEmpty(conf.Arguments.Build) && !pa.Contains("-c ") && !pa.Contains("--configuration"))
                 {
-                    builder.Append(" -c ");
-                    builder.Append(Arguments.Build);
+                    sb.Append(" -c ");
+                    sb.Append(conf.Arguments.Build);
                 }
             }
 
-            if (!string.IsNullOrEmpty(Arguments.Property))
+            if (!string.IsNullOrEmpty(conf.Arguments.Property))
             {
-                builder.Append(" -");
+                sb.Append(" -");
 
-                if (!Arguments.Property.StartsWith("p:"))
+                if (!conf.Arguments.Property.StartsWith("p:"))
                 {
-                    builder.Append("p:");
+                    sb.Append("p:");
                 }
 
-                builder.Append(Arguments.Property);
+                sb.Append(conf.Arguments.Property);
             }
 
-            if (!string.IsNullOrEmpty(args))
+            if (!string.IsNullOrEmpty(pa))
             {
-                builder.Append(" ");
-                builder.Append(args);
+                sb.Append(" ");
+                sb.Append(pa);
             }
 
-            builder.Append(" -o \"");
-            builder.Append(PublishBin);
-            builder.Append("\"");
+            sb.Append(" -o \"");
+            sb.Append(builder.PublishBin);
+            sb.Append("\"");
 
-            list.Add(builder.ToString());
+            list.Add(sb.ToString());
         }
 
-        list.AddRange(Configuration.DotnetPostPublish);
-
+        list.AddRange(conf.DotnetPostPublish);
         return list;
     }
 }

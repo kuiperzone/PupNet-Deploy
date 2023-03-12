@@ -30,6 +30,14 @@ public class BuildMacros
     private readonly SortedDictionary<string, string> _sorted = new();
 
     /// <summary>
+    /// Default constructor. Example values only.
+    /// </summary>
+    public BuildMacros()
+        : this(new AppImageBuilder(new ConfigurationReader()))
+    {
+    }
+
+    /// <summary>
     /// Constructor.
     /// </summary>
     public BuildMacros(PackageBuilder builder)
@@ -56,7 +64,8 @@ public class BuildMacros
         dict.Add(MacroId.BuildArch, conf.GetBuildArch());
         dict.Add(MacroId.BuildTarget, args.Build);
         dict.Add(MacroId.OutputPath, Path.Combine(builder.OutputDirectory, builder.OutputName));
-        dict.Add(MacroId.IsoDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
+        dict.Add(MacroId.BuildDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
+        dict.Add(MacroId.BuildYear, DateTime.UtcNow.ToString("yyyy"));
 
         dict.Add(MacroId.BuildRoot, builder.BuildRoot);
         dict.Add(MacroId.BuildShare, builder.BuildUsrShare ?? "");
@@ -87,7 +96,7 @@ public class BuildMacros
     /// Expand all macros in text content. Simple search replace. Case sensitive.
     /// </summary>
     [return: NotNullIfNotNull("content")]
-    public string? Expand(string? content, ICollection<string>? warnings = null)
+    public string? Expand(string? content, ICollection<string>? warnings = null, string? itemName = null)
     {
         if (!string.IsNullOrEmpty(content) && content.Contains("${"))
         {
@@ -98,7 +107,7 @@ public class BuildMacros
 
             if (warnings != null)
             {
-                AddInvalidMacros(content, warnings);
+                AddInvalidMacros(content, warnings, itemName);
             }
         }
 
@@ -108,13 +117,13 @@ public class BuildMacros
     /// <summary>
     /// Expand all macros in text content items.
     /// </summary>
-    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, ICollection<string>? warnings = null)
+    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, ICollection<string>? warnings = null, string? itemName = null)
     {
         var list = new List<string>();
 
         foreach (var item in content)
         {
-            list.Add(Expand(item, warnings));
+            list.Add(Expand(item, warnings, itemName));
         }
 
         return list;
@@ -135,7 +144,7 @@ public class BuildMacros
         return builder.ToString().Trim();
     }
 
-    private static void AddInvalidMacros(string content, ICollection<string> warnings)
+    private static void AddInvalidMacros(string content, ICollection<string> warnings, string? itemName)
     {
         int p0 = content.IndexOf("${");
 
@@ -156,6 +165,11 @@ public class BuildMacros
             }
 
             s = $"Invalid macro {s}";
+
+            if (!string.IsNullOrEmpty(itemName))
+            {
+                s += $" in {itemName}";
+            }
 
             if (!warnings.Contains(s))
             {

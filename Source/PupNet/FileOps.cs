@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 
 using System.Diagnostics;
+using System.IO.Compression;
 using Microsoft.VisualBasic.FileIO;
 
 namespace KuiperZone.PupNet;
@@ -42,9 +43,9 @@ public class FileOps
     public string? Root { get; }
 
     /// <summary>
-    /// Gets or sets the displays of path information. Default is true.
+    /// Gets or sets whether to display commands and path information. Default is true.
     /// </summary>
-    public bool DisplayPath { get; set; } = true;
+    public bool ShowCommands { get; set; } = true;
 
     /// <summary>
     /// Gets a list of files currently under dir, including sub-paths.
@@ -205,49 +206,96 @@ public class FileOps
     }
 
     /// <summary>
-    /// Runs the command.
+    /// Zips the directory and writes to output.
     /// </summary>
-    public void Execute(string cmd)
+    public void Zip(string? directory, string? output)
     {
-        WriteLine(cmd);
-        ExecInternal(cmd);
+        if (!string.IsNullOrEmpty(directory) && !string.IsNullOrEmpty(output))
+        {
+            try
+            {
+                Write("Zip: ", directory);
+                ZipFile.CreateFromDirectory(directory, output, CompressionLevel.Optimal, false);
+                WriteLine(" ... OK");
+            }
+            catch
+            {
+                WriteLine(" ... FAILED");
+                throw;
+            }
+        }
     }
 
-    private void ExecInternal(string cmd)
+    /// <summary>
+    /// Runs the command.
+    /// </summary>
+    public void Execute(string command, bool redirect = false, bool wait = true)
     {
         string? args = null;
-        int idx = cmd.IndexOf(' ');
+        int idx = command.IndexOf(' ');
 
         if (idx > 0)
         {
-            args = cmd.Substring(idx + 1).Trim();
-            cmd = cmd.Substring(0, idx).Trim();
+            args = command.Substring(idx + 1).Trim();
+            command = command.Substring(0, idx).Trim();
         }
+
+        Execute(command, args, redirect, wait);
+    }
+
+    /// <summary>
+    /// Runs the command with separate arguments.
+    /// </summary>
+    public void Execute(string command, string? args, bool redirect = false, bool wait = true)
+    {
+        WriteLine($"{command} {args}");
 
         var info = new ProcessStartInfo
         {
             Arguments = args,
             CreateNoWindow = true,
-            FileName = cmd,
-            RedirectStandardOutput = false,
-            RedirectStandardError = false,
+            FileName = command,
+            RedirectStandardOutput = redirect,
+            RedirectStandardError = redirect,
             UseShellExecute = false,
         };
 
-        var proc = Process.Start(info) ??
-            throw new InvalidOperationException($"{cmd} failed");
+        using var proc = Process.Start(info) ??
+            throw new InvalidOperationException($"{command} failed");
 
-        proc.WaitForExit();
-
-        if (proc.ExitCode != 0)
+        if (wait)
         {
-            throw new InvalidOperationException($"Command {cmd} returned non-zero exit code");
+            proc.WaitForExit();
+
+            if (proc.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"{command} returned non-zero exit code");
+            }
         }
     }
 
-    private void Write(string prefix, string? path = null)
+    /// <summary>
+    /// Runs the commands.
+    /// </summary>
+    public void Execute(IEnumerable<string> commands, bool redirect = false)
     {
-        if (DisplayPath)
+        bool more = false;
+
+        foreach (var item in commands)
+        {
+            if (more && !redirect)
+            {
+                WriteLine(null);
+            }
+
+            Execute(item, redirect);
+            more = true;
+        }
+    }
+
+    private void Write(string? prefix, string? path = null)
+    {
+        if (ShowCommands)
         {
             Console.Write(prefix);
 
@@ -260,9 +308,9 @@ public class FileOps
         }
     }
 
-    private void WriteLine(string prefix, string? path = null)
+    private void WriteLine(string? prefix, string? path = null)
     {
-        if (DisplayPath)
+        if (ShowCommands)
         {
             Write(prefix, path);
             Console.WriteLine();

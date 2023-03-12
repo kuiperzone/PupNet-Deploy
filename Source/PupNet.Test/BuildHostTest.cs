@@ -18,34 +18,34 @@
 
 namespace KuiperZone.PupNet.Test;
 
-public class PackageBuilderTest
+public class BuildHostTest
 {
     [Fact]
     public void AppImage_DecodesOK()
     {
-        var builder = new BuildHost(new DummyConf(PackKind.AppImage));
-
-        AssertOK(builder);
+        var host = new BuildHost(new DummyConf(PackKind.AppImage));
+        AssertOK(host);
     }
 
     [Fact]
     public void Flatpak_DecodesOK()
     {
-        var builder = new BuildHost(new DummyConf(PackKind.Flatpak));
-
-        AssertOK(builder);
+        var host = new BuildHost(new DummyConf(PackKind.Flatpak));
+        AssertOK(host);
     }
 
     [Fact]
     public void Rpm_DecodesOK()
     {
-        var builder = new BuildHost(new DummyConf(PackKind.Rpm));
-
-        AssertOK(builder);
+        var host = new BuildHost(new DummyConf(PackKind.Rpm));
+        AssertOK(host);
     }
 
-    private void AssertOK(BuildHost builder)
+    private void AssertOK(BuildHost host)
     {
-        Console.WriteLine(builder.ToString(true));
+        Console.WriteLine("DUMMY: " + host.GetType().Name);
+        Console.WriteLine(host.ToString(true));
+        Console.WriteLine();
+        Console.WriteLine();
     }
 }

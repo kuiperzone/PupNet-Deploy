@@ -38,8 +38,8 @@ public enum MacroId
     BuildArch,
     BuildTarget,
     OutputPath,
-    IsoDate,
-
+    BuildDate,
+    BuildYear,
     BuildRoot,
     BuildShare,
     PublishBin,
@@ -52,7 +52,7 @@ public enum MacroId
 public static class MacroIdExtension
 {
     /// <summary>
-    /// Converts to string which must used for expansion.
+    /// Converts to name string (i.e. "APP_BASE_NAME").
     /// </summary>
     public static string ToName(this MacroId id)
     {
@@ -74,8 +74,8 @@ public static class MacroIdExtension
             case MacroId.BuildArch: return "BUILD_ARCH";
             case MacroId.BuildTarget: return "BUILD_TARGET";
             case MacroId.OutputPath: return "OUTPUT_PATH";
-            case MacroId.IsoDate: return "ISO_DATE";
-
+            case MacroId.BuildDate: return "BUILD_DATE";
+            case MacroId.BuildYear: return "BUILD_YEAR";
             case MacroId.BuildRoot: return "BUILD_ROOT";
             case MacroId.BuildShare: return "BUILD_SHARE";
             case MacroId.PublishBin: return "PUBLISH_BIN";
@@ -85,6 +85,9 @@ public static class MacroIdExtension
         }
     }
 
+    /// <summary>
+    /// Converts to variable string (i.e. "${APP_BASE_NAME}").
+    /// </summary>
     public static string ToVar(this MacroId id)
     {
         return "${" + ToName(id) + "}";

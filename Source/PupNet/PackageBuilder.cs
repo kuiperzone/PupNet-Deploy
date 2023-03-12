@@ -43,9 +43,9 @@ public abstract class PackageBuilder
         OutputDirectory = GetOutputDirectory(Configuration);
         OutputName = GetOutputName(Configuration, PackKind, AppVersion, PackRelease);
 
-        PackRoot = Path.Combine(GlobalRoot, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Arguments.Build}-{PackKind}");
-        BuildRoot = Path.Combine(PackRoot, buildRootName);
-        Operations = new(PackRoot);
+        Root = Path.Combine(GlobalRoot, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Arguments.Build}-{PackKind}");
+        BuildRoot = Path.Combine(Root, buildRootName);
+        Operations = new(Root);
 
         IconPaths = GetShareIconPaths(Configuration.Icons);
 
@@ -55,7 +55,7 @@ public abstract class PackageBuilder
             IconPaths = GetShareIconPaths(DefaultIcons);
         }
 
-        PrimeIconSource = GetSourceIcon(PackKind, Configuration.Icons);
+        IconSource = GetSourceIcon(PackKind, IconPaths.Keys);
     }
 
     /// <summary>
@@ -125,12 +125,20 @@ public abstract class PackageBuilder
     public string OutputName { get; }
 
     /// <summary>
-    /// Gets the package root for this build instance. This will be a temporary top level build directory.
+    /// Gets output file path.
     /// </summary>
-    public string PackRoot { get; }
+    public string OutputPath
+    {
+        get { return Path.Combine(OutputDirectory, OutputName); }
+    }
 
     /// <summary>
-    /// Gets the app root directory, i.e. "${PackRoot}/AppDir".
+    /// Gets the package root for this build instance. This will be a temporary top level build directory.
+    /// </summary>
+    public string Root { get; }
+
+    /// <summary>
+    /// Gets the app root directory, i.e. "${Root}/AppDir".
     /// </summary>
     public string BuildRoot { get; }
 
@@ -184,13 +192,14 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets the desktop build file path. Null if no desktop file.
+    /// Gets the desktop build file path. AppImage needs to override, otherwise default is standard under
+    /// <see cref="BuildShareApplications"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
     /// </summary>
-    public string? DesktopPath
+    public virtual string? DesktopPath
     {
         get
         {
-            if (!string.IsNullOrEmpty(Configuration.DesktopEntry) && BuildShareApplications != null)
+            if (BuildShareApplications != null)
             {
                 return Path.Combine(BuildShareApplications, Configuration.AppId + ".desktop");
             }
@@ -200,13 +209,14 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets the AppStream build file path. Null if no metainfo file.
+    /// Gets the AppStream build file path. AppImage needs to override, otherwise default is standard under
+    /// <see cref="BuildShareMeta"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
     /// </summary>
-    public string? MetaInfoPath
+    public virtual string? MetaInfoPath
     {
         get
         {
-            if (!string.IsNullOrEmpty(Configuration.MetaInfo) && BuildShareMeta != null)
+            if (BuildShareMeta != null)
             {
                 return Path.Combine(BuildShareMeta, Configuration.AppId + ".metainfo.xml");
             }
@@ -219,23 +229,7 @@ public abstract class PackageBuilder
     /// Gets the source path of the "prime" icon, i.e. the single icon considered to be the most generally suitable.
     /// On Linux this is the first SVG file encountered, or the largest PNG otherwise. On Windows, it is an ICO file.
     /// </summary>
-    public string? PrimeIconSource { get; }
-
-    /// <summary>
-    /// Gets the destination build path for <see cref="PrimeIconSource"/>.
-    /// </summary>
-    public virtual string? PrimeIconPath
-    {
-        get
-        {
-            if (!string.IsNullOrEmpty(PrimeIconSource))
-            {
-                return Path.Combine(PackRoot, Configuration.AppId + Path.GetExtension(PrimeIconSource));
-            }
-
-            return null;
-        }
-    }
+    public string? IconSource { get; }
 
     /// <summary>
     /// A sequence of source icon paths (key) and their destinations (value) under <see cref="PackageBuilder.BuildShareIcons"/>.
@@ -262,42 +256,102 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the "manifest file" specific to the package kind. For RPM, this is the "Spec file" content.
-    /// For Flatpak, it is the "manifest". It may contain macros, which will be expanded. It may be null if not used.
+    /// For Flatpak, it is the "manifest". It must not contain macros. It may be null if not used.
     /// </summary>
     public abstract string? ManifestContent { get; }
 
     /// <summary>
-    /// Gets a sequence of commends needed to build the package. It may contain macros which will be
-    /// expanded prior to calling.
+    /// Gets a sequence of commends needed to build the package. It must not contain macros.
     /// </summary>
     public abstract IReadOnlyCollection<string> PackageCommands { get; }
 
     /// <summary>
-    /// Builds the package. Prior to calling this method, the application will be published to the <see cref="PublishBin"/>.
-    /// The base implementation writes the "desktop" and "metainfo" (expanded) content to standard Linux locations under
-    /// <see cref="BuildShareApplications"/> and <see cref="BuildShareMeta"/> respectively. It does nothing for these
-    /// for Windows packages or if the respective string is null or empty. It writes <see cref="ManifestContent"/> to
-    /// <see cref="ManifestPath"/>, and copies <see cref="IconPaths"/> to their respective destinations. Moreover, it
-    /// copies <see cref="PrimeIconSource"/> to <see cref="PrimeIconPath"/>. It then calls <see cref="FileOps.Execute(string)"/>
-    /// against each item in <see cref="PackageCommands"/>. May be overridden to perform additional or other operations.
+    /// Gets whether package supports run after build without installation.
     /// </summary>
-    public virtual void BuildPackage(string? desktop, string? metainfo)
+    public abstract bool SupportsRunOnBuild { get; }
+
+    /// <summary>
+    /// Create directories tree. It will be called at the start of the build process to create all build directories
+    /// and populate them with standard assets. It does not populate the application binary. The base implementation
+    /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
+    /// <see cref="MetaInfoPath"/> respectively. It does nothing for these for Windows packages or if the respective
+    /// string is null or empty. It copies <see cref="IconPaths"/> to their respective destinations, and writes
+    /// <see cref="ManifestContent"/> to <see cref="ManifestPath"/>. Finally, it ensures that <see cref="OutputDirectory"/>
+    /// exists. It should be overridden to perform additional tasks, but subclass should call this base method first.
+    /// </summary>
+    public virtual void Create(string? desktop, string? metainfo)
     {
-        Operations.WriteFile(DesktopPath, desktop);
-        Operations.WriteFile(MetaInfoPath, metainfo);
+        RemoveRoot();
+        Operations.CreateDirectory(Root);
+        Operations.CreateDirectory(BuildRoot);
+        Operations.CreateDirectory(BuildUsrBin);
+        Operations.CreateDirectory(BuildUsrShare);
+        Operations.CreateDirectory(BuildShareIcons);
+        Operations.CreateDirectory(BuildShareApplications);
+        Operations.CreateDirectory(BuildShareMeta);
+        Operations.CreateDirectory(PublishBin);
+
+        if (!IsWindowsPackage)
+        {
+            // Non-Windows only
+            Operations.WriteFile(DesktopPath, desktop);
+            Operations.WriteFile(MetaInfoPath, metainfo);
+
+            foreach (var item in IconPaths)
+            {
+                Operations.CopyFile(item.Key, item.Value, true);
+            }
+        }
+
         Operations.WriteFile(ManifestPath, ManifestContent);
+        Operations.CreateDirectory(OutputDirectory);
+    }
 
-        Operations.CopyFile(PrimeIconSource, PrimeIconPath);
+    /// <summary>
+    /// Removes <see cref="Root"/>.
+    /// </summary>
+    public void RemoveRoot()
+    {
+        Operations.RemoveDirectory(Root);
+    }
 
-        foreach (var item in IconPaths)
+    /// <summary>
+    /// Gets all files under <see cref="BuildRoot"/>. Note results are prefixed with "/" on non-windows platforms.
+    /// </summary>
+    public IReadOnlyCollection<string> ListBuild(string filter = "*")
+    {
+        if (Directory.Exists(BuildRoot))
         {
-            Operations.CopyFile(item.Key, item.Value, true);
+            var files = FileOps.ListFiles(BuildRoot, filter);
+
+            if (!IsWindowsPackage)
+            {
+                for (int n = 0; n < files.Length; ++n)
+                {
+                    if (!files[n].StartsWith('/'))
+                    {
+                        files[n] = "/" + files[n];
+                    }
+                }
+            }
+
+            return files;
         }
 
-        foreach (var item in PackageCommands)
-        {
-            Operations.Execute(item);
-        }
+        return Array.Empty<string>();
+    }
+
+    /// <summary>
+    /// Builds the package. This method is called after <see cref="Create"/> and after <see cref="PublishBin"/>
+    /// has been populated with the application. The base implementation ensures that the expected runnable binary
+    /// exists and calls <see cref="FileOps.Execute(string)"/> against each item in <see cref="PackageCommands"/>.
+    /// It may be overridden to perform additional or other operations.
+    /// </summary>
+    public virtual void BuildPackage()
+    {
+        // Must exist
+        Operations.AssertExists(Path.Combine(PublishBin, AppExecName));
+        Operations.Execute(PackageCommands);
     }
 
     /// <summary>
@@ -305,7 +359,7 @@ public abstract class PackageBuilder
     /// </summary>
     public override string ToString()
     {
-        return PackRoot;
+        return Root;
     }
 
     private static string SplitVersion(string version, out string release)
@@ -385,8 +439,10 @@ public abstract class PackageBuilder
         // Default icon in assembly directory
         var list = new List<string>();
 
+        // Leave windows icon out - leave InnoSetup to assign own
+        // list.Add(Path.Combine(AssemblyDirectory, "app.icon"));
+
         list.Add(Path.Combine(AssemblyDirectory, "app.svg"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.icon"));
         list.Add(Path.Combine(AssemblyDirectory, "app.16x16.png"));
         list.Add(Path.Combine(AssemblyDirectory, "app.24x24.png"));
         list.Add(Path.Combine(AssemblyDirectory, "app.32x32.png"));
@@ -429,7 +485,7 @@ public abstract class PackageBuilder
         return 0;
     }
 
-    private static string? GetSourceIcon(PackKind kind, IReadOnlyCollection<string> paths)
+    private static string? GetSourceIcon(PackKind kind, IEnumerable<string> paths)
     {
         int max = 0;
         string? rslt = null;

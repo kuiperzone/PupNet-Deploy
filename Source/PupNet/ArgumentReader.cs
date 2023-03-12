@@ -329,7 +329,7 @@ public class ArgumentReader
         sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [value]");
         sb.AppendLine($"{indent}Creates a new empty conf or asset file for new project. A base file name may optionally");
         sb.AppendLine($"{indent}be given. Valid values are : {NewKind.Conf}, {NewKind.Desktop}, {NewKind.Meta} and {NewKind.All}.");
-        sb.AppendLine($"{indent}Example: {indent}{Program.CommandName} basename -{NewShortArg} {NewKind.All}");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} basename -{NewShortArg} {NewKind.All}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [flag]");
         sb.AppendLine($"{indent}Show help information.");

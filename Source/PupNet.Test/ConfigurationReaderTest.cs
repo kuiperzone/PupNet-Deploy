@@ -44,7 +44,7 @@ public class ConfigurationReaderTest
     [Fact]
     public void AppVersionRelease_Mandatory_DecodeOK()
     {
-        Assert.Equal("5.4.3[3]", new DummyConf(PackKind.AppImage).AppVersionRelease);
+        Assert.Equal("5.4.3[2]", new DummyConf(PackKind.AppImage).AppVersionRelease);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppVersionRelease)).AppVersionRelease);
     }
 
@@ -54,14 +54,6 @@ public class ConfigurationReaderTest
         Assert.Equal("Test application only", new DummyConf(PackKind.AppImage).AppSummary);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppSummary)).AppSummary);
     }
-
-    [Fact]
-    public void IsTerminal_Mandatory_DecodeOK()
-    {
-        Assert.True(new DummyConf(PackKind.AppImage).IsTerminal);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.IsTerminal)));
-    }
-
 
     [Fact]
     public void DesktopEntry_Optional_DecodeOK()

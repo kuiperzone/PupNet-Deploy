@@ -91,13 +91,13 @@ internal class Program
                 Console.WriteLine("AppImageKit:");
                 Console.WriteLine("Copyright (c) 2004-20 Simon Peter");
 
-                if (BuildAssets.AppImageTool != null)
+                if (AppImageBuilder.AppImageTool != null)
                 {
                     try
                     {
                         var ops = new FileOps();
-                        ops.DisplayPath = false;
-                        ops.Execute($"{BuildAssets.AppImageTool} --version");
+                        ops.ShowCommands = false;
+                        ops.Execute($"{AppImageBuilder.AppImageTool} --version");
                     }
                     catch
                     {
@@ -150,41 +150,50 @@ internal class Program
 
     private static void CreateNewFiles(ArgumentReader args)
     {
-        if (args.New == NewKind.Conf || args.New == NewKind.All)
+        bool all = args.New == NewKind.All;
+
+        if (all || args.New == NewKind.Conf)
         {
-            CreateNewSingleFile(NewKind.Conf, args.Value);
+            CreateNewSingleFile(NewKind.Conf, args);
         }
 
-        if (args.New == NewKind.Desktop || args.New == NewKind.All)
+        if (all || args.New == NewKind.Desktop)
         {
-            CreateNewSingleFile(NewKind.Desktop, args.Value);
+            CreateNewSingleFile(NewKind.Desktop, args);
         }
 
-        if (args.New == NewKind.Meta || args.New == NewKind.All)
+        if (all || args.New == NewKind.Meta)
         {
-            CreateNewSingleFile(NewKind.Meta, args.Value);
+            CreateNewSingleFile(NewKind.Meta, args);
         }
     }
 
-    private static void CreateNewSingleFile(NewKind kind, string? bas)
+    private static void CreateNewSingleFile(NewKind kind, ArgumentReader args)
     {
-        var path = GetNewPath(kind, bas);
+        var path = GetNewPath(kind, args.Value);
         var name = Path.GetFileName(path);
 
         if (!File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?").Wait())
         {
             var fop = new FileOps();
+            string? baseName = null;
+
+            if (args.New == NewKind.All)
+            {
+                // Link conf to expected other meta files
+                baseName = Path.GetFileNameWithoutExtension(GetNewPath(NewKind.Desktop, args.Value));
+            }
 
             switch (kind)
             {
                 case NewKind.Conf:
-                    fop.WriteFile(path, new ConfigurationReader().ToString());
+                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString());
                     break;
                 case NewKind.Desktop:
-                    fop.WriteFile(path, BuildAssets.GetDesktopTemplate(true));
+                    fop.WriteFile(path, MetaTemplates.Desktop);
                     break;
                 case NewKind.Meta:
-                    fop.WriteFile(path, BuildAssets.AppMetaTemplate);
+                    fop.WriteFile(path, MetaTemplates.MetaInfo);
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid {kind} value");
@@ -192,24 +201,24 @@ internal class Program
         }
     }
 
-    private static string GetNewPath(NewKind kind, string? bas)
+    private static string GetNewPath(NewKind kind, string? baseName)
     {
         var ext = kind.GetFileExt();
         var def = (kind == NewKind.Conf ? CommandName : "app") + ext;
 
-        if (!string.IsNullOrEmpty(bas))
+        if (!string.IsNullOrEmpty(baseName))
         {
-            if (Directory.Exists(bas))
+            if (baseName.EndsWith('/') || baseName.EndsWith('\\'))
             {
-                return Path.Combine(bas, def);
+                return Path.Combine(baseName, def);
             }
 
-            if (!def.EndsWith(ext))
+            if (!baseName.EndsWith(ext))
             {
-                return bas + ext;
+                return baseName + ext;
             }
 
-            return bas;
+            return baseName;
         }
 
         return def;

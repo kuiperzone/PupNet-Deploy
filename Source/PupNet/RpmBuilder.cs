@@ -21,7 +21,7 @@ using System.Text;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Extends <see cref="PackageBuilder"/> for Flatpak package.
+/// Extends <see cref="PackageBuilder"/> for RPM package.
 /// </summary>
 public class RpmBuilder : PackageBuilder
 {
@@ -34,29 +34,18 @@ public class RpmBuilder : PackageBuilder
         : base(conf, PackKind.Rpm, RootName)
     {
         PublishBin = Path.Combine(BuildRoot, "opt", Configuration.AppId);
-        DesktopExec = AppExecName;
+        DesktopExec = $"/opt/{Configuration.AppId}/{AppExecName}";
 
-        ManifestPath = Path.Combine(PackRoot, Configuration.AppId + ".spec");
-
+        // We do not set the content here
+        ManifestPath = Path.Combine(Root, Configuration.AppId + ".spec");
 
         var list = new List<string>();
-
-        if (BuildUsrBin != null)
-        {
-            // We put app under /opt, so put script link under usr/bin
-            var path = Path.Combine(BuildUsrBin, AppExecName);
-            var script = $"#!/bin/sh\nexec {DesktopExec} \\\"$@\\\"";
-            list.Add($"echo -e \"{script}\" > \"{path}\"");
-            list.Add($"chmod a+x \"{path}\"");
-        }
-
-        var temp = Path.Combine(PackRoot, "rpmbuild");
-        var output = Path.Combine(OutputDirectory, OutputName);
+        var temp = Path.Combine(Root, "rpmbuild");
 
         // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
         var cmd = $"rpmbuild -bb \"{ManifestPath}\"";
         cmd += $" --define \"_topdir {temp}\" --buildroot=\"{BuildRoot}\"";
-        cmd += $" --define \"_rpmdir {output}\" --define \"_build_id_links none\"";
+        cmd += $" --define \"_rpmdir {OutputPath}\" --define \"_build_id_links none\"";
 
         list.Add(cmd);
 
@@ -83,15 +72,7 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override string? ManifestContent
     {
-        get
-        {
-            if (Directory.Exists(BuildRoot))
-            {
-                return GetSpec(FileOps.ListFiles(BuildRoot));
-            }
-
-            return GetSpec();
-        }
+        get { return GetSpec(); }
     }
 
     /// <summary>
@@ -99,7 +80,34 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override IReadOnlyCollection<string> PackageCommands { get; }
 
-    private string GetSpec(IReadOnlyCollection<string>? files = null)
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool SupportsRunOnBuild { get; }
+
+    /// <summary>
+    /// Overrides and extends.
+    /// </summary>
+    public override void Create(string? desktop, string? metainfo)
+    {
+        base.Create(desktop, metainfo);
+
+        // Rpm and Deb etc only. These get installed to /opt, but put 'link file' in /usr/bin
+        if (BuildUsrBin != null && !string.IsNullOrEmpty(Configuration.StartCommand))
+        {
+            // We put app under /opt, so put script link under usr/bin
+            var path = Path.Combine(BuildUsrBin, Configuration.StartCommand);
+            var script = $"#!/bin/sh\nexec {DesktopExec} \"$@\"";
+
+            if (!File.Exists(path))
+            {
+                Operations.WriteFile(path, script);
+                Operations.Execute($"chmod a+x {path}");
+            }
+        }
+    }
+
+    private string GetSpec()
     {
         // We don't actually need install, build sections.
         var sb = new StringBuilder();
@@ -147,22 +155,22 @@ public class RpmBuilder : PackageBuilder
         sb.AppendLine();
         sb.AppendLine("%files");
 
-        if (files != null && files.Count != 0)
-        {
-            foreach (var item in files)
-            {
-                if (!item.StartsWith('/'))
-                {
-                    sb.Append('/');
-                }
+        var files = ListBuild();
 
-                sb.AppendLine(item);
-            }
-        }
-        else
+        if (files.Count == 0)
         {
             // Placeholder only
             sb.Append("[FILES]");
+        }
+
+        foreach (var item in files)
+        {
+            if (!item.StartsWith('/'))
+            {
+                sb.Append('/');
+            }
+
+            sb.AppendLine(item);
         }
 
         return sb.ToString().TrimEnd();

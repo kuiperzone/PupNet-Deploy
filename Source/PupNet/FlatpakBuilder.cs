@@ -37,14 +37,13 @@ public class FlatpakBuilder : PackageBuilder
         DesktopExec = AppExecName;
 
         // Not used
-        ManifestPath = Path.Combine(PackRoot, Configuration.AppId + ".yml");
+        ManifestPath = Path.Combine(Root, Configuration.AppBaseName + ".yml");
         ManifestContent = GetFlatpakManifest();
 
         // Do the build
-        var temp = Path.Combine(PackRoot, "build");
-        var state = Path.Combine(PackRoot, "state");
-        var repo = Path.Combine(PackRoot, "repo");
-        var output = Path.Combine(OutputDirectory, OutputName);
+        var temp = Path.Combine(Root, "build");
+        var state = Path.Combine(Root, "state");
+        var repo = Path.Combine(Root, "repo");
 
         var cmd = $"flatpak-builder {Configuration.FlatpakBuilderArgs}";
 
@@ -59,7 +58,7 @@ public class FlatpakBuilder : PackageBuilder
         var list = new List<string>();
 
         list.Add(cmd);
-        list.Add($"flatpak build-bundle \"{repo}\" \"{output}\" {Configuration.AppId}");
+        list.Add($"flatpak build-bundle \"{repo}\" \"{OutputPath}\" {Configuration.AppId}");
 
         if (Arguments.IsRun)
         {
@@ -93,6 +92,11 @@ public class FlatpakBuilder : PackageBuilder
     /// Implements.
     /// </summary>
     public override IReadOnlyCollection<string> PackageCommands { get; }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool SupportsRunOnBuild { get; } = true;
 
     private string GetFlatpakManifest()
     {

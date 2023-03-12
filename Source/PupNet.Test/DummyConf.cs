@@ -41,11 +41,10 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.AppSummary)} = Test application only");
         lines.Add($"{nameof(ConfigurationReader.AppVendor)} = KuiperZone");
         lines.Add($"{nameof(ConfigurationReader.AppUrl)} = https://kuiper.zone");
-        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[3]");
+        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
         lines.Add($"{nameof(ConfigurationReader.AppLicense)} = LicenseRef-LICENSE");
 
         lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
-        lines.Add($"{nameof(ConfigurationReader.IsTerminal)} = true");
         lines.Add($"{nameof(ConfigurationReader.DesktopEntry)} = app.desktop");
         lines.Add($"{nameof(ConfigurationReader.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
         lines.Add($"{nameof(ConfigurationReader.MetaInfo)} = metainfo.xml");

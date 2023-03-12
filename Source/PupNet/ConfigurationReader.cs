@@ -34,11 +34,17 @@ public class ConfigurationReader
     /// <summary>
     /// Default constructor. No arguments.
     /// </summary>
-    public ConfigurationReader()
+    public ConfigurationReader(string? metabase = null)
     {
         Arguments = new();
         Reader = new();
-        ConfDirectory = "";
+        LocalDirectory = "";
+
+        if (!string.IsNullOrEmpty(metabase))
+        {
+            DesktopEntry = metabase + ".desktop";
+            MetaInfo = metabase + ".metainfo.xml";
+        }
     }
 
     /// <summary>
@@ -62,7 +68,7 @@ public class ConfigurationReader
         Arguments = args;
         Reader = reader;
         AssertFiles = assertFiles;
-        ConfDirectory = assertFiles ? Path.GetDirectoryName(reader.Filepath)! : "";
+        LocalDirectory = assertFiles ? Path.GetDirectoryName(reader.Filepath)! : "";
 
         AppBaseName = GetMandatory(nameof(AppBaseName));
         AppFriendlyName = GetMandatory(nameof(AppFriendlyName));
@@ -75,16 +81,15 @@ public class ConfigurationReader
         AppUrl = GetOptional(nameof(AppUrl));
 
         StartCommand = GetOptional(nameof(StartCommand));
-        IsTerminal = GetBool(nameof(IsTerminal));
-        DesktopEntry = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DesktopEntry)), true);
-        Icons = AssertAbsolutePath(ConfDirectory, GetMultiCollection(nameof(Icons)));
-        MetaInfo = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(MetaInfo)), false);
+        DesktopEntry = AssertAbsolutePath(GetOptional(nameof(DesktopEntry)), true);
+        Icons = AssertAbsolutePath(GetMultiCollection(nameof(Icons)));
+        MetaInfo = AssertAbsolutePath(GetOptional(nameof(MetaInfo)), false);
 
-        DotnetProjectPath = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(DotnetProjectPath)), true);
+        DotnetProjectPath = AssertAbsolutePath(GetOptional(nameof(DotnetProjectPath)), true);
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs));
         DotnetPostPublish = GetMultiCollection(nameof(DotnetPostPublish));
 
-        OutputDirectory = AssertAbsolutePath(ConfDirectory, GetOptional(nameof(OutputDirectory)), false) ?? ConfDirectory;
+        OutputDirectory = AssertAbsolutePath(GetOptional(nameof(OutputDirectory)), false) ?? LocalDirectory;
         OutputVersion = GetBool(nameof(OutputVersion));
 
         AppImageArgs = GetOptional(nameof(AppImageArgs));
@@ -98,7 +103,14 @@ public class ConfigurationReader
         AssertOK();
     }
 
+    /// <summary>
+    /// Gets the underlying ini values.
+    /// </summary>
     public IniReader Reader { get; }
+
+    /// <summary>
+    /// Gets a reference to the arguments used on construction.
+    /// </summary>
     public ArgumentReader Arguments { get; }
 
     /// <summary>
@@ -107,9 +119,9 @@ public class ConfigurationReader
     public bool AssertFiles { get; }
 
     /// <summary>
-    /// Gets the conf file directory. Empty if <see cref="AssertFiles"/> is false.
+    /// Gets the configuration file local directory. Empty if <see cref="AssertFiles"/> is false.
     /// </summary>
-    public string ConfDirectory { get; }
+    public string LocalDirectory { get; }
 
     public string AppBaseName { get; } = "HelloWorld";
     public string AppFriendlyName { get; } = "Hello World";
@@ -117,11 +129,10 @@ public class ConfigurationReader
     public string AppVersionRelease { get; } = "1.0.0[1]";
     public string AppSummary { get; } = "A HelloWorld application";
     public string AppLicense { get; } = "LicenseRef-Proprietary";
-    public string AppVendor { get; } = "Acme Ltd";
+    public string AppVendor { get; } = "The HelloWorld Team";
     public string? AppUrl { get; } = "https://example.net";
 
     public string? StartCommand { get; }
-    public bool IsTerminal { get; } = true;
     public string? DesktopEntry { get; }
     public string? MetaInfo { get; }
     public IReadOnlyCollection<string> Icons { get; } = Array.Empty<string>();
@@ -191,6 +202,30 @@ public class ConfigurationReader
         }
 
         return GetOSArch();
+    }
+
+    /// <summary>
+    /// Reads text file. Returns null if path is null or equals <see cref="PathNone"/>.
+    /// If path is unqualified, then relative to <see cref="LocalDirectory"/>.
+    /// Throws if file not exist and <see cref="AssertFiles"/> is true.
+    /// </summary>
+    public string? ReadFile(string? path)
+    {
+        path = AssertAbsolutePath(path, true);
+
+        if (path != null && path != ConfigurationReader.PathNone && (AssertFiles || File.Exists(path)))
+        {
+            var content = File.ReadAllText(path).Trim().ReplaceLineEndings("\n");
+
+            if (string.IsNullOrEmpty(content))
+            {
+                throw new InvalidOperationException("File is empty " + path);
+            }
+
+            return content;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -277,10 +312,6 @@ public class ConfigurationReader
         c?.AppendLine($"# line. This value is not supported for {nameof(PackKind.AppImage)} and {nameof(PackKind.Flatpak)}");
         c?.AppendLine($"# and will be ignored. Default is empty.");
         sb.AppendLine(GetHelpNameValue(nameof(StartCommand), StartCommand));
-
-        c?.AppendLine();
-        c?.AppendLine($"# Flag (use 'true' or 'false') which indicates whether the application runs in the terminal.");
-        sb.AppendLine(GetHelpNameValue(nameof(IsTerminal), IsTerminal));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
@@ -459,6 +490,7 @@ public class ConfigurationReader
     {
         if (runtime.EndsWith("-x64", StringComparison.InvariantCultureIgnoreCase))
         {
+            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
             return "x86_64";
         }
 
@@ -528,7 +560,7 @@ public class ConfigurationReader
         }
     }
 
-    private string? AssertAbsolutePath(string? source, string? path, bool allowNone)
+    private string? AssertAbsolutePath(string? path, bool allowNone)
     {
         if (!string.IsNullOrEmpty(path))
         {
@@ -538,9 +570,9 @@ public class ConfigurationReader
                 return PathNone;
             }
 
-            if (!string.IsNullOrEmpty(source) && !Path.IsPathFullyQualified(path))
+            if (!string.IsNullOrEmpty(LocalDirectory) && !Path.IsPathFullyQualified(path))
             {
-                path = Path.Combine(source, path);
+                path = Path.Combine(LocalDirectory, path);
             }
 
             if (AssertFiles && !Path.Exists(path))
@@ -554,7 +586,7 @@ public class ConfigurationReader
         return null;
     }
 
-    private IReadOnlyCollection<string> AssertAbsolutePath(string? source, IReadOnlyCollection<string> paths)
+    private IReadOnlyCollection<string> AssertAbsolutePath(IReadOnlyCollection<string> paths)
     {
         if (paths.Count != 0)
         {
@@ -562,7 +594,7 @@ public class ConfigurationReader
 
             foreach (var item in paths)
             {
-                list.Add(AssertAbsolutePath(source, item, false) ?? "");
+                list.Add(AssertAbsolutePath(item, false) ?? "");
             }
 
             return list;

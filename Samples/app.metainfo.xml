@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-
     <id>${APP_ID}</id>
-    <name>hellopuppy</name>
+    <metadata_license>MIT</metadata_license>
+    <project_license>${APP_LICENSE}</project_license>
+    <content_rating type="oars-1.1" />
+
+    <name>${APP_FRIENDLY_NAME}</name>
     <summary>${APP_SUMMARY}</summary>
     <developer_name>${APP_VENDOR}</developer_name>
     <url type="homepage">${APP_URL}</url>
-    <metadata_license>MIT</metadata_license>
-    <project_license>${APP_LICENSE}</project_license>
-
-    <content_rating type="oars-1.1" />
 
     <description>
-        <p>This is a longer application description. REPLACE THIS WITH YOUR OWN.
+        <p>REPLACE THIS WITH YOUR OWN. This is a longer application description.
         IMPORTANT: In this file, you can use supported macros. See the --help output for details.</p>
     </description>
 
     <releases>
-        <release version="${APP_VERSION}" date="${ISO_DATE}">
+        <release version="${APP_VERSION}" date="${BUILD_DATE}">
             <description><p>The latest release.</p></description>
         </release>
     </releases>
@@ -28,6 +27,6 @@
         </screenshot>
     </screenshots>
 
-    <launchable type="desktop-id">${DESKTOP_NAME}</launchable>
-
+    <!-- Do not change the ID -->
+    <launchable type="desktop-id">${APP_ID}.desktop</launchable>
 </component>

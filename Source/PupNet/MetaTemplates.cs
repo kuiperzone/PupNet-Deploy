@@ -78,7 +78,7 @@ public static class MetaTemplates
         sb.AppendLine($"{Indent}</description>");
         sb.AppendLine();
         sb.AppendLine($"{Indent}<releases>");
-        sb.AppendLine($"{IndentIndent}<release version=\"{MacroId.AppVersion.ToVar()}\" date=\"{MacroId.IsoDate.ToVar()}\">");
+        sb.AppendLine($"{IndentIndent}<release version=\"{MacroId.AppVersion.ToVar()}\" date=\"{MacroId.BuildDate.ToVar()}\">");
         sb.AppendLine($"{IndentIndentIndent}<description><p>The latest release.</p></description>");
         sb.AppendLine($"{IndentIndent}</release>");
         sb.AppendLine($"{Indent}</releases>");

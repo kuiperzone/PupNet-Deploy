@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=${APP_FRIENDLY_NAME}
+Icon=${APP_ID}
+Comment=${APP_SUMMARY}
+Exec=${DESKTOP_EXEC}
+TryExec=${DESKTOP_EXEC}
+Terminal=true
+Categories=Utility
+MimeType=
+Keywords=

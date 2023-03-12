@@ -54,17 +54,17 @@ public class IniReader
     /// <summary>
     /// Multi-line value start quote.
     /// </summary>
-    public const string StartMultiQuote = "{[";
+    public const string StartMultiQuote = "\"\"\"";
 
     /// <summary>
     /// Multi-line value end quote.
     /// </summary>
-    public const string EndMultiQuote = "]}";
+    public const string EndMultiQuote = "\"\"\"";
 
     private readonly string _string = "";
 
     /// <summary>
-    /// Default constructor.
+    /// Default constructor (empty).
     /// </summary>
     public IniReader(IniOptions opts = IniOptions.Default)
     {
