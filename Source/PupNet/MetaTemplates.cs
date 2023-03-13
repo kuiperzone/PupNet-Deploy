@@ -72,18 +72,14 @@ public static class MetaTemplates
         sb.AppendLine($"{Indent}<developer_name>{MacroId.AppVendor.ToVar()}</developer_name>");
         sb.AppendLine($"{Indent}<url type=\"homepage\">{MacroId.AppUrl.ToVar()}</url>");
         sb.AppendLine();
+        sb.AppendLine($"{Indent}<!-- Do not change the ID -->");
+	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">{MacroId.AppId.ToVar()}.desktop</launchable>");
+        sb.AppendLine();
         sb.AppendLine($"{Indent}<description>");
         sb.AppendLine($"{IndentIndent}<p>REPLACE THIS WITH YOUR OWN. This is a longer application description.");
         sb.AppendLine($"{IndentIndent}IMPORTANT: In this file, you can use supported macros. See the --help output for details.</p>");
         sb.AppendLine($"{Indent}</description>");
         sb.AppendLine();
-        sb.AppendLine($"{Indent}<releases>");
-        sb.AppendLine($"{IndentIndent}<release version=\"{MacroId.AppVersion.ToVar()}\" date=\"{MacroId.BuildDate.ToVar()}\">");
-        sb.AppendLine($"{IndentIndentIndent}<description><p>The latest release.</p></description>");
-        sb.AppendLine($"{IndentIndent}</release>");
-        sb.AppendLine($"{Indent}</releases>");
-        sb.AppendLine();
-
         sb.AppendLine($"{Indent}<!-- Uncomment and provide screenshot");
         sb.AppendLine($"{Indent}<screenshots>");
         sb.AppendLine($"{IndentIndent}<screenshot type=\"default\">");
@@ -91,10 +87,13 @@ public static class MetaTemplates
         sb.AppendLine($"{IndentIndent}</screenshot>");
         sb.AppendLine($"{Indent}</screenshots>");
         sb.AppendLine($"{Indent}-->");
-
-        sb.AppendLine($"{Indent}<!-- Do not change the ID -->");
-	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">{MacroId.AppId.ToVar()}.desktop</launchable>");
-
+        sb.AppendLine();
+        sb.AppendLine($"{Indent}<releases>");
+        sb.AppendLine($"{IndentIndent}<release version=\"{MacroId.AppVersion.ToVar()}\" date=\"{MacroId.BuildDate.ToVar()}\">");
+        sb.AppendLine($"{IndentIndentIndent}<description><p>The latest release.</p></description>");
+        sb.AppendLine($"{IndentIndent}</release>");
+        sb.AppendLine($"{Indent}</releases>");
+        sb.AppendLine();
         sb.AppendLine($"</component>");
 
         return sb.ToString();

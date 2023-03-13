@@ -5,9 +5,6 @@ Zip
 RPM build warnings:
     source_date_epoch_from_changelog set but %changelog is missing
 
-
-
-
 DONE
 BuildArch in rpm
 File to value arg

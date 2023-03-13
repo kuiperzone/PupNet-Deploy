@@ -10,16 +10,12 @@
     <developer_name>${APP_VENDOR}</developer_name>
     <url type="homepage">${APP_URL}</url>
 
+    <launchable type="desktop-id">${APP_ID}.desktop</launchable>
+
     <description>
         <p>REPLACE THIS WITH YOUR OWN. This is a longer application description.
         IMPORTANT: In this file, you can use supported macros. See the --help output for details.</p>
     </description>
-
-    <releases>
-        <release version="${APP_VERSION}" date="${BUILD_DATE}">
-            <description><p>The latest release.</p></description>
-        </release>
-    </releases>
 
     <screenshots>
         <screenshot type="default">
@@ -27,6 +23,11 @@
         </screenshot>
     </screenshots>
 
-    <!-- Do not change the ID -->
-    <launchable type="desktop-id">${APP_ID}.desktop</launchable>
+    <releases>
+        <release version="${APP_VERSION}" date="${BUILD_DATE}">
+            <description><p>The latest release.</p></description>
+        </release>
+    </releases>
+
+
 </component>

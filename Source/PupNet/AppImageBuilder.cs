@@ -65,17 +65,18 @@ public class AppImageBuilder : PackageBuilder
     /// <summary>
     /// Overrides.
     /// </summary>
-    public override string? DesktopPath
-    {
-        get { return Path.Combine(BuildRoot, Configuration.AppId + ".desktop"); }
-    }
-
-    /// <summary>
-    /// Overrides.
-    /// </summary>
     public override string? MetaInfoPath
     {
-        get { return Path.Combine(BuildRoot, Configuration.AppId + ".metainfo.xml"); }
+        get
+        {
+            if (BuildShareMeta != null)
+            {
+                // Older style name currently required
+                return Path.Combine(BuildShareMeta, Configuration.AppId + ".appdata.xml");
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -115,21 +116,11 @@ public class AppImageBuilder : PackageBuilder
     {
         base.Create(desktop, metainfo);
 
-        if (BuildShareApplications != null)
-        {
-            // We need a bodge fix to get AppImage to pass validation.
-            // In effect, we need two .metainfo.xml files. One at root, and one under applications.
-            // See: https://github.com/AppImage/AppImageKit/issues/603#issuecomment-355105387
-            Operations.WriteFile(Path.Combine(BuildShareApplications, Configuration.AppId + ".desktop"), desktop);
-        }
-
-        if (BuildShareMeta != null)
-        {
-            // We need a bodge fix to get AppImage to pass validation.
-            // In effect, we need two .metainfo.xml files. One at root, and one under applications.
-            // See: https://github.com/AppImage/AppImageKit/issues/603#issuecomment-355105387
-            Operations.WriteFile(Path.Combine(BuildShareMeta, Configuration.AppId + ".metainfo.xml"), metainfo);
-        }
+        // We need a bodge fix to get AppImage to pass validation. We need desktop and meta in
+        // two places, one place for AppImage builder itself, and the other to get the meta to
+        // pass validation. See: https://github.com/AppImage/AppImageKit/issues/603#issuecomment-355105387
+        Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".desktop"), desktop);
+        Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".appdata.xml"), metainfo);
 
         if (IconSource != null)
         {

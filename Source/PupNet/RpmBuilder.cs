@@ -48,7 +48,6 @@ public class RpmBuilder : PackageBuilder
         cmd += $" --define \"_rpmdir {OutputPath}\" --define \"_build_id_links none\"";
 
         list.Add(cmd);
-
         PackageCommands = list;
     }
 
@@ -107,6 +106,15 @@ public class RpmBuilder : PackageBuilder
         }
     }
 
+    /// <summary>
+    /// Overrides and extends.
+    /// </summary>
+    public override void BuildPackage()
+    {
+        Environment.SetEnvironmentVariable("SOURCE_DATE_EPOCH", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString());
+        base.BuildPackage();
+    }
+
     private string GetSpec()
     {
         // We don't actually need install, build sections.
@@ -130,9 +138,10 @@ public class RpmBuilder : PackageBuilder
         sb.AppendLine();
         sb.AppendLine("AutoReqProv: no");
 
+        sb.AppendLine("BuildRequires: libappstream-glib");
+
         if (DesktopPath != null || MetaInfoPath != null)
         {
-            sb.AppendLine("BuildRequires: libappstream-glib");
             sb.AppendLine();
             sb.AppendLine("%check");
 
@@ -152,10 +161,11 @@ public class RpmBuilder : PackageBuilder
         sb.AppendLine("%description");
         sb.AppendLine(Configuration.AppSummary);
 
+        // https://stackoverflow.com/questions/57385249/in-an-rpm-files-section-is-it-possible-to-specify-a-directory-and-all-of-its-fi
         sb.AppendLine();
         sb.AppendLine("%files");
 
-        var files = ListBuild();
+        var files = ListBuild(true);
 
         if (files.Count == 0)
         {

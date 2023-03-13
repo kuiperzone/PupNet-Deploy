@@ -27,6 +27,8 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public abstract class PackageBuilder
 {
+    private string _buildRootName;
+
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -36,6 +38,7 @@ public abstract class PackageBuilder
         Arguments = conf.Arguments;
         Configuration = conf;
         IsWindowsPackage = PackKind.IsWindows();
+        _buildRootName = buildRootName;
 
         AppVersion = SplitVersion(conf.AppVersionRelease, out string temp);
         PackRelease = temp;
@@ -192,10 +195,9 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets the desktop build file path. AppImage needs to override, otherwise default is standard under
-    /// <see cref="BuildShareApplications"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the desktop build file path. Returns null if <see cref="IsWindowsPackage"/> is true.
     /// </summary>
-    public virtual string? DesktopPath
+    public string? DesktopPath
     {
         get
         {
@@ -255,8 +257,8 @@ public abstract class PackageBuilder
     public abstract string? ManifestPath { get; }
 
     /// <summary>
-    /// Gets the "manifest file" specific to the package kind. For RPM, this is the "Spec file" content.
-    /// For Flatpak, it is the "manifest". It must not contain macros. It may be null if not used.
+    /// Gets the "manifest content" specific to the package kind provided for display purposes. For RPM, this is the
+    /// "Spec file" content. For Flatpak, it is the "manifest". It must not contain macros. It may be null if not used.
     /// </summary>
     public abstract string? ManifestContent { get; }
 
@@ -303,7 +305,6 @@ public abstract class PackageBuilder
             }
         }
 
-        Operations.WriteFile(ManifestPath, ManifestContent);
         Operations.CreateDirectory(OutputDirectory);
     }
 
@@ -316,22 +317,26 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets all files under <see cref="BuildRoot"/>. Note results are prefixed with "/" on non-windows platforms.
+    /// Gets all files under <see cref="BuildRoot"/>. Note results are prefixed with "/" on non-windows platforms if rooted.
     /// </summary>
-    public IReadOnlyCollection<string> ListBuild(string filter = "*")
+    public IReadOnlyCollection<string> ListBuild(bool sysrooted)
     {
         if (Directory.Exists(BuildRoot))
         {
-            var files = FileOps.ListFiles(BuildRoot, filter);
+            var files = FileOps.ListFiles(BuildRoot, "*");
 
-            if (!IsWindowsPackage)
+            for (int n = 0; n < files.Length; ++n)
             {
-                for (int n = 0; n < files.Length; ++n)
+                if (sysrooted)
                 {
                     if (!files[n].StartsWith('/'))
                     {
                         files[n] = "/" + files[n];
                     }
+                }
+                else
+                {
+                    files[n] = Path.Combine(_buildRootName, files[n]);
                 }
             }
 
@@ -351,6 +356,11 @@ public abstract class PackageBuilder
     {
         // Must exist
         Operations.AssertExists(Path.Combine(PublishBin, AppExecName));
+
+        // Write manifest just before build, as ManifestContents may
+        // change Before Create() and build in some deployments.
+        Operations.WriteFile(ManifestPath, ManifestContent);
+
         Operations.Execute(PackageCommands);
     }
 

@@ -32,12 +32,9 @@ public enum MacroId
     AppUrl,
 
     AppVersion,
-    PackRelease,
-    PackKind,
     DotnetRuntime,
     BuildArch,
     BuildTarget,
-    OutputPath,
     BuildDate,
     BuildYear,
     BuildRoot,
@@ -59,6 +56,7 @@ public static class MacroIdExtension
         // Do not change names as will break configs out in the wild
         switch (id)
         {
+            // Conf only
             case MacroId.AppBaseName: return "APP_BASE_NAME";
             case MacroId.AppFriendlyName: return "APP_FRIENDLY_NAME";
             case MacroId.AppId: return "APP_ID";
@@ -67,13 +65,11 @@ public static class MacroIdExtension
             case MacroId.AppVendor: return "APP_VENDOR";
             case MacroId.AppUrl: return "APP_URL";
 
+            // Build static
             case MacroId.AppVersion: return "APP_VERSION";
-            case MacroId.PackRelease: return "PACK_RELEASE";
-            case MacroId.PackKind: return "PACK_KIND";
             case MacroId.DotnetRuntime: return "DOTNET_RUNTIME";
             case MacroId.BuildArch: return "BUILD_ARCH";
             case MacroId.BuildTarget: return "BUILD_TARGET";
-            case MacroId.OutputPath: return "OUTPUT_PATH";
             case MacroId.BuildDate: return "BUILD_DATE";
             case MacroId.BuildYear: return "BUILD_YEAR";
             case MacroId.BuildRoot: return "BUILD_ROOT";

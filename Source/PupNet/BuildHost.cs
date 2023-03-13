@@ -137,9 +137,9 @@ public class BuildHost
             if (Arguments.IsVerbose)
             {
                 Console.WriteLine();
-                Console.WriteLine("Build Files:");
+                Console.WriteLine("BuildRoot:");
 
-                foreach (var item in Builder.ListBuild())
+                foreach (var item in Builder.ListBuild(false))
                 {
                     Console.WriteLine(item);
                 }
@@ -148,6 +148,10 @@ public class BuildHost
             Console.WriteLine();
             Console.WriteLine("Build Package");
             Builder.BuildPackage();
+
+            Console.WriteLine();
+            Console.WriteLine("OUTPUT OK:");
+            Console.WriteLine(Builder.OutputPath);
 
             return true;
         }

@@ -36,11 +36,9 @@ public class FlatpakBuilder : PackageBuilder
         PublishBin = BuildUsrBin ?? throw new ArgumentNullException(nameof(BuildUsrBin));
         DesktopExec = AppExecName;
 
-        // Not used
-        ManifestPath = Path.Combine(Root, Configuration.AppBaseName + ".yml");
         ManifestContent = GetFlatpakManifest();
+        ManifestPath = Path.Combine(Root, Configuration.AppBaseName + ".yml");
 
-        // Do the build
         var temp = Path.Combine(Root, "build");
         var state = Path.Combine(Root, "state");
         var repo = Path.Combine(Root, "repo");
@@ -118,7 +116,7 @@ public class FlatpakBuilder : PackageBuilder
         sb.AppendLine($"      - cp -rn share/* /app/share");
         sb.AppendLine($"    sources:");
         sb.AppendLine($"      - type: dir");
-        sb.AppendLine($"        path: ${RootName}/usr/");
+        sb.AppendLine($"        path: {RootName}/usr/");
 
         if (Configuration.FlatpakFinishArgs.Count != 0)
         {
