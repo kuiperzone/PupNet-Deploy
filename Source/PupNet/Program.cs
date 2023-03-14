@@ -68,12 +68,6 @@ internal class Program
             if (decoder.ShowVersion)
             {
                 Console.WriteLine($"{ProductName} {Version}");
-                return 0;
-            }
-
-            if (decoder.ShowAbout)
-            {
-                Console.WriteLine($"{ProductName} {Version}");
                 Console.WriteLine($"{Copyright}");
                 Console.WriteLine($"{ProjectUrl}");
 
@@ -88,21 +82,24 @@ internal class Program
                 Console.WriteLine($"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.");
 
                 Console.WriteLine();
-                Console.WriteLine("AppImageKit:");
-                Console.WriteLine("Copyright (c) 2004-20 Simon Peter");
+                Console.WriteLine("THIRD-PARTY TOOLS:");
 
-                if (AppImageBuilder.AppImageTool != null)
-                {
-                    try
-                    {
-                        var ops = new FileOps();
-                        ops.ShowCommands = false;
-                        ops.Execute($"{AppImageBuilder.AppImageTool} --version");
-                    }
-                    catch
-                    {
-                    }
-                }
+                var factory = new BuilderFactory();
+                Console.WriteLine();
+                Console.WriteLine("AppImageKit: Copyright (C) 2004-20 Simon Peter");
+                factory.Create(PackKind.AppImage).WriteVersion();
+
+                Console.WriteLine();
+                factory.Create(PackKind.Deb).WriteVersion();
+
+                Console.WriteLine();
+                factory.Create(PackKind.Rpm).WriteVersion();
+
+                Console.WriteLine();
+                factory.Create(PackKind.Flatpak).WriteVersion();
+
+                Console.WriteLine();
+                factory.Create(PackKind.WinSetup).WriteVersion();
 
                 Console.WriteLine();
                 return 0;

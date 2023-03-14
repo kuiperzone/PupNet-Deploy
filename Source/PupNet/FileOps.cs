@@ -57,6 +57,7 @@ public class FileOps
         opts.RecurseSubdirectories = true;
         opts.ReturnSpecialDirectories = false;
         opts.IgnoreInaccessible = true;
+        opts.MaxRecursionDepth = 20;
 
         var files = Directory.GetFiles(dir, filter, System.IO.SearchOption.AllDirectories);
 
@@ -214,6 +215,11 @@ public class FileOps
         {
             try
             {
+                if (File.Exists(output))
+                {
+                    File.Delete(output);
+                }
+
                 Write("Zip: ", directory);
                 ZipFile.CreateFromDirectory(directory, output, CompressionLevel.Optimal, false);
                 WriteLine(" ... OK");

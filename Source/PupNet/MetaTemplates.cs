@@ -62,15 +62,15 @@ public static class MetaTemplates
         var sb = new StringBuilder();
         sb.AppendLine($"<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         sb.AppendLine($"<component type=\"desktop-application\">");
-        sb.AppendLine($"{Indent}<id>{MacroId.AppId.ToVar()}</id>");
         sb.AppendLine($"{Indent}<metadata_license>MIT</metadata_license>");
-        sb.AppendLine($"{Indent}<project_license>{MacroId.AppLicense.ToVar()}</project_license>");
-        sb.AppendLine($"{Indent}<content_rating type=\"oars-1.1\" />");
         sb.AppendLine();
+        sb.AppendLine($"{Indent}<id>{MacroId.AppId.ToVar()}</id>");
         sb.AppendLine($"{Indent}<name>{MacroId.AppFriendlyName.ToVar()}</name>");
         sb.AppendLine($"{Indent}<summary>{MacroId.AppSummary.ToVar()}</summary>");
         sb.AppendLine($"{Indent}<developer_name>{MacroId.AppVendor.ToVar()}</developer_name>");
         sb.AppendLine($"{Indent}<url type=\"homepage\">{MacroId.AppUrl.ToVar()}</url>");
+        sb.AppendLine($"{Indent}<project_license>{MacroId.AppLicense.ToVar()}</project_license>");
+        sb.AppendLine($"{Indent}<content_rating type=\"oars-1.1\" />");
         sb.AppendLine();
         sb.AppendLine($"{Indent}<!-- Do not change the ID -->");
 	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">{MacroId.AppId.ToVar()}.desktop</launchable>");

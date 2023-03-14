@@ -16,6 +16,8 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
+
 namespace KuiperZone.PupNet;
 
 /// <summary>
@@ -99,14 +101,7 @@ public static class PackKindExtension
     /// </summary>
     public static bool IsWindows(this PackKind kind)
     {
-        switch (kind)
-        {
-            case PackKind.Zip:
-            case PackKind.WinSetup:
-                return true;
-            default:
-                return false;
-        }
+        return kind == PackKind.Zip || kind == PackKind.WinSetup;
     }
 
     /// <summary>
@@ -114,13 +109,30 @@ public static class PackKindExtension
     /// </summary>
     public static bool IsOsx(this PackKind kind)
     {
-        switch (kind)
+        return kind == PackKind.Zip;
+    }
+
+    /// <summary>
+    /// Returns true if the package kind can be built on this system.
+    /// </summary>
+    public static bool CanBuildOnSystem(this PackKind kind)
+    {
+        if (kind.IsLinux() && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            case PackKind.Zip:
-                return true;
-            default:
-                return false;
+            return true;
         }
+
+        if (kind.IsWindows() && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return true;
+        }
+
+        if (kind.IsOsx() && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return true;
+        }
+
+        return false;
     }
 
 }

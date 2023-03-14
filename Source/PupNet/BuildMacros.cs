@@ -58,12 +58,12 @@ public class BuildMacros
         dict.Add(MacroId.AppUrl, conf.AppUrl ?? "");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
-        dict.Add(MacroId.DotnetRuntime, args.Runtime);
-        dict.Add(MacroId.BuildArch, conf.GetBuildArch());
+        dict.Add(MacroId.DotnetRuntime, builder.Architecture.RuntimeId);
+        dict.Add(MacroId.BuildArch, builder.Architecture.ToString());
         dict.Add(MacroId.BuildTarget, args.Build);
         dict.Add(MacroId.BuildDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
         dict.Add(MacroId.BuildYear, DateTime.UtcNow.ToString("yyyy"));
-        dict.Add(MacroId.BuildRoot, builder.BuildRoot);
+        dict.Add(MacroId.BuildRoot, builder.AppRoot);
         dict.Add(MacroId.BuildShare, builder.BuildUsrShare ?? "");
         dict.Add(MacroId.PublishBin, builder.PublishBin);
         dict.Add(MacroId.DesktopExec, builder.DesktopExec);

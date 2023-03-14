@@ -59,22 +59,10 @@ public class ArgumentReader
     public const string NewShortArg = "n";
     public const string NewLongArg = "new";
 
-    public const string AboutLongArg = "about";
     public const string VersionLongArg = "version";
 
     public const string HelpShortArg = "h";
     public const string HelpLongArg = "help";
-
-
-    /// <summary>
-    /// The default runtime.
-    /// </summary>
-    public readonly static string DefaultRuntime;
-
-    /// <summary>
-    /// The default package kind.
-    /// </summary>
-    public readonly static PackKind DefaultKind;
 
     private string _string;
 
@@ -95,32 +83,6 @@ public class ArgumentReader
         else
         {
             DefaultKind = PackKind.Zip;
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-            {
-                DefaultRuntime = "win-arm64";
-            }
-            else
-            {
-                DefaultRuntime = "win-x64";
-            }
-        }
-        else
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            DefaultRuntime = "osx-x64";
-        }
-        else
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-        {
-            DefaultRuntime = "linux-arm64";
-        }
-        else
-        {
-            DefaultRuntime = "linux-x64";
         }
     }
 
@@ -157,13 +119,13 @@ public class ArgumentReader
 
         Value = args.Value;
         New = args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None);
-        Runtime = args.GetOrDefault(RidShortArg, RidLongArg, DefaultRuntime);
+        Runtime = args.GetOrDefault(RidShortArg, RidLongArg, ArchitectureConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
 
         if (New == NewKind.None)
         {
             Value = GetDefaultValuePath(Value);
-            Kind = AssertKind(args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind));
+            Kind = args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind);
             AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
 
             // Currently not implemented
@@ -176,11 +138,15 @@ public class ArgumentReader
             IsVerbose = args.GetOrDefault(VerboseLongArg, false);
             IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
-            ShowAbout = args.GetOrDefault(AboutLongArg, false);
             ShowVersion = args.GetOrDefault(VersionLongArg, false);
             ShowHelp = args.GetOrDefault(HelpShortArg, HelpLongArg, false);
         }
     }
+
+    /// <summary>
+    /// Get the default package kind.
+    /// </summary>
+    public static PackKind DefaultKind { get; }
 
     /// <summary>
     /// Gets the unknown arg value. Typically file name.
@@ -243,11 +209,6 @@ public class ArgumentReader
     public bool IsSkipYes { get; }
 
     /// <summary>
-    /// Gets whether to show about information.
-    /// </summary>
-    public bool ShowAbout { get; }
-
-    /// <summary>
     /// Gets whether to show version only.
     /// </summary>
     public bool ShowVersion { get; }
@@ -282,7 +243,7 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Value must be one of: {string.Join(",", Enum.GetNames<PackKind>())}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{RidShortArg}, --{RidLongArg} value");
-        sb.AppendLine($"{indent}Dotnet publish runtime identifier. Default: {DefaultRuntime}.");
+        sb.AppendLine($"{indent}Dotnet publish runtime identifier. Default: {ArchitectureConverter.DefaultRuntime}.");
         sb.AppendLine($"{indent}Valid examples include: 'linux-x64' and 'linux-arm64'.");
         sb.AppendLine($"{indent}See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog");
         sb.AppendLine();
@@ -336,19 +297,8 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}--{VersionLongArg} [flag]");
         sb.AppendLine($"{indent}Show version information.");
-        sb.AppendLine();
-        sb.AppendLine($"{indent}--{AboutLongArg} [flag]");
-        sb.Append($"{indent}Show about information.");
 
         return sb.ToString();
-    }
-
-    /// <summary>
-    /// Returns true if the RID appears to be windows.
-    /// </summary>
-    public bool IsWindowsRuntime()
-    {
-        return !string.IsNullOrEmpty(Runtime) && Runtime.StartsWith("win", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>
@@ -368,26 +318,6 @@ public class ArgumentReader
 
         var files = Directory.GetFiles("./", "*.conf", SearchOption.TopDirectoryOnly);
         return files.Length == 1 ? files[0] : null;
-    }
-
-    private static PackKind AssertKind(PackKind pack)
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && pack.IsLinux())
-        {
-            return pack;
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && pack.IsWindows())
-        {
-            return pack;
-        }
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && pack.IsOsx())
-        {
-            return pack;
-        }
-
-        throw new ArgumentException($"Package kind {pack} cannot be built on this platform");
     }
 
 }

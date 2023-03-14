@@ -22,32 +22,33 @@ using System.Text;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Extends <see cref="PackageBuilder"/> for RPM package.
-/// https://docs.fedoraproject.org/en-US/package-maintainers/Packaging_Tutorial_GNU_Hello/
-/// https://www.techrepublic.com/article/making-rpms-part-1-the-spec-file-header/
+/// Extends <see cref="PackageBuilder"/> for Debian package.
+/// https://www.baeldung.com/linux/create-debian-package
 /// </summary>
-public class RpmBuilder : PackageBuilder
+public class DebBuilder : PackageBuilder
 {
     /// <summary>
     /// Constructor.
     /// </summary>
-    public RpmBuilder(ConfigurationReader conf)
-        : base(conf, PackKind.Rpm)
+    public DebBuilder(ConfigurationReader conf)
+        : base(conf, PackKind.Deb)
     {
         PublishBin = Path.Combine(AppRoot, "opt", Configuration.AppId);
         DesktopExec = $"/opt/{Configuration.AppId}/{AppExecName}";
 
         // We do not set the content here
-        ManifestPath = Path.Combine(Root, Configuration.AppId + ".spec");
+        ManifestPath = Path.Combine(AppRoot, "DEBIAN/control");
 
         var list = new List<string>();
-        var temp = Path.Combine(Root, "rpmbuild");
+        var cmd = "dpkg-deb --root-owner-group ";
 
-        // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
-        var cmd = $"rpmbuild -bb \"{ManifestPath}\"";
-        cmd += $" --define \"_topdir {temp}\" --buildroot=\"{AppRoot}\"";
-        cmd += $" --define \"_rpmdir {OutputPath}\" --define \"_build_id_links none\"";
+        if (Arguments.IsVerbose)
+        {
+            cmd += "--verbose ";
+        }
 
+        var archiveDirectory = Path.Combine(OutputDirectory, OutputName);
+        cmd += $"--build \"{AppRoot}\" \"{archiveDirectory}\"";
         list.Add(cmd);
         PackageCommands = list;
     }
@@ -72,7 +73,7 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override string? ManifestContent
     {
-        get { return GetSpec(); }
+        get { return GetControl(); }
     }
 
     /// <summary>
@@ -90,7 +91,7 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override bool CheckInstalled()
     {
-        return WriteVersion("rpmbuild", "--version", true);
+        return WriteVersion("dpkg-deb", "--version", true);
     }
 
     /// <summary>
@@ -98,7 +99,7 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override void WriteVersion()
     {
-        WriteVersion("rpmbuild", "--version");
+        WriteVersion("dpkg-deb", "--version");
     }
 
     /// <summary>
@@ -128,77 +129,37 @@ public class RpmBuilder : PackageBuilder
     /// </summary>
     public override void BuildPackage()
     {
-        Environment.SetEnvironmentVariable("SOURCE_DATE_EPOCH", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString());
+        Operations.CreateDirectory(Path.GetDirectoryName(ManifestPath));
+        Operations.CreateDirectory(OutputPath);
         base.BuildPackage();
     }
 
-    private string GetSpec()
+    private string GetControl()
     {
-        // We don't actually need install, build sections.
-        // https://rpm-software-management.github.io/rpm/manual/spec.html
+        // https://www.debian.org/doc/debian-policy/ch-controlfields.html
         var sb = new StringBuilder();
 
-        sb.AppendLine($"Name: {Configuration.AppBaseName.ToLowerInvariant()}");
-        sb.AppendLine($"Version: {AppVersion}");
-        sb.AppendLine($"Release: {PackRelease}");
-        sb.AppendLine($"BuildArch: {Architecture}");
-        sb.AppendLine($"Summary: {Configuration.AppSummary}");
-        sb.AppendLine($"License: {Configuration.AppLicense}");
-        sb.AppendLine($"Vendor: {Configuration.AppVendor}");
+        sb.AppendLine($"Package: {Configuration.AppBaseName.ToLowerInvariant()}");
+        sb.AppendLine($"Version: {AppVersion}-{PackRelease}");
+        sb.AppendLine($"Section: misc");
+        sb.AppendLine($"Priority: optional");
+        sb.AppendLine($"Architecture: {Architecture}");
+        sb.AppendLine($"Description: {Configuration.AppSummary}");
 
         if (!string.IsNullOrEmpty(Configuration.AppUrl))
         {
-            sb.AppendLine($"Url: {Configuration.AppUrl}");
+            sb.AppendLine($"Homepage: {Configuration.AppUrl}");
         }
 
-        // We expect dotnet "--self-contained true" to provide ALL dependencies in single directory
-        // https://rpm-list.redhat.narkive.com/KqUzv7C1/using-nodeps-with-rpmbuild-is-it-possible
+        // Annoying!
+        // https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-maintainer
+        sb.AppendLine($"Maintainer: Not used <example-inc@example.com>");
+
+        // Treated as comments
+        sb.AppendLine($"License: {Configuration.AppLicense}");
+        sb.AppendLine($"Vendor: {Configuration.AppVendor}");
         sb.AppendLine();
-        sb.AppendLine("AutoReqProv: no");
 
-        if (DesktopPath != null || MetaInfoPath != null)
-        {
-            sb.AppendLine("BuildRequires: libappstream-glib");
-            sb.AppendLine();
-            sb.AppendLine("%check");
-
-            if (DesktopPath != null)
-            {
-                sb.AppendLine("desktop-file-validate %{buildroot}/%{_datadir}/applications/*.desktop");
-            }
-
-            if (MetaInfoPath != null)
-            {
-                sb.AppendLine("appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml");
-            }
-        }
-
-        // Description is mandatory, but just repeat summary
-        sb.AppendLine();
-        sb.AppendLine("%description");
-        sb.AppendLine(Configuration.AppSummary);
-
-        // https://stackoverflow.com/questions/57385249/in-an-rpm-files-section-is-it-possible-to-specify-a-directory-and-all-of-its-fi
-        sb.AppendLine();
-        sb.AppendLine("%files");
-
-        var files = ListBuild(true);
-
-        if (files.Count == 0)
-        {
-            // Placeholder only
-            sb.Append("[FILES]");
-        }
-
-        foreach (var item in files)
-        {
-            if (!item.StartsWith('/'))
-            {
-                sb.Append('/');
-            }
-
-            sb.AppendLine(item);
-        }
 
         return sb.ToString();
     }

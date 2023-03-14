@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KuiperZone.PupNet;
@@ -25,13 +26,11 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class FlatpakBuilder : PackageBuilder
 {
-    private const string RootName = "AppDir";
-
     /// <summary>
     /// Constructor.
     /// </summary>
     public FlatpakBuilder(ConfigurationReader conf)
-        : base(conf, PackKind.Flatpak, RootName)
+        : base(conf, PackKind.Flatpak)
     {
         PublishBin = BuildUsrBin ?? throw new ArgumentNullException(nameof(BuildUsrBin));
         DesktopExec = AppExecName;
@@ -96,6 +95,22 @@ public class FlatpakBuilder : PackageBuilder
     /// </summary>
     public override bool SupportsRunOnBuild { get; } = true;
 
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool CheckInstalled()
+    {
+        return WriteVersion("flatpak-builder", "--version", true);
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override void WriteVersion()
+    {
+        WriteVersion("flatpak-builder", "--version");
+    }
+
     private string GetFlatpakManifest()
     {
         var sb = new StringBuilder();
@@ -116,7 +131,7 @@ public class FlatpakBuilder : PackageBuilder
         sb.AppendLine($"      - cp -rn share/* /app/share");
         sb.AppendLine($"    sources:");
         sb.AppendLine($"      - type: dir");
-        sb.AppendLine($"        path: {RootName}/usr/");
+        sb.AppendLine($"        path: {AppRootName}/usr/");
 
         if (Configuration.FlatpakFinishArgs.Count != 0)
         {

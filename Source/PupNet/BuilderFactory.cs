@@ -24,13 +24,6 @@ namespace KuiperZone.PupNet;
 public class BuilderFactory
 {
     /// <summary>
-    /// Constructor.
-    /// </summary>
-    public BuilderFactory()
-    {
-    }
-
-    /// <summary>
     /// Creates.
     /// </summary>
     public PackageBuilder Create(ConfigurationReader conf)
@@ -40,8 +33,18 @@ public class BuilderFactory
             case PackKind.AppImage: return new AppImageBuilder(conf);
             case PackKind.Flatpak: return new FlatpakBuilder(conf);
             case PackKind.Rpm: return new RpmBuilder(conf);
+            case PackKind.Deb: return new DebBuilder(conf);
+            case PackKind.WinSetup: return new WinSetupBuilder(conf);
             case PackKind.Zip: return new ZipBuilder(conf);
             default: throw new ArgumentException($"Invalid or unsupported {nameof(PackKind)} {conf.Arguments.Kind}");
         }
+    }
+
+    /// <summary>
+    /// Creates with dummy configuration.
+    /// </summary>
+    public PackageBuilder Create(PackKind kind)
+    {
+        return Create(new ConfigurationReader(kind));
     }
 }

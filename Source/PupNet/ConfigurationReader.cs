@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KuiperZone.PupNet;
@@ -32,11 +31,19 @@ public class ConfigurationReader
     public const string PathNone = "NONE";
 
     /// <summary>
-    /// Default constructor. No arguments.
+    /// Default constructor. No arguments. Test or demo only.
     /// </summary>
     public ConfigurationReader(string? metabase = null)
+        : this(PackKind.AppImage, metabase)
     {
-        Arguments = new();
+    }
+
+    /// <summary>
+    /// Constructor with kind. No other arguments. Test or demo only.
+    /// </summary>
+    public ConfigurationReader(PackKind kind, string? metabase = null)
+    {
+        Arguments = new($"-{ArgumentReader.KindShortArg} {kind}");
         Reader = new();
         LocalDirectory = "";
 
@@ -152,57 +159,6 @@ public class ConfigurationReader
     public IReadOnlyCollection<string> FlatpakFinishArgs { get; } = new string[]
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
-
-    /// <summary>
-    /// Gets this system architecture as string in common use with packagers.
-    /// </summary>
-    public static string GetOSArch()
-    {
-        // Get from OS, but map to expected names
-        var arch = RuntimeInformation.OSArchitecture;
-
-        if (arch == Architecture.X64)
-        {
-            return "x86_64";
-        }
-
-        if (arch == Architecture.Arm64)
-        {
-            return "aarch64";
-        }
-
-        if (arch == Architecture.Ppc64le)
-        {
-            return "powerpc";
-        }
-
-        if (arch == Architecture.X86)
-        {
-            return "x86";
-        }
-
-        return arch.ToString().ToLowerInvariant();
-    }
-
-    /// <summary>
-    /// Gets the target build architecture. Derived from args and config.
-    /// </summary>
-    public string GetBuildArch()
-    {
-        if (Arguments.Arch != null)
-        {
-            // Provided explicitly
-            return Arguments.Arch;
-        }
-
-        if (DotnetProjectPath != ConfigurationReader.PathNone)
-        {
-            // Map from dotnet RID
-            return GetRuntimeArch(Arguments.Runtime);
-        }
-
-        return GetOSArch();
-    }
 
     /// <summary>
     /// Reads text file. Returns null if path is null or equals <see cref="PathNone"/>.
@@ -484,32 +440,6 @@ public class ConfigurationReader
         }
 
         return path;
-    }
-
-    private static string GetRuntimeArch(string runtime)
-    {
-        if (runtime.EndsWith("-x64", StringComparison.InvariantCultureIgnoreCase))
-        {
-            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
-            return "x86_64";
-        }
-
-        if (runtime.EndsWith("-arm64", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return "aarch64";
-        }
-
-        if (runtime.EndsWith("-arm", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return "arm";
-        }
-
-        if (runtime.EndsWith("-x86", StringComparison.InvariantCultureIgnoreCase))
-        {
-            return "x86";
-        }
-
-        return runtime;
     }
 
     private static string? AssertConfValue(string name, string? value, bool multi, int maxlen = int.MaxValue)

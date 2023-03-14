@@ -1,0 +1,25 @@
+
+Debian
+sb.AppendLine($"Maintainer: Not used <example-inc@example.com>");
+
+Need maintainer field
+Need changelog
+Need PackageName field (lowercase in rpm/deb)
+Rigorous checks on name,id, PackageName
+
+
+
+DONE
+BuildArch in rpm
+File to value arg
+Fully qualified files
+Conf categories
+Macro final output
+PackRelease
+Embed AppImage
+Default conf file -- look in directories
+Icons
+
+RPM build warnings:
+    source_date_epoch_from_changelog set but %changelog is missing
+

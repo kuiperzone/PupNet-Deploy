@@ -21,33 +21,35 @@ using System.Reflection;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// A base class for package build operations. It defines a temporary build directory structure under which the
-/// application is to be published by dotnet, along with other assets such a desktop and AppStream metadata files
+/// A base class for package build operations. It defines a working build directory structure under which the
+/// application is to be published by dotnet, along with other assets such a desktop, AppStream metadata
 /// and icons. The subclass is to define package specific values and operations by overriding key members.
 /// </summary>
 public abstract class PackageBuilder
 {
-    private string _buildRootName;
+    /// <summary>
+    /// AppRoot leaf name.
+    /// </summary>
+    protected const string AppRootName = "AppDir";
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public PackageBuilder(ConfigurationReader conf, PackKind kind, string buildRootName = "AppDir")
+    public PackageBuilder(ConfigurationReader conf, PackKind kind)
     {
-        PackKind = kind;
         Arguments = conf.Arguments;
         Configuration = conf;
-        IsWindowsPackage = PackKind.IsWindows();
-        _buildRootName = buildRootName;
+        Architecture = new ArchitectureConverter(kind, Arguments.Runtime, Arguments.Arch);
+        IsWindowsPackage = kind.IsWindows();
 
         AppVersion = SplitVersion(conf.AppVersionRelease, out string temp);
         PackRelease = temp;
 
         OutputDirectory = GetOutputDirectory(Configuration);
-        OutputName = GetOutputName(Configuration, PackKind, AppVersion, PackRelease);
+        OutputName = GetOutputName(Configuration, Architecture, AppVersion, PackRelease);
 
-        Root = Path.Combine(GlobalRoot, $"{conf.AppId}-{conf.GetBuildArch()}-{conf.Arguments.Build}-{PackKind}");
-        BuildRoot = Path.Combine(Root, buildRootName);
+        Root = Path.Combine(GlobalRoot, $"{conf.AppId}-{Architecture}-{conf.Arguments.Build}-{kind}");
+        AppRoot = Path.Combine(Root, AppRootName);
         Operations = new(Root);
 
         IconPaths = GetShareIconPaths(Configuration.Icons);
@@ -58,7 +60,7 @@ public abstract class PackageBuilder
             IconPaths = GetShareIconPaths(DefaultIcons);
         }
 
-        IconSource = GetSourceIcon(PackKind, IconPaths.Keys);
+        IconSource = GetSourceIcon(kind, IconPaths.Keys);
     }
 
     /// <summary>
@@ -83,11 +85,6 @@ public abstract class PackageBuilder
     public static IReadOnlyCollection<string> DefaultIcons { get; } = GetDefaultIcons();
 
     /// <summary>
-    /// Gets the output package kind.
-    /// </summary>
-    public PackKind PackKind { get; }
-
-    /// <summary>
     /// Gets a reference to the arguments.
     /// </summary>
     public ArgumentReader Arguments { get; }
@@ -101,6 +98,11 @@ public abstract class PackageBuilder
     /// Gets a "file operations" instance.
     /// </summary>
     public FileOps Operations { get; }
+
+    /// <summary>
+    /// Gets the thing that provides the architecture.
+    /// </summary>
+    public ArchitectureConverter Architecture { get; }
 
     /// <summary>
     /// Gets whether output is for Windows.
@@ -143,14 +145,14 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets the app root directory, i.e. "${Root}/AppDir".
     /// </summary>
-    public string BuildRoot { get; }
+    public string AppRoot { get; }
 
     /// <summary>
     /// Gets the application executable filename (no directory part). I.e. "Configuration.AppBase[.exe]".
     /// </summary>
     public string AppExecName
     {
-        get { return Arguments.IsWindowsRuntime() ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
+        get { return Architecture.IsWindowsRuntime ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
     }
 
     /// <summary>
@@ -159,7 +161,7 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildUsrBin
     {
-        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "bin"); }
+        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "bin"); }
     }
 
     /// <summary>
@@ -167,7 +169,7 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildUsrShare
     {
-        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share"); }
+        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share"); }
     }
 
     /// <summary>
@@ -175,7 +177,7 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareMeta
     {
-        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "metainfo"); }
+        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "metainfo"); }
     }
 
     /// <summary>
@@ -183,7 +185,7 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareApplications
     {
-        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "applications"); }
+        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "applications"); }
     }
 
     /// <summary>
@@ -191,7 +193,7 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareIcons
     {
-        get { return IsWindowsPackage ? null : Path.Combine(BuildRoot, "usr", "share", "icons"); }
+        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "icons"); }
     }
 
     /// <summary>
@@ -247,7 +249,7 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the application bin directory to which the dotnet (or C++) build must publish to. It must be under
-    /// <see cref="BuildRoot"/> and may typically be equal to <see cref="BuildUsrBin"/>, or "${BuildRoot}/opt/AppId".
+    /// <see cref="AppRoot"/> and may typically be equal to <see cref="BuildUsrBin"/>, or "${BuildRoot}/opt/AppId".
     /// </summary>
     public abstract string PublishBin { get; }
 
@@ -273,6 +275,17 @@ public abstract class PackageBuilder
     public abstract bool SupportsRunOnBuild { get; }
 
     /// <summary>
+    /// Checks whether the package can be built on this platform. For example, for RPM, the method will check for
+    /// Linux OS and then test the command "rpmbuild --version". Returns true on success.
+    /// </summary>
+    public abstract bool CheckInstalled();
+
+    /// <summary>
+    /// Calls utility to write version to console.
+    /// </summary>
+    public abstract void WriteVersion();
+
+    /// <summary>
     /// Create directories tree. It will be called at the start of the build process to create all build directories
     /// and populate them with standard assets. It does not populate the application binary. The base implementation
     /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
@@ -285,7 +298,7 @@ public abstract class PackageBuilder
     {
         RemoveRoot();
         Operations.CreateDirectory(Root);
-        Operations.CreateDirectory(BuildRoot);
+        Operations.CreateDirectory(AppRoot);
         Operations.CreateDirectory(BuildUsrBin);
         Operations.CreateDirectory(BuildUsrShare);
         Operations.CreateDirectory(BuildShareIcons);
@@ -317,13 +330,13 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets all files under <see cref="BuildRoot"/>. Note results are prefixed with "/" on non-windows platforms if rooted.
+    /// Gets all files under <see cref="AppRoot"/>. Note results are prefixed with "/" on non-windows platforms if rooted.
     /// </summary>
     public IReadOnlyCollection<string> ListBuild(bool sysrooted)
     {
-        if (Directory.Exists(BuildRoot))
+        if (Directory.Exists(AppRoot))
         {
-            var files = FileOps.ListFiles(BuildRoot, "*");
+            var files = FileOps.ListFiles(AppRoot, "*");
 
             for (int n = 0; n < files.Length; ++n)
             {
@@ -336,7 +349,7 @@ public abstract class PackageBuilder
                 }
                 else
                 {
-                    files[n] = Path.Combine(_buildRootName, files[n]);
+                    files[n] = Path.Combine(AppRootName, files[n]);
                 }
             }
 
@@ -370,6 +383,33 @@ public abstract class PackageBuilder
     public override string ToString()
     {
         return Root;
+    }
+
+    /// <summary>
+    /// For use by the <see cref="WriteVersion()"/> methods.
+    /// </summary>
+    protected bool WriteVersion(string? cmd, string? args, bool silent = false)
+    {
+        try
+        {
+            if (!string.IsNullOrEmpty(cmd) && Arguments.Kind.CanBuildOnSystem())
+            {
+                var ops = new FileOps();
+                ops.ShowCommands = false;
+                ops.Execute(cmd, args, silent);
+                return true;
+            }
+        }
+        catch
+        {
+        }
+
+        if (!silent)
+        {
+            Console.WriteLine($"{Architecture.Kind} utility not installed or supported on this system");
+        }
+
+        return false;
     }
 
     private static string SplitVersion(string version, out string release)
@@ -413,7 +453,7 @@ public abstract class PackageBuilder
         return conf.OutputDirectory;
     }
 
-    private static string GetOutputName(ConfigurationReader conf, PackKind kind, string version, string release)
+    private static string GetOutputName(ConfigurationReader conf, ArchitectureConverter arch, string version, string release)
     {
         var output = Path.GetFileName(conf.Arguments.Output);
 
@@ -429,19 +469,19 @@ public abstract class PackageBuilder
             output += $"-{version}-{release}";
         }
 
-        output += $".{conf.GetBuildArch()}";
+        output += $".{arch}";
 
-        if (kind == PackKind.AppImage)
+        if (arch.Kind == PackKind.AppImage)
         {
             return output + ".AppImage";
         }
 
-        if (kind == PackKind.WinSetup)
+        if (arch.Kind == PackKind.WinSetup)
         {
             return output + ".exe";
         }
 
-        return output + "." + kind.ToString().ToLowerInvariant();
+        return output + "." + arch.Kind.ToString().ToLowerInvariant();
     }
 
     private static IReadOnlyCollection<string> GetDefaultIcons()

@@ -27,9 +27,9 @@ public class ZipBuilder : PackageBuilder
     /// Constructor.
     /// </summary>
     public ZipBuilder(ConfigurationReader conf)
-        : base(conf, PackKind.Zip, "AppDir")
+        : base(conf, PackKind.Zip)
     {
-        PublishBin = Path.Combine(BuildRoot, "Publish");
+        PublishBin = Path.Combine(AppRoot, "Publish");
         DesktopExec = AppExecName;
 
         // Not used
@@ -67,6 +67,22 @@ public class ZipBuilder : PackageBuilder
     /// Implements.
     /// </summary>
     public override bool SupportsRunOnBuild { get; } = true;
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool CheckInstalled()
+    {
+        // Always available
+        return true;
+    }
+
+    /// <summary>
+    /// Implements. Does nothing.
+    /// </summary>
+    public override void WriteVersion()
+    {
+    }
 
     /// <summary>
     /// Overrides and extends.

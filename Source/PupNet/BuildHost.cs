@@ -66,7 +66,7 @@ public class BuildHost
 
         if (Arguments.IsRun && !Builder.SupportsRunOnBuild)
         {
-            warnings.Add($"{Builder.PackKind} does not support the post-build run option");
+            warnings.Add($"{Arguments.Kind} does not support the post-build run option");
         }
 
         Warnings = warnings;
@@ -181,9 +181,9 @@ public class BuildHost
         AppendPair(sb, nameof(Builder.PackRelease), Builder.PackRelease);
 
         AppendHeader(sb, "OUTPUT");
-        AppendPair(sb, nameof(Builder.PackKind), Builder.PackKind.ToString().ToLowerInvariant());
+        AppendPair(sb, nameof(PackKind), Arguments.Kind.ToString().ToLowerInvariant());
         AppendPair(sb, nameof(Arguments.Runtime), Arguments.Runtime);
-        AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Configuration.GetBuildArch()})");
+        AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Builder.Architecture})");
         AppendPair(sb, nameof(Arguments.Build), Arguments.Build);
         AppendPair(sb, nameof(Builder.OutputName), Builder.OutputName);
         AppendPair(sb, nameof(Builder.OutputDirectory), Builder.OutputDirectory);
@@ -201,22 +201,22 @@ public class BuildHost
 
             foreach (var item in Builder.IconPaths)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, item.Value));
+                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, item.Value));
             }
 
             if (Builder.DesktopPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.DesktopPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, Builder.DesktopPath));
             }
 
             if (Builder.MetaInfoPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.MetaInfoPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, Builder.MetaInfoPath));
             }
 
             AppendSection(sb, "ASSETS", temp.ToString().TrimEnd());
             AppendSection(sb, "METAINFO", ExpandedMetaInfo);
-            AppendSection(sb, "MANIFEST", Builder.ManifestContent);
+            AppendSection(sb, "MANIFEST", Builder.ManifestContent?.TrimEnd());
         }
 
         AppendSection(sb, "BUILD PROJECT", PublishCommands);

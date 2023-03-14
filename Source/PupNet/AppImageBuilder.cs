@@ -29,14 +29,8 @@ public class AppImageBuilder : PackageBuilder
     /// Constructor.
     /// </summary>
     public AppImageBuilder(ConfigurationReader conf)
-        : base(conf, PackKind.AppImage, "AppDir")
+        : base(conf, PackKind.AppImage)
     {
-        // Path to embedded
-        if (AppImageTool == null)
-        {
-            throw new InvalidOperationException($"{PackKind.AppImage} not supported on {ConfigurationReader.GetOSArch()}");
-        }
-
         PublishBin = BuildUsrBin ?? throw new ArgumentNullException(nameof(BuildUsrBin));
         DesktopExec = $"usr/bin/{AppExecName}";
 
@@ -47,7 +41,7 @@ public class AppImageBuilder : PackageBuilder
         var cmds = new List<string>();
 
         // Do the build
-        cmds.Add($"{AppImageTool} {Configuration.AppImageArgs} \"{BuildRoot}\" \"{OutputPath}\"");
+        cmds.Add($"{AppImageTool} {Configuration.AppImageArgs} \"{AppRoot}\" \"{OutputPath}\"");
 
         if (Arguments.IsRun)
         {
@@ -110,6 +104,22 @@ public class AppImageBuilder : PackageBuilder
     public override bool SupportsRunOnBuild { get; } = true;
 
     /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool CheckInstalled()
+    {
+        return AppImageTool != null;
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override void WriteVersion()
+    {
+        WriteVersion(AppImageTool, "--version");
+    }
+
+    /// <summary>
     /// Overrides and extends.
     /// </summary>
     public override void Create(string? desktop, string? metainfo)
@@ -119,17 +129,17 @@ public class AppImageBuilder : PackageBuilder
         // We need a bodge fix to get AppImage to pass validation. We need desktop and meta in
         // two places, one place for AppImage builder itself, and the other to get the meta to
         // pass validation. See: https://github.com/AppImage/AppImageKit/issues/603#issuecomment-355105387
-        Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".desktop"), desktop);
-        Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".appdata.xml"), metainfo);
+        Operations.WriteFile(Path.Combine(AppRoot, Configuration.AppId + ".desktop"), desktop);
+        Operations.WriteFile(Path.Combine(AppRoot, Configuration.AppId + ".appdata.xml"), metainfo);
 
         if (IconSource != null)
         {
-            Operations.CopyFile(IconSource, Path.Combine(BuildRoot, Configuration.AppId + Path.GetExtension(IconSource)));
+            Operations.CopyFile(IconSource, Path.Combine(AppRoot, Configuration.AppId + Path.GetExtension(IconSource)));
         }
 
         // IMPORTANT - Create AppRun link
         // ln -s {target} {link}
-        Operations.Execute($"ln -s \"{DesktopExec}\" \"{Path.Combine(BuildRoot, "AppRun")}\"");
+        Operations.Execute($"ln -s \"{DesktopExec}\" \"{Path.Combine(AppRoot, "AppRun")}\"");
     }
 
     /// <summary>
@@ -148,14 +158,17 @@ public class AppImageBuilder : PackageBuilder
 
     private static string? GetAppImageTool()
     {
-        if (RuntimeInformation.ProcessArchitecture == Architecture.X64)
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            return Path.Combine(AssemblyDirectory, "appimagetool-x86_64.AppImage");
-        }
+            if (RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.X64)
+            {
+                return Path.Combine(AssemblyDirectory, "appimagetool-x86_64.AppImage");
+            }
 
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-        {
-            return Path.Combine(AssemblyDirectory, "appimagetool-aarch64.AppImage");
+            if (RuntimeInformation.ProcessArchitecture == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                return Path.Combine(AssemblyDirectory, "appimagetool-aarch64.AppImage");
+            }
         }
 
         return null;

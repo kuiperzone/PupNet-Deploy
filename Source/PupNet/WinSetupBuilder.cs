@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KuiperZone.PupNet;
@@ -25,15 +26,13 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class WinSetupBuilder : PackageBuilder
 {
-    private const string RootName = "AppDir";
-
     /// <summary>
     /// Constructor.
     /// </summary>
     public WinSetupBuilder(ConfigurationReader conf)
-        : base(conf, PackKind.WinSetup, RootName)
+        : base(conf, PackKind.WinSetup)
     {
-        PublishBin = Path.Combine(BuildRoot, "Publish");
+        PublishBin = Path.Combine(AppRoot, "Publish");
         DesktopExec = AppExecName;
 
         // We do not set the content here
@@ -75,6 +74,22 @@ public class WinSetupBuilder : PackageBuilder
     /// </summary>
     public override bool SupportsRunOnBuild { get; }
 
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override bool CheckInstalled()
+    {
+        return WriteVersion("issc", "/version", true);
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override void WriteVersion()
+    {
+        WriteVersion("issc", "/version");
+    }
+
     private string GetInnoFile()
     {
         // We don't actually need install, build sections.
@@ -115,9 +130,8 @@ public class WinSetupBuilder : PackageBuilder
         sb.AppendLine($"MinVersion=6.2");
         sb.AppendLine($"AppId={Configuration.AppId}");
 
-        var arch = GetInnoArch();
-        sb.AppendLine($"ArchitecturesAllowed={arch}");
-        sb.AppendLine($"ArchitecturesInstallIn64BitMode={arch}");
+        sb.AppendLine($"ArchitecturesAllowed={Architecture}");
+        sb.AppendLine($"ArchitecturesInstallIn64BitMode={Architecture}");
 
         sb.AppendLine();
         sb.AppendLine($"[Files]");
@@ -147,31 +161,6 @@ public class WinSetupBuilder : PackageBuilder
         sb.AppendLine($"Type: dirifempty; Name: \"{{app}}\"");
 
         return sb.ToString().TrimEnd();
-    }
-
-    private string? GetInnoArch()
-    {
-        if (!string.IsNullOrEmpty(Arguments.Arch))
-        {
-            // Prefer
-            return Arguments.Arch;
-        }
-
-        // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
-        var arch = Configuration.GetBuildArch();
-
-        if (arch == "x86_64")
-        {
-            return "x64";
-        }
-
-        if (arch == "aarch64")
-        {
-            return "arm64";
-        }
-
-        // Leave default
-        return null;
     }
 
 }

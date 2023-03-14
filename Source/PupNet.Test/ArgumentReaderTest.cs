@@ -57,7 +57,7 @@ public class ArgumentReaderTest
     {
         // Default - changes depending on system
         var args = new ArgumentReader();
-        Assert.Equal(ArgumentReader.DefaultRuntime, args.Runtime);
+        Assert.Equal(ArchitectureConverter.DefaultRuntime, args.Runtime);
 
         args = new ArgumentReader("-r test1");
         Assert.Equal("test1", args.Runtime);
