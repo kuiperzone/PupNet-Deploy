@@ -78,7 +78,7 @@ public class ArgumentReader
         else
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            DefaultKind = PackKind.WinSetup;
+            DefaultKind = PackKind.Setup;
         }
         else
         {
@@ -253,7 +253,7 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}-{AppVersionShortArg}, --{AppVersionLongArg} value");
         sb.AppendLine($"{indent}Specifies application version-release in form 'VERSION[RELEASE]', where value in square");
-        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.AppVersionRelease)} in conf file.");
+        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.VersionRelease)} in conf file.");
         sb.AppendLine($"{indent}Example: 1.2.3[1].");
 
         /*
@@ -289,8 +289,8 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [value]");
         sb.AppendLine($"{indent}Creates a new empty conf or asset file for new project. A base file name may optionally");
-        sb.AppendLine($"{indent}be given. Valid values are : {NewKind.Conf}, {NewKind.Desktop}, {NewKind.Meta} and {NewKind.All}.");
-        sb.AppendLine($"{indent}Example: {Program.CommandName} basename -{NewShortArg} {NewKind.All}");
+        sb.AppendLine($"{indent}be given. Valid values are : {string.Join(',', Enum.GetValues<NewKind>())}.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [flag]");
         sb.AppendLine($"{indent}Show help information.");

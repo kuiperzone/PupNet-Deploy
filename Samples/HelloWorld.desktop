@@ -2,10 +2,10 @@
 Type=Application
 Name=${APP_FRIENDLY_NAME}
 Icon=${APP_ID}
-Comment=${APP_SUMMARY}
+Comment=${SHORT_SUMMARY}
 Exec=${DESKTOP_EXEC}
 TryExec=${DESKTOP_EXEC}
+Terminal=${IS_TERMINAL_APP}
 Categories=Utility
-Terminal=true
 MimeType=
-Keywords=
+Keywords= appimage;dotnet;csharp;deb;rpm;flatpak

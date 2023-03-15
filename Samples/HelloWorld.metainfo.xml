@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <metadata_license>MIT</metadata_license>
+
+    <id>${APP_ID}</id>
+    <name>${APP_FRIENDLY_NAME}</name>
+    <summary>${SHORT_SUMMARY}</summary>
+    <developer_name>${VENDOR_NAME}</developer_name>
+    <url type="homepage">${VENDOR_URL}</url>
+    <project_license>${LICENSE_ID}</project_license>
+    <content_rating type="oars-1.1" />
+
+    <launchable type="desktop-id">${APP_ID}.desktop</launchable>
+
+    <description>
+        <p>A terminal "Hello World" program, written in C# intended to demonstrate the features of PupNet.</p>
+    </description>
+
+    <keywords>
+        <keyword>appimage</keyword>
+        <keyword>dotnet</keyword>
+        <keyword>csharp</keyword>
+        <keyword>rpm</keyword>
+        <keyword>deb</keyword>
+        <keyword>flatpak</keyword>
+    </keywords>
+
+    <categories>
+        <category>Utility</category>
+    </categories>
+
+    <screenshots>
+        <screenshot type="default">
+            <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
+        </screenshot>
+    </screenshots>
+
+    <releases>
+        <release version="${APP_VERSION}" date="${BUILD_DATE}">
+            <description><p>The latest release.</p></description>
+        </release>
+    </releases>
+
+</component>

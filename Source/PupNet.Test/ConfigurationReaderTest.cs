@@ -21,7 +21,7 @@ namespace KuiperZone.PupNet.Test;
 public class ConfigurationReaderTest
 {
     [Fact]
-    public void AppBase_Mandatory_DecodeOK()
+    public void AppBaseName_Mandatory_DecodeOK()
     {
         Assert.Equal("HelloWorld", new DummyConf(PackKind.AppImage).AppBaseName);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppBaseName)));
@@ -35,31 +35,38 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
-    public void AppName_Mandatory_DecodeOK()
+    public void AppFriendlyName_Mandatory_DecodeOK()
     {
         Assert.Equal("Hello World", new DummyConf(PackKind.AppImage).AppFriendlyName);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppFriendlyName)));
     }
 
     [Fact]
-    public void AppVersionRelease_Mandatory_DecodeOK()
+    public void VersionRelease_Mandatory_DecodeOK()
     {
-        Assert.Equal("5.4.3[2]", new DummyConf(PackKind.AppImage).AppVersionRelease);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppVersionRelease)).AppVersionRelease);
+        Assert.Equal("5.4.3[2]", new DummyConf(PackKind.AppImage).VersionRelease);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.VersionRelease)).VersionRelease);
     }
 
     [Fact]
-    public void AppSummary_Mandatory_DecodeOK()
+    public void ShortSummary_Mandatory_DecodeOK()
     {
-        Assert.Equal("Test application only", new DummyConf(PackKind.AppImage).AppSummary);
-        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.AppSummary)).AppSummary);
+        Assert.Equal("Test application only", new DummyConf(PackKind.AppImage).ShortSummary);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.ShortSummary)).ShortSummary);
     }
 
     [Fact]
-    public void DesktopEntry_Optional_DecodeOK()
+    public void DesktopFile_Optional_DecodeOK()
     {
-        Assert.Equal("app.desktop", new DummyConf(PackKind.AppImage).DesktopEntry);
-        Assert.Null(new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.DesktopEntry)).DesktopEntry);
+        Assert.Equal("app.desktop", new DummyConf(PackKind.AppImage).DesktopFile);
+        Assert.Null(new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.DesktopFile)).DesktopFile);
+    }
+
+    [Fact]
+    public void MetaFile_Optional_DecodeOK()
+    {
+        Assert.Equal("metainfo.xml", new DummyConf(PackKind.AppImage).MetaFile);
+        Assert.Null(new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.MetaFile)).MetaFile);
     }
 
     [Fact]
@@ -88,6 +95,20 @@ public class ConfigurationReaderTest
     {
         Assert.True(new DummyConf(PackKind.AppImage).OutputVersion);
         Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.OutputVersion)));
+    }
+
+    [Fact]
+    public void SetupMinWindowsVersion_Mandatory_DecodeOK()
+    {
+        Assert.Equal("6.9", new DummyConf(PackKind.AppImage).SetupMinWindowsVersion);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.SetupMinWindowsVersion)));
+    }
+
+    [Fact]
+    public void SetupSignTool_Optional_DecodeOK()
+    {
+        Assert.Equal("signtool.exe", new DummyConf(PackKind.AppImage).SetupSignTool);
+        Assert.Null(new DummyConf(PackKind.AppImage, nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
     }
 
     [Fact]

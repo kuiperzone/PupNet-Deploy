@@ -38,16 +38,21 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.AppBaseName)} = 'HelloWorld'");
         lines.Add($"{nameof(ConfigurationReader.AppFriendlyName)} = Hello World");
         lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloword\"");
-        lines.Add($"{nameof(ConfigurationReader.AppSummary)} = Test application only");
-        lines.Add($"{nameof(ConfigurationReader.AppVendor)} = KuiperZone");
-        lines.Add($"{nameof(ConfigurationReader.AppUrl)} = https://kuiper.zone");
-        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
-        lines.Add($"{nameof(ConfigurationReader.AppLicense)} = LicenseRef-LICENSE");
+        lines.Add($"{nameof(ConfigurationReader.VersionRelease)} = 5.4.3[2]");
+        lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
+        lines.Add($"{nameof(ConfigurationReader.ShortSummary)} = Test application only");
+        lines.Add($"{nameof(ConfigurationReader.LicenseId)} = LicenseRef-LICENSE");
+
+        lines.Add($"{nameof(ConfigurationReader.VendorName)} = KuiperZone");
+        lines.Add($"{nameof(ConfigurationReader.VendorCopyright)} = Copyright KuiperZone");
+        lines.Add($"{nameof(ConfigurationReader.VendorUrl)} = https://kuiper.zone");
+        lines.Add($"{nameof(ConfigurationReader.VendorEmail)} = email@example.net");
 
         lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
-        lines.Add($"{nameof(ConfigurationReader.DesktopEntry)} = app.desktop");
-        lines.Add($"{nameof(ConfigurationReader.Icons)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
-        lines.Add($"{nameof(ConfigurationReader.MetaInfo)} = metainfo.xml");
+        lines.Add($"{nameof(ConfigurationReader.IsTerminalApp)} = True");
+        lines.Add($"{nameof(ConfigurationReader.DesktopFile)} = app.desktop");
+        lines.Add($"{nameof(ConfigurationReader.IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
+        lines.Add($"{nameof(ConfigurationReader.MetaFile)} = metainfo.xml");
 
         lines.Add($"{nameof(ConfigurationReader.DotnetProjectPath)} = HelloProject");
         lines.Add($"{nameof(ConfigurationReader.DotnetPublishArgs)} = --self-contained true");
@@ -63,6 +68,9 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformVersion)} = \"18.00\"");
         lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
         lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
+
+        lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
+        lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
 
         Remove(lines, omit);
 

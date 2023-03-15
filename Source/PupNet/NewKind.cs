@@ -29,12 +29,17 @@ public enum NewKind
     None = 0,
 
     /// <summary>
-    /// Conf file
+    /// Conf file with comments.
     /// </summary>
     Conf,
 
     /// <summary>
-    /// Conf file
+    /// Conf file without comments.
+    /// </summary>
+    ConfMin,
+
+    /// <summary>
+    /// Desktop file.
     /// </summary>
     Desktop,
 
@@ -42,6 +47,11 @@ public enum NewKind
     /// AppStream metadata.
     /// </summary>
     Meta,
+
+    /// <summary>
+    /// Change log in custom format.
+    /// </summary>
+    ChangeLog,
 
     /// <summary>
     /// All kinds.
@@ -61,9 +71,11 @@ public static class AssetKindExtension
     {
         switch (kind)
         {
-            case NewKind.Conf: return ".conf";
+            case NewKind.Conf:
+            case NewKind.ConfMin: return ".pupnet.conf";
             case NewKind.Desktop: return ".desktop";
             case NewKind.Meta: return ".metainfo.xml";
+            case NewKind.ChangeLog: return ".changelog.txt";
             default: return "";
         }
     }

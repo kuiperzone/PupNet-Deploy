@@ -86,19 +86,6 @@ public class ArgumentReaderTest
     }
 
     [Fact]
-    public void Kinds_AssertsInvalid()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            Assert.Throws<ArgumentException>(() => new ArgumentReader("-k winsetup"));
-        }
-        else
-        {
-            Assert.Throws<ArgumentException>(() => new ArgumentReader("-k deb"));
-        }
-    }
-
-    [Fact]
     public void AppVersion_DecodeOK()
     {
         var args = new ArgumentReader();

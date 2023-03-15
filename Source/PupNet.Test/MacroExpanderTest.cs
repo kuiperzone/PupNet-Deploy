@@ -16,57 +16,30 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.Text;
+
 namespace KuiperZone.PupNet.Test;
 
-public class BuildHostTest
+public class MacroExpanderTest
 {
     [Fact]
-    public void AppImage_DecodesOK()
+    public void Expand_ReplacesAllMacros()
     {
+        // Use factory to create one
         var host = new BuildHost(new DummyConf(PackKind.AppImage));
-        AssertOK(host);
+
+        var sb = new StringBuilder();
+
+        foreach (var item in Enum.GetValues<MacroId>())
+        {
+            sb.AppendLine(item.ToVar());
+        }
+
+        var test = host.Macros.Expand(sb.ToString());
+
+        // Expect no remaining macros
+        Console.WriteLine(test);
+        Assert.DoesNotContain("${", test);
     }
 
-    [Fact]
-    public void Flatpak_DecodesOK()
-    {
-        var host = new BuildHost(new DummyConf(PackKind.Flatpak));
-        AssertOK(host);
-    }
-
-    [Fact]
-    public void Rpm_DecodesOK()
-    {
-        var host = new BuildHost(new DummyConf(PackKind.Rpm));
-        AssertOK(host);
-    }
-
-    [Fact]
-    public void Deb_DecodesOK()
-    {
-        var host = new BuildHost(new DummyConf(PackKind.Deb));
-        AssertOK(host);
-    }
-
-    [Fact]
-    public void Setup_DecodesOK()
-    {
-        var host = new BuildHost(new DummyConf(PackKind.Setup));
-        AssertOK(host);
-    }
-
-    [Fact]
-    public void Zip_DecodesOK()
-    {
-        var host = new BuildHost(new DummyConf(PackKind.Zip));
-        AssertOK(host);
-    }
-
-    private void AssertOK(BuildHost host)
-    {
-        Console.WriteLine("DUMMY: " + host.GetType().Name);
-        Console.WriteLine(host.ToString(true));
-        Console.WriteLine();
-        Console.WriteLine();
-    }
 }

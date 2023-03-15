@@ -18,21 +18,22 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using KuiperZone.PupNet.Builders;
 
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Declares and defines macros for use in fields and file contents. When expanding, simple search-replace is
-/// used. Therefore important to specify ${NAME}, and not $NAME.
+/// Expands macros for use in fields and file contents. When expanding, simple search-replace
+/// is used. Therefore important to specify "${NAME}", and not "$NAME".
 /// </summary>
-public class BuildMacros
+public class MacrosExpander
 {
     private readonly SortedDictionary<string, string> _sorted = new();
 
     /// <summary>
     /// Default constructor. Example values only.
     /// </summary>
-    public BuildMacros()
+    public MacrosExpander()
         : this(new AppImageBuilder(new ConfigurationReader()))
     {
     }
@@ -40,7 +41,7 @@ public class BuildMacros
     /// <summary>
     /// Constructor.
     /// </summary>
-    public BuildMacros(PackageBuilder builder)
+    public MacrosExpander(PackageBuilder builder)
     {
         var args = builder.Arguments;
         var conf = builder.Configuration;
@@ -52,14 +53,16 @@ public class BuildMacros
         dict.Add(MacroId.AppBaseName, conf.AppBaseName);
         dict.Add(MacroId.AppFriendlyName, conf.AppFriendlyName);
         dict.Add(MacroId.AppId, conf.AppId);
-        dict.Add(MacroId.AppSummary, conf.AppSummary);
-        dict.Add(MacroId.AppLicense, conf.AppLicense);
-        dict.Add(MacroId.AppVendor, conf.AppVendor);
-        dict.Add(MacroId.AppUrl, conf.AppUrl ?? "");
+        dict.Add(MacroId.ShortSummary, conf.ShortSummary);
+        dict.Add(MacroId.LicenseId, conf.LicenseId);
+        dict.Add(MacroId.VendorName, conf.VendorName);
+        dict.Add(MacroId.VendorCopyright, conf.VendorCopyright ?? "");
+        dict.Add(MacroId.VendorUrl, conf.VendorUrl ?? "");
+        dict.Add(MacroId.VendorEmail, conf.VendorEmail ?? "");
+        dict.Add(MacroId.IsTerminalApp, conf.IsTerminalApp.ToString().ToLowerInvariant());
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
         dict.Add(MacroId.DotnetRuntime, builder.Architecture.RuntimeId);
-        dict.Add(MacroId.BuildArch, builder.Architecture.ToString());
         dict.Add(MacroId.BuildTarget, args.Build);
         dict.Add(MacroId.BuildDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
         dict.Add(MacroId.BuildYear, DateTime.UtcNow.ToString("yyyy"));

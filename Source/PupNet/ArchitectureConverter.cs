@@ -35,7 +35,9 @@ public class ArchitectureConverter
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+            SimpleOS = "Windows";
+
+            if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
             {
                 DefaultRuntime = "win-arm64";
             }
@@ -47,16 +49,21 @@ public class ArchitectureConverter
         else
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
+            SimpleOS = "OSX";
             DefaultRuntime = "osx-x64";
         }
         else
-        if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
         {
-            DefaultRuntime = "linux-arm64";
-        }
-        else
-        {
-            DefaultRuntime = "linux-x64";
+            SimpleOS = "Linux";
+
+            if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+            {
+                DefaultRuntime = "linux-arm64";
+            }
+            else
+            {
+                DefaultRuntime = "linux-x64";
+            }
         }
     }
 
@@ -74,25 +81,25 @@ public class ArchitectureConverter
         if (RuntimeId.EndsWith("-x64"))
         {
             IsUncertain = false;
-            ArchRuntime = Architecture.X64;
+            RuntimeArch = Architecture.X64;
         }
         else
         if (RuntimeId.EndsWith("-arm64"))
         {
             IsUncertain = false;
-            ArchRuntime = Architecture.Arm64;
+            RuntimeArch = Architecture.Arm64;
         }
         else
         if (RuntimeId.EndsWith("-arm"))
         {
             IsUncertain = false;
-            ArchRuntime = Architecture.Arm;
+            RuntimeArch = Architecture.Arm;
         }
         else
         if (RuntimeId.EndsWith("-x86"))
         {
             IsUncertain = false;
-            ArchRuntime = Architecture.X86;
+            RuntimeArch = Architecture.X86;
         }
 
         if (string.IsNullOrWhiteSpace(xarch))
@@ -100,22 +107,60 @@ public class ArchitectureConverter
             // Hard to get any definitive ARCH list for other package kinds.
             // We commonly see "x86_64" and "aarch64" in examples, rather than "x64" and "arm64".
             // We can add further exceptions here according to kind.
-            _string = ArchRuntime.ToString().ToLower();
-
-            // RPM Example:
-            // https://koji.fedoraproject.org/koji/buildinfo?buildID=2108850
+            _string = RuntimeArch.ToString().ToLower();
 
             // Windows:
             // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
-
-            if (kind != PackKind.WinSetup && kind != PackKind.Deb)
+            if (kind == PackKind.Deb)
             {
-                if (ArchRuntime == Architecture.X64)
+                // DEB Example: amd64 (not x64 or x86_64)
+                // https://wiki.debian.org/ArchitectureSpecificsMemo
+                if (RuntimeArch == Architecture.X64)
+                {
+                    _string = "amd64";
+                }
+                else
+                if (RuntimeArch == Architecture.Arm64)
+                {
+                    _string = "arm64";
+                }
+                else
+                if (RuntimeArch == Architecture.X86)
+                {
+                    // Not sure about this?
+                    // https://en.wikipedia.org/wiki/X32_ABI
+                    _string = "x32";
+                }
+            }
+            else
+            if (kind == PackKind.Rpm)
+            {
+                // RPM Example: (aarch64 not arm64)
+                // https://koji.fedoraproject.org/koji/buildinfo?buildID=2108850
+                if (RuntimeArch == Architecture.X64)
                 {
                     _string = "x86_64";
                 }
                 else
-                if (ArchRuntime == Architecture.Arm64)
+                if (RuntimeArch == Architecture.Arm64)
+                {
+                    _string = "aarch64";
+                }
+                else
+                if (RuntimeArch == Architecture.X86)
+                {
+                    _string = "i686";
+                }
+            }
+            else
+            if (kind != PackKind.Setup)
+            {
+                if (RuntimeArch == Architecture.X64)
+                {
+                    _string = "x86_64";
+                }
+                else
+                if (RuntimeArch == Architecture.Arm64)
                 {
                     _string = "aarch64";
                 }
@@ -131,6 +176,11 @@ public class ArchitectureConverter
     /// Gets the default runtime.
     /// </summary>
     public static string DefaultRuntime { get; }
+
+    /// <summary>
+    /// Gets OS name, i.e. "Windows", "Linux" or "OSX".
+    /// </summary>
+    public static string SimpleOS { get; }
 
     /// <summary>
     /// Gets the package kind.
@@ -150,15 +200,16 @@ public class ArchitectureConverter
     /// <summary>
     /// Gets the runtime converted to architecture.
     /// </summary>
-    public Architecture ArchRuntime { get; } = RuntimeInformation.OSArchitecture;
+    public Architecture RuntimeArch { get; } = RuntimeInformation.OSArchitecture;
 
     /// <summary>
-    /// Gets whether the <see cref="ArchRuntime"/> was mapped from <see cref="RuntimeId"/> with certainty.
+    /// Gets whether the <see cref="RuntimeArch"/> was mapped from <see cref="RuntimeId"/> with certainty.
     /// </summary>
     public bool IsUncertain { get; }
 
     /// <summary>
-    /// Gets the architecture as a string.
+    /// Gets the architecture as a string. Note - this is tailored to <see cref="PackKind"/>.
+    /// Otherwise, use <see cref="RuntimeArch"/>.
     /// </summary>
     public override string ToString()
     {

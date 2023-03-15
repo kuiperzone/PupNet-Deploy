@@ -1,15 +1,16 @@
 
 Debian
-sb.AppendLine($"Maintainer: Not used <example-inc@example.com>");
-
-Need maintainer field
 Need changelog
-Need PackageName field (lowercase in rpm/deb)
-Rigorous checks on name,id, PackageName
 
 
 
 DONE
+Check for exec
+AssertOK() - update
+Need maintainer field
+Need PackageName field (lowercase in rpm/deb)
+Rigorous checks on name,id, PackageName
+Warning for no desktop or appstream
 BuildArch in rpm
 File to value arg
 Fully qualified files

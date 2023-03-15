@@ -16,6 +16,8 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using KuiperZone.PupNet.Builders;
+
 namespace KuiperZone.PupNet;
 
 /// <summary>
@@ -34,7 +36,7 @@ public class BuilderFactory
             case PackKind.Flatpak: return new FlatpakBuilder(conf);
             case PackKind.Rpm: return new RpmBuilder(conf);
             case PackKind.Deb: return new DebBuilder(conf);
-            case PackKind.WinSetup: return new WinSetupBuilder(conf);
+            case PackKind.Setup: return new SetupBuilder(conf);
             case PackKind.Zip: return new ZipBuilder(conf);
             default: throw new ArgumentException($"Invalid or unsupported {nameof(PackKind)} {conf.Arguments.Kind}");
         }

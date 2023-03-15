@@ -23,8 +23,8 @@ using Microsoft.VisualBasic.FileIO;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Wraps standard file operations with desired behavior and console output.
-/// It's mainly for aesthetic information purposes.
+/// Wraps standard file operations with desired console output behavior.
+/// This is mainly for convenience and aesthetic/information purposes.
 /// </summary>
 public class FileOps
 {

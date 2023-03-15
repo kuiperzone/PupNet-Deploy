@@ -42,34 +42,52 @@ public class BuildHost
         Arguments = conf.Arguments;
         Configuration = conf;
         Builder = new BuilderFactory().Create(Configuration);
-        Macros = new BuildMacros(Builder);
+        Macros = new MacrosExpander(Builder);
 
-        var warnings = new List<string>();
+        var warns = new List<string>();
 
         if (!Builder.IsWindowsPackage)
         {
-            ExpandedDesktop = Macros.Expand(Configuration.ReadFile(Configuration.DesktopEntry), warnings, Path.GetFileName(Configuration.DesktopEntry));
-            ExpandedMetaInfo = Macros.Expand(Configuration.ReadFile(Configuration.MetaInfo), warnings, Path.GetFileName(Configuration.MetaInfo));
+            var desktop = Configuration.ReadFile(Configuration.DesktopFile);
+
+            // Careful - filename may equal "NONE"
+            if (Configuration.DesktopFile == null)
+            {
+                desktop = MetaTemplates.Desktop;
+            }
+
+            if (desktop != null && ((!desktop.Contains("Exec=") && !desktop.Contains("Exec ")) || !desktop.Contains(MacroId.DesktopExec.ToVar())))
+            {
+                warns.Add($"WARNING. Desktop file does not contain Exec={MacroId.DesktopExec.ToVar()} line (macro is needed to accommodate multiple packages)");
+            }
+
+            ExpandedDesktop = Macros.Expand(desktop, warns, Path.GetFileName(Configuration.DesktopFile));
+            ExpandedMetaInfo = Macros.Expand(Configuration.ReadFile(Configuration.MetaFile), warns, Path.GetFileName(Configuration.MetaFile));
 
             if (ExpandedDesktop == null)
             {
-                warnings.Add("Installation does not provide a desktop file");
+                warns.Add("Note. Desktop file not provided");
+
+                if (string.IsNullOrEmpty(Configuration.StartCommand))
+                {
+                    warns.Add($"WARNING. Desktop file and {Configuration.StartCommand} not provided (no way to start the application)");
+                }
             }
 
             if (ExpandedMetaInfo == null)
             {
-                warnings.Add("Installation does not provide AppStream metadata");
+                warns.Add("Note. AppStream metadata (.metainfo.xml) file not provided");
             }
         }
 
-        PublishCommands = Macros.Expand(GetPublishCommands(Builder), warnings, "dotnet publish");
+        PublishCommands = Macros.Expand(GetPublishCommands(Builder), warns, "dotnet publish");
 
         if (Arguments.IsRun && !Builder.SupportsRunOnBuild)
         {
-            warnings.Add($"{Arguments.Kind} does not support the post-build run option");
+            warns.Add($"{Arguments.Kind} does not support post-build run (--{ArgumentReader.RunLongArg} ignored)");
         }
 
-        Warnings = warnings;
+        Warnings = warns;
     }
 
     /// <summary>
@@ -90,7 +108,7 @@ public class BuildHost
     /// <summary>
     /// Get the macro expander.
     /// </summary>
-    public BuildMacros Macros { get; }
+    public MacrosExpander Macros { get; }
 
     /// <summary>
     /// Gets expanded desktop entry content.

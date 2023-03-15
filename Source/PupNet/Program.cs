@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace KuiperZone.PupNet;
 
@@ -25,7 +26,7 @@ internal class Program
     /// <summary>
     /// Gets the program name.
     /// </summary>
-    public const string CommandName = "PupNet";
+    public const string CommandName = "pupnet";
 
     /// <summary>
     /// Gets the program product name.
@@ -70,6 +71,7 @@ internal class Program
                 Console.WriteLine($"{ProductName} {Version}");
                 Console.WriteLine($"{Copyright}");
                 Console.WriteLine($"{ProjectUrl}");
+                Console.WriteLine($"System: {ArchitectureConverter.SimpleOS} {RuntimeInformation.OSArchitecture}");
 
                 Console.WriteLine();
                 Console.WriteLine($"{ProductName} is free software: you can redistribute it and/or modify it under");
@@ -82,25 +84,11 @@ internal class Program
                 Console.WriteLine($"FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.");
 
                 Console.WriteLine();
-                Console.WriteLine("THIRD-PARTY TOOLS:");
-
-                var factory = new BuilderFactory();
-                Console.WriteLine();
-                Console.WriteLine("AppImageKit: Copyright (C) 2004-20 Simon Peter");
-                factory.Create(PackKind.AppImage).WriteVersion();
+                Console.WriteLine("Third-party Tools:");
 
                 Console.WriteLine();
-                factory.Create(PackKind.Deb).WriteVersion();
-
-                Console.WriteLine();
-                factory.Create(PackKind.Rpm).WriteVersion();
-
-                Console.WriteLine();
-                factory.Create(PackKind.Flatpak).WriteVersion();
-
-                Console.WriteLine();
-                factory.Create(PackKind.WinSetup).WriteVersion();
-
+                Console.WriteLine("AppImageKit: {AppImageBuilder.AppImageVersion}");
+                Console.WriteLine("Copyright (C) 2004-20 Simon Peter");
                 Console.WriteLine();
                 return 0;
             }
@@ -115,7 +103,7 @@ internal class Program
                 Console.WriteLine("Macro Reference:");
                 Console.WriteLine("The following macros (with example values) are supported. See online help.");
                 Console.WriteLine();
-                Console.WriteLine(new BuildMacros().ToString());
+                Console.WriteLine(new MacrosExpander().ToString());
                 Console.WriteLine();
 
                 return 0;
@@ -135,11 +123,9 @@ internal class Program
         {
             Console.WriteLine();
             Console.WriteLine("FAILED");
-#if DEBUG
+
             Console.WriteLine(e);
-#else
-            Console.WriteLine(e.Message);
-#endif
+            // Console.WriteLine(e.Message);
             Console.WriteLine();
             return 1;
         }
@@ -152,6 +138,12 @@ internal class Program
         if (all || args.New == NewKind.Conf)
         {
             CreateNewSingleFile(NewKind.Conf, args);
+        }
+
+        if (args.New == NewKind.ConfMin)
+        {
+            // Not all
+            CreateNewSingleFile(NewKind.ConfMin, args);
         }
 
         if (all || args.New == NewKind.Desktop)
@@ -184,7 +176,10 @@ internal class Program
             switch (kind)
             {
                 case NewKind.Conf:
-                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString());
+                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(true));
+                    break;
+                case NewKind.ConfMin:
+                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(false));
                     break;
                 case NewKind.Desktop:
                     fop.WriteFile(path, MetaTemplates.Desktop);
@@ -200,14 +195,15 @@ internal class Program
 
     private static string GetNewPath(NewKind kind, string? baseName)
     {
+        const string Default = "app";
         var ext = kind.GetFileExt();
-        var def = (kind == NewKind.Conf ? CommandName : "app") + ext;
 
         if (!string.IsNullOrEmpty(baseName))
         {
             if (baseName.EndsWith('/') || baseName.EndsWith('\\'))
             {
-                return Path.Combine(baseName, def);
+                // Provided a directory
+                return Path.Combine(baseName, Default);
             }
 
             if (!baseName.EndsWith(ext))
@@ -218,6 +214,6 @@ internal class Program
             return baseName;
         }
 
-        return def;
+        return Default + ext;
     }
 }

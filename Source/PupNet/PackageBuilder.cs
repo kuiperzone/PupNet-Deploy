@@ -42,7 +42,7 @@ public abstract class PackageBuilder
         Architecture = new ArchitectureConverter(kind, Arguments.Runtime, Arguments.Arch);
         IsWindowsPackage = kind.IsWindows();
 
-        AppVersion = SplitVersion(conf.AppVersionRelease, out string temp);
+        AppVersion = SplitVersion(conf.VersionRelease, out string temp);
         PackRelease = temp;
 
         OutputDirectory = GetOutputDirectory(Configuration);
@@ -52,7 +52,7 @@ public abstract class PackageBuilder
         AppRoot = Path.Combine(Root, AppRootName);
         Operations = new(Root);
 
-        IconPaths = GetShareIconPaths(Configuration.Icons);
+        IconPaths = GetShareIconPaths(Configuration.IconFiles);
 
         if (IconPaths.Count == 0)
         {
@@ -281,11 +281,6 @@ public abstract class PackageBuilder
     public abstract bool CheckInstalled();
 
     /// <summary>
-    /// Calls utility to write version to console.
-    /// </summary>
-    public abstract void WriteVersion();
-
-    /// <summary>
     /// Create directories tree. It will be called at the start of the build process to create all build directories
     /// and populate them with standard assets. It does not populate the application binary. The base implementation
     /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
@@ -388,7 +383,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// For use by the <see cref="WriteVersion()"/> methods.
     /// </summary>
-    protected bool WriteVersion(string? cmd, string? args, bool silent = false)
+    protected bool CheckInstalled(string? cmd, string? args)
     {
         try
         {
@@ -396,17 +391,12 @@ public abstract class PackageBuilder
             {
                 var ops = new FileOps();
                 ops.ShowCommands = false;
-                ops.Execute(cmd, args, silent);
+                ops.Execute(cmd, args, true);
                 return true;
             }
         }
         catch
         {
-        }
-
-        if (!silent)
-        {
-            Console.WriteLine($"{Architecture.Kind} utility not installed or supported on this system");
         }
 
         return false;
@@ -462,7 +452,7 @@ public abstract class PackageBuilder
             return output;
         }
 
-        output = conf.AppBaseName;
+        output = conf.PackageName;
 
         if (conf.OutputVersion && !string.IsNullOrEmpty(version))
         {
@@ -476,7 +466,7 @@ public abstract class PackageBuilder
             return output + ".AppImage";
         }
 
-        if (arch.Kind == PackKind.WinSetup)
+        if (arch.Kind == PackKind.Setup)
         {
             return output + ".exe";
         }

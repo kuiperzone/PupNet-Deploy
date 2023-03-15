@@ -51,9 +51,9 @@ public enum PackKind
     Flatpak,
 
     /// <summary>
-    /// Windows setup. Windows only.
+    /// Setup file. Windows only.
     /// </summary>
-    WinSetup,
+    Setup,
 }
 
 /// <summary>
@@ -73,7 +73,7 @@ public static class PackKindExtension
             case PackKind.Deb: return ".deb";
             case PackKind.Rpm: return ".rpm";
             case PackKind.Flatpak: return ".flatpak";
-            case PackKind.WinSetup: return ".exe";
+            case PackKind.Setup: return ".exe";
             default: throw new ArgumentException($"Invalid {nameof(PackKind)} {kind}");
         }
     }
@@ -101,7 +101,7 @@ public static class PackKindExtension
     /// </summary>
     public static bool IsWindows(this PackKind kind)
     {
-        return kind == PackKind.Zip || kind == PackKind.WinSetup;
+        return kind == PackKind.Zip || kind == PackKind.Setup;
     }
 
     /// <summary>

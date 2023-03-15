@@ -78,8 +78,8 @@ public class IniReader
     public IniReader(string path, IniOptions opts = IniOptions.Default)
     {
         Options = opts;
-        Values = Parse(File.ReadAllLines(path));
         Filepath = Path.GetFullPath(path);
+        Values = Parse(File.ReadAllLines(Filepath));
         _string = GetString(Values);
     }
 
