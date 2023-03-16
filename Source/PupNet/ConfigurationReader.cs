@@ -86,6 +86,7 @@ public class ConfigurationReader
         PackageName = GetStrict(nameof(PackageName), true);
         ShortSummary = GetMandatory(nameof(ShortSummary));
         LicenseId = GetMandatory(nameof(LicenseId));
+        LicenseFile = AssertAbsolutePath(GetOptional(nameof(LicenseFile)), false);
 
         VendorName = GetMandatory(nameof(VendorName));
         VendorCopyright = GetOptional(nameof(VendorCopyright));
@@ -95,12 +96,14 @@ public class ConfigurationReader
         StartCommand = GetOptional(nameof(StartCommand));
         IsTerminalApp = GetBool(nameof(IsTerminalApp));
         DesktopFile = AssertAbsolutePath(GetOptional(nameof(DesktopFile)), true);
+        PrimeCategory = GetOptional(nameof(PrimeCategory));
         IconFiles = AssertAbsolutePaths(GetMultiCollection(nameof(IconFiles)));
         MetaFile = AssertAbsolutePath(GetOptional(nameof(MetaFile)), false);
 
         DotnetProjectPath = AssertAbsolutePath(GetOptional(nameof(DotnetProjectPath)), true);
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs));
         DotnetPostPublish = GetMultiCollection(nameof(DotnetPostPublish));
+        DotnetPostPublishOnWindows = GetMultiCollection(nameof(DotnetPostPublishOnWindows));
 
         OutputDirectory = AssertAbsolutePath(GetOptional(nameof(OutputDirectory)), false) ?? LocalDirectory;
         OutputVersion = GetBool(nameof(OutputVersion));
@@ -162,6 +165,7 @@ public class ConfigurationReader
     public string PackageName { get; } = "HelloWorld";
     public string ShortSummary { get; } = "A HelloWorld application";
     public string LicenseId { get; } = "LicenseRef-Proprietary";
+    public string? LicenseFile { get; }
 
     public string VendorName { get; } = "HelloWorld Team";
     public string? VendorCopyright = "Copyright (C) HelloWorld Team 1970";
@@ -171,12 +175,14 @@ public class ConfigurationReader
     public string? StartCommand { get; }
     public bool IsTerminalApp { get; } = true;
     public string? DesktopFile { get; }
+    public string? PrimeCategory { get; }
     public string? MetaFile { get; }
     public IReadOnlyCollection<string> IconFiles { get; } = Array.Empty<string>();
 
     public string? DotnetProjectPath { get; }
     public string? DotnetPublishArgs { get; } = $"-p:Version={MacroId.AppVersion.ToVar()} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
     public IReadOnlyCollection<string> DotnetPostPublish { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> DotnetPostPublishOnWindows { get; } = Array.Empty<string>();
 
     public string OutputDirectory { get; } = "Deploy";
     public bool OutputVersion { get; } = false;
@@ -194,11 +200,11 @@ public class ConfigurationReader
     public string SetupMinWindowsVersion { get; } = "10";
 
     /// <summary>
-    /// Reads text file. Returns null if path is null or equals <see cref="PathNone"/>.
-    /// If path is unqualified, then relative to <see cref="LocalDirectory"/>.
+    /// Reads file associated with this configuration and returns the text. Returns null if path is null or
+    /// equals <see cref="PathNone"/>. If path is unqualified, then relative to <see cref="LocalDirectory"/>.
     /// Throws if file not exist and <see cref="AssertFiles"/> is true.
     /// </summary>
-    public string? ReadFile(string? path)
+    public string? ReadAssociatedFile(string? path)
     {
         path = AssertAbsolutePath(path, true);
 
@@ -273,7 +279,7 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory package name (excludes version etc.). It must contain only alpha-numeric and");
-        c?.AppendLine($"# the '-' characters. It will be converted to lowercase for RPM and Debian. Example: helloworld");
+        c?.AppendLine($"# the '-' characters. Example: helloworld");
         sb.AppendLine(GetHelpNameValue(nameof(PackageName), PackageName));
 
         c?.AppendLine();
@@ -285,6 +291,11 @@ public class ConfigurationReader
         c?.AppendLine($"# identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a properietary or");
         c?.AppendLine($"# custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'.");
         sb.AppendLine(GetHelpNameValue(nameof(LicenseId), LicenseId));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Optional path to a copyright/license text file. If provided, it will be packaged with the");
+        c?.AppendLine($"# application and identified to package builder where supported. Example: Assets/Copright.txt");
+        sb.AppendLine(GetHelpNameValue(nameof(LicenseFile), LicenseFile));
 
         sb.AppendLine();
         c?.AppendLine(breaker2);
@@ -328,13 +339,21 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
-        c?.AppendLine($"# generated automatically from the information in this file. A file name may be supplied instead");
-        c?.AppendLine($"# to provide for mime-types and internationalisation. If supplied, the file MUST contain the line:");
+        c?.AppendLine($"# generated automatically from the information in this file. Supplying a custom file, however,");
+        c?.AppendLine($"# allows for mime-types and internationalisation. If supplied, the file MUST contain the line:");
         c?.AppendLine($"# 'Exec={MacroId.DesktopExec.ToVar()}' in order to use the correct install location. Other macros may be");
         c?.AppendLine($"# used to help automate the content. If required that no desktop be installed, set value to: '{PathNone}.");
         c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
         c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
         sb.AppendLine(GetHelpNameValue(nameof(DesktopFile), DesktopFile));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Optional category for the application. The value should be one of the recognised Freedesktop");
+        c?.AppendLine($"# categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value");
+        c?.AppendLine($"# should be provided here which will be used, where supported, to populate metadata. The default");
+        c?.AppendLine($"# is empty. See referece: https://specifications.freedesktop.org/menu-spec/latest/apa.html");
+        c?.AppendLine($"# Example: Utility");
+        sb.AppendLine(GetHelpNameValue(nameof(PrimeCategory), PrimeCategory));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional icon file paths. The value may include multiple filenames separated with semicolon or");
@@ -376,11 +395,17 @@ public class ConfigurationReader
         c?.AppendLine();
         c?.AppendLine($"# Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands");
         c?.AppendLine($"# may be specifed, separated by semicolon or given in multi-line form. They are called after");
-        c?.AppendLine($"# dotnet publish, but before the final output is built. This could, for example, copy additional");
-        c?.AppendLine($"# files into the build directory. The working directory will be the location of this file.");
-        c?.AppendLine($"# This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathNone}'.");
+        c?.AppendLine($"# dotnet publish, but before the final output is built. These could, for example, copy additional");
+        c?.AppendLine($"# files into the build directory given by {MacroId.PublishBin.ToVar()}. The working directory will be the");
+        c?.AppendLine($"# location of this file. This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathNone}'.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
+        c?.AppendLine();
+        c?.AppendLine($"# Post-publish (or standalone build) commands on Windows (ignored on Linux). This should perform");
+        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)},  but using DOS");
+        c?.AppendLine($"# commands and batch scripts. Multiple commands may be specifed, separated by semicolon or given");
+        c?.AppendLine($"# in multi-line form.");
+        sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublishOnWindows), DotnetPostPublishOnWindows));
 
         sb.AppendLine();
         c?.AppendLine(breaker2);
@@ -458,7 +483,7 @@ public class ConfigurationReader
         sb.AppendLine(GetHelpNameValue(nameof(SetupSignTool), SetupSignTool));
 
         c?.AppendLine();
-        c?.AppendLine($"# Mandatory values which specifies minimum version of Windows that your software runs on.");
+        c?.AppendLine($"# Mandatory value which specifies minimum version of Windows that your software runs on.");
         c?.AppendLine($"# Windows 8 = 6.2, Windows 10/11 = 10. Default: 10.");
         c?.AppendLine($"# See 'MinVersion' parameter in: https://jrsoftware.org/ishelp/");
         sb.AppendLine(GetHelpNameValue(nameof(SetupMinWindowsVersion), SetupMinWindowsVersion));

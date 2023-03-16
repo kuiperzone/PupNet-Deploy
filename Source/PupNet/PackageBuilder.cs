@@ -256,7 +256,23 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written. If null, no file is saved.
     /// </summary>
-    public abstract string? ManifestPath { get; }
+    public abstract string? ManifestDest { get; }
+
+    /// <summary>
+    /// Gets the destination path of the license file in the build directory.
+    /// </summary>
+    public string? LicenseDest
+    {
+        get
+        {
+            if (Configuration.LicenseFile != null)
+            {
+                return Path.Combine(PublishBin, Path.GetFileName(Configuration.LicenseFile));
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Gets the "manifest content" specific to the package kind provided for display purposes. For RPM, this is the
@@ -286,7 +302,7 @@ public abstract class PackageBuilder
     /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
     /// <see cref="MetaInfoPath"/> respectively. It does nothing for these for Windows packages or if the respective
     /// string is null or empty. It copies <see cref="IconPaths"/> to their respective destinations, and writes
-    /// <see cref="ManifestContent"/> to <see cref="ManifestPath"/>. Finally, it ensures that <see cref="OutputDirectory"/>
+    /// <see cref="ManifestContent"/> to <see cref="ManifestDest"/>. Finally, it ensures that <see cref="OutputDirectory"/>
     /// exists. It should be overridden to perform additional tasks, but subclass should call this base method first.
     /// </summary>
     public virtual void Create(string? desktop, string? metainfo)
@@ -367,7 +383,13 @@ public abstract class PackageBuilder
 
         // Write manifest just before build, as ManifestContents may
         // change Before Create() and build in some deployments.
-        Operations.WriteFile(ManifestPath, ManifestContent);
+        Operations.WriteFile(ManifestDest, ManifestContent);
+
+        if (Configuration.LicenseFile != null && LicenseDest != null)
+        {
+           var content = Configuration.ReadAssociatedFile(Configuration.LicenseFile);
+            Operations.WriteFile(LicenseDest, content);
+        }
 
         Operations.Execute(PackageCommands);
     }

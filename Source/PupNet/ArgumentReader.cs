@@ -36,6 +36,9 @@ public class ArgumentReader
     public const string BuildShortArg = "c";
     public const string BuildLongArg = "build";
 
+    public const string CleanShortArg = "e";
+    public const string CleanLongArg = "clean";
+
     public const string AppVersionShortArg = "v";
     public const string AppVersionLongArg = "app-version";
 
@@ -121,17 +124,14 @@ public class ArgumentReader
         New = args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None);
         Runtime = args.GetOrDefault(RidShortArg, RidLongArg, ArchitectureConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
+        Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
 
         if (New == NewKind.None)
         {
             Value = GetDefaultValuePath(Value);
             Kind = args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind);
             AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
-
-            // Currently not implemented
-            // The '=' in "-p DefineConstants=TESTFLAG" causes a problem for ArgumentParser
-            // Property = args.GetOrDefault(PropertyShortArg, PropertyLongArg, null);
-
+            Property = args.GetOrDefault(PropertyShortArg, PropertyLongArg, null);
             Arch = args.GetOrDefault(ArchShortArg, ArchLongArg, null);
             Output = args.GetOrDefault(OutputShortArg, OutputLongArg, null);
             IsRun = args.GetOrDefault(RunShortArg, RunLongArg, false);
@@ -167,6 +167,11 @@ public class ArgumentReader
     /// Gets the target build configuration (Release or Debug).
     /// </summary>
     public string Build { get; }
+
+    /// <summary>
+    /// Gets whether to call dotnet clean prior to publish.
+    /// </summary>
+    public bool Clean { get; }
 
     /// <summary>
     /// Gets the package kinds.
@@ -251,18 +256,17 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Optional build target (or 'Configuration' is dotnet terminology).");
         sb.AppendLine($"{indent}Value should be 'Release' or 'Debug'. Default: Release.");
         sb.AppendLine();
+        sb.AppendLine($"{indent}-{CleanShortArg}, --{CleanLongArg} [flag]");
+        sb.AppendLine($"{indent}Specifies whether to call 'dotnet clean' prior to 'dotnet publish'. Default: false.");
+        sb.AppendLine();
         sb.AppendLine($"{indent}-{AppVersionShortArg}, --{AppVersionLongArg} value");
         sb.AppendLine($"{indent}Specifies application version-release in form 'VERSION[RELEASE]', where value in square");
         sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.VersionRelease)} in conf file.");
         sb.AppendLine($"{indent}Example: 1.2.3[1].");
-
-        /*
-        DISABLED
         sb.AppendLine();
         sb.AppendLine($"{indent}-{PropertyShortArg}, --{PropertyLongArg} value");
         sb.AppendLine($"{indent}Specifies a property to be supplied to dotnet publish command. Do not use for");
         sb.AppendLine($"{indent}app versioning. Example: -{PropertyShortArg} DefineConstants=TRACE;DEBUG");
-        */
         sb.AppendLine();
         sb.AppendLine($"{indent}-{ArchShortArg}, --{ArchLongArg} value");
         sb.AppendLine($"{indent}Force target architecture, i.e. as 'x86_64' or 'aarch64'. Note this is optional and");

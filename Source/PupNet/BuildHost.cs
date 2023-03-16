@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KuiperZone.PupNet;
@@ -48,7 +49,7 @@ public class BuildHost
 
         if (!Builder.IsWindowsPackage)
         {
-            var desktop = Configuration.ReadFile(Configuration.DesktopFile);
+            var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
 
             // Careful - filename may equal "NONE"
             if (Configuration.DesktopFile == null)
@@ -62,7 +63,7 @@ public class BuildHost
             }
 
             ExpandedDesktop = Macros.Expand(desktop, warns, Path.GetFileName(Configuration.DesktopFile));
-            ExpandedMetaInfo = Macros.Expand(Configuration.ReadFile(Configuration.MetaFile), warns, Path.GetFileName(Configuration.MetaFile));
+            ExpandedMetaInfo = Macros.Expand(Configuration.ReadAssociatedFile(Configuration.MetaFile), warns, Path.GetFileName(Configuration.MetaFile));
 
             if (ExpandedDesktop == null)
             {
@@ -299,7 +300,24 @@ public class BuildHost
 
         if (conf.DotnetProjectPath != ConfigurationReader.PathNone)
         {
-            var sb = new StringBuilder("dotnet publish");
+            var sb = new StringBuilder();
+
+            if (conf.Arguments.Clean)
+            {
+                // Clean first
+                sb.Append("dotnet clean");
+
+                if (!string.IsNullOrEmpty(conf.DotnetProjectPath) && conf.DotnetProjectPath != ".")
+                {
+                    sb.Append($" \"{conf.DotnetProjectPath}\"");
+                }
+
+                list.Add(sb.ToString());
+                sb.Clear();
+            }
+
+            // PUBLISH
+            sb.Append("dotnet publish");
             var pa = conf.DotnetPublishArgs;
 
             if (!string.IsNullOrEmpty(conf.DotnetProjectPath) && conf.DotnetProjectPath != ".")
@@ -353,7 +371,15 @@ public class BuildHost
             list.Add(sb.ToString());
         }
 
-        list.AddRange(conf.DotnetPostPublish);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            list.AddRange(conf.DotnetPostPublishOnWindows);
+        }
+        else
+        {
+            list.AddRange(conf.DotnetPostPublish);
+        }
+
         return list;
     }
 }

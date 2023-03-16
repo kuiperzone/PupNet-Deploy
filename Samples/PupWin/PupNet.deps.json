@@ -1,0 +1,41 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v7.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v7.0": {
+      "PupNet/1.0.0": {
+        "dependencies": {
+          "KuiperZone.Utility.Yaap": "2.0.0"
+        },
+        "runtime": {
+          "PupNet.dll": {}
+        }
+      },
+      "KuiperZone.Utility.Yaap/2.0.0": {
+        "runtime": {
+          "lib/net6.0/Yaap.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "PupNet/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "KuiperZone.Utility.Yaap/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1UZ2O7TfktMP9zUNL+r7H1QznHgIQ3qLwwapJSyhiCB4pnOSmTKfv8/8z2WmHJ8Hov267TKTMPWb79QmViHHOw==",
+      "path": "kuiperzone.utility.yaap/2.0.0",
+      "hashPath": "kuiperzone.utility.yaap.2.0.0.nupkg.sha512"
+    }
+  }
+}

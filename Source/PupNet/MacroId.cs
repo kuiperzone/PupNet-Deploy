@@ -33,9 +33,12 @@ public enum MacroId
     VendorUrl,
     VendorEmail,
     IsTerminalApp,
+    PrimeCategory,
 
     AppVersion,
+    PackKind,
     DotnetRuntime,
+    BuildArch,
     BuildTarget,
     BuildDate,
     BuildYear,
@@ -69,10 +72,13 @@ public static class MacroIdExtension
             case MacroId.VendorUrl: return "VENDOR_URL";
             case MacroId.VendorEmail: return "VENDOR_EMAIL";
             case MacroId.IsTerminalApp: return "IS_TERMINAL_APP";
+            case MacroId.PrimeCategory: return "PRIME_CATEGORY";
 
             // Derived
             case MacroId.AppVersion: return "APP_VERSION";
+            case MacroId.PackKind: return "PACK_KIND";
             case MacroId.DotnetRuntime: return "DOTNET_RUNTIME";
+            case MacroId.BuildArch: return "BUILD_ARCH";
             case MacroId.BuildTarget: return "BUILD_TARGET";
             case MacroId.BuildDate: return "BUILD_DATE";
             case MacroId.BuildYear: return "BUILD_YEAR";
@@ -107,14 +113,17 @@ public static class MacroIdExtension
             case MacroId.VendorUrl: return $"{nameof(ConfigurationReader.VendorUrl)} value from conf file";
             case MacroId.VendorEmail: return $"{nameof(ConfigurationReader.VendorName)} value from conf file";
             case MacroId.IsTerminalApp: return $"{nameof(ConfigurationReader.IsTerminalApp)} value from conf file";
+            case MacroId.PrimeCategory: return $"{nameof(ConfigurationReader.PrimeCategory)} value from conf file";
 
             case MacroId.AppVersion: return "Application version, exluding package-release extension.";
+            case MacroId.PackKind: return "Package output kind: appimage, flatpak, rpm, deb, setup, zip";
             case MacroId.DotnetRuntime: return "Dotnet publish runtime identifier used (RID)";
+            case MacroId.BuildArch: return "Build architecture: x64, arm64, arm or x86. May differ from package output notation.";
             case MacroId.BuildTarget: return "Release or Debug (Release unless explicitly specified)";
-            case MacroId.BuildDate: return "Date in ISO 'yyyy-MM-dd' format";
+            case MacroId.BuildDate: return "Date in 'yyyy-MM-dd' format";
             case MacroId.BuildYear: return "Current year as 'yyyy'";
             case MacroId.BuildRoot: return "Root of the temporary directory used to build the application";
-            case MacroId.BuildShare: return $"The Linux 'share' directory under {nameof(MacroId.BuildRoot)} (maybe empty)";
+            case MacroId.BuildShare: return $"The Linux 'share' build directory under {nameof(MacroId.BuildRoot)} (maybe empty for certain deployments)";
             case MacroId.PublishBin: return "Directory for dotnet publish output (i.e. application binary directory)";
             case MacroId.DesktopExec: return "Path to executable on target system (variable according to package kind)";
 

@@ -46,7 +46,7 @@ public static class MetaTemplates
         list.Add($"Exec={MacroId.DesktopExec.ToVar()}");
         list.Add($"TryExec={MacroId.DesktopExec.ToVar()}");
         list.Add($"Terminal={MacroId.IsTerminalApp.ToVar()}");
-        list.Add($"Categories=Utility");
+        list.Add($"Categories={MacroId.PrimeCategory.ToVar()}");
         list.Add($"MimeType=");
         list.Add($"Keywords=");
 
@@ -79,6 +79,11 @@ public static class MetaTemplates
         sb.AppendLine($"{IndentIndent}IMPORTANT: Many of the values in this file may be automated with macros. See --help for details.</p>");
         sb.AppendLine($"{Indent}</description>");
         sb.AppendLine();
+        sb.AppendLine($"{Indent}<!-- Freedesktop Categories -->");
+        sb.AppendLine($"{Indent}<categories>");
+        sb.AppendLine($"{IndentIndent}<category>${MacroId.AppId.ToVar()}</category>");
+        sb.AppendLine($"{Indent}</categories>");
+        sb.AppendLine();
         sb.AppendLine($"{Indent}<!-- Uncomment to provide keywords");
         sb.AppendLine($"{Indent}<keywords>");
         sb.AppendLine($"{IndentIndent}<keyword translate=\"no\">IDE</keyword>");
@@ -87,12 +92,6 @@ public static class MetaTemplates
         sb.AppendLine($"{IndentIndent}<keyword xml:lang=\"de\">entwicklung</keyword>");
         sb.AppendLine($"{IndentIndent}<keyword xml:lang=\"de\">programmierung</keyword>");
         sb.AppendLine($"{Indent}</keywords>");
-        sb.AppendLine($"{Indent}-->");
-        sb.AppendLine();
-        sb.AppendLine($"{Indent}<!-- Uncomment to provide freedesktop category names");
-        sb.AppendLine($"{Indent}<categories>");
-        sb.AppendLine($"{IndentIndent}<category>Utility</category>");
-        sb.AppendLine($"{Indent}</categories>");
         sb.AppendLine($"{Indent}-->");
         sb.AppendLine();
         sb.AppendLine($"{Indent}<!-- Uncomment to provide screenshots");

@@ -60,9 +60,12 @@ public class MacrosExpander
         dict.Add(MacroId.VendorUrl, conf.VendorUrl ?? "");
         dict.Add(MacroId.VendorEmail, conf.VendorEmail ?? "");
         dict.Add(MacroId.IsTerminalApp, conf.IsTerminalApp.ToString().ToLowerInvariant());
+        dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
+        dict.Add(MacroId.PackKind, args.Kind.ToString().ToLowerInvariant());
         dict.Add(MacroId.DotnetRuntime, builder.Architecture.RuntimeId);
+        dict.Add(MacroId.BuildArch, builder.Architecture.RuntimeArch.ToString().ToLowerInvariant());
         dict.Add(MacroId.BuildTarget, args.Build);
         dict.Add(MacroId.BuildDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
         dict.Add(MacroId.BuildYear, DateTime.UtcNow.ToString("yyyy"));

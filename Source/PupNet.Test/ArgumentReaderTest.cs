@@ -98,7 +98,7 @@ public class ArgumentReaderTest
         Assert.Equal("5.4.3[2]", args.AppVersion);
     }
 
-    // [Fact] Disable
+    [Fact]
     public void Property_DecodeOK()
     {
         var args = new ArgumentReader();

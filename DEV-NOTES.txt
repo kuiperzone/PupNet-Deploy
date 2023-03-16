@@ -1,8 +1,8 @@
 
-Debian
-Need changelog
 
+Hook up license to Inno
 
+Test Deb, RPM
 
 DONE
 Check for exec

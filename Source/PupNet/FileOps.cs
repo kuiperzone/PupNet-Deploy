@@ -190,7 +190,7 @@ public class FileOps
     /// </summary>
     public void WriteFile(string? path, string? content)
     {
-        if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(content))
+        if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(content) && !File.Exists(path))
         {
             try
             {

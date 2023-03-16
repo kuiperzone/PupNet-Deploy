@@ -28,10 +28,15 @@ namespace HelloWorld
         {
             Console.WriteLine(nameof(HelloWorld));
             Console.WriteLine("Version: {0}", GetVersion());
+#if DEBUG
+            Console.WriteLine("Build: DEBUG");
+#else
+            Console.WriteLine("Build: RELEASE");
+#endif
             Console.WriteLine();
 
             // Ensure arguments are passed
-            Console.WriteLine("Args: {0}", string.Join(" ", args));
+            Console.WriteLine("Args: {0}", string.Join(", ", args));
 
             // Working directory
             Console.WriteLine("GetCurrentDirectory: {0}", Directory.GetCurrentDirectory());
@@ -44,12 +49,12 @@ namespace HelloWorld
             Console.WriteLine("Assembly.GetEntryAssembly().Location: {0}", Assembly.GetEntryAssembly()?.Location ?? "null");
             Console.WriteLine();
 
-#if TESTFLAG
+#if BUILDFLAG
             // Test for passing property from command line
-            Console.WriteLine("TESTFLAG constant defined OK");
+            Console.WriteLine("BUILDFLAG constant defined OK");
 #else
-            Console.WriteLine("TESTFLAG NOT defined!!!");
-            Console.WriteLine("Build package with publish arg: -p:DefineConstants=TESTFLAG");
+            Console.WriteLine("BUILDFLAG NOT defined!!!");
+            Console.WriteLine("Build package with publish arg: --property:DefineConstants=BUILDFLAG");
 #endif
 
             // Look for sub-directory created by DotnetPostPublish - ensures custom content is packaged
