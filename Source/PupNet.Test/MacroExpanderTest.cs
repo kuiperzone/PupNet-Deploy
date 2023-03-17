@@ -26,7 +26,7 @@ public class MacroExpanderTest
     public void Expand_ReplacesAllMacros()
     {
         // Use factory to create one
-        var host = new BuildHost(new DummyConf(PackKind.AppImage));
+        var host = new BuildHost(new DummyConf(DeployKind.AppImage));
 
         var sb = new StringBuilder();
 

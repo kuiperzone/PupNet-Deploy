@@ -81,7 +81,7 @@ public static class MetaTemplates
         sb.AppendLine();
         sb.AppendLine($"{Indent}<!-- Freedesktop Categories -->");
         sb.AppendLine($"{Indent}<categories>");
-        sb.AppendLine($"{IndentIndent}<category>${MacroId.AppId.ToVar()}</category>");
+        sb.AppendLine($"{IndentIndent}<category>{MacroId.PrimeCategory.ToVar()}</category>");
         sb.AppendLine($"{Indent}</categories>");
         sb.AppendLine();
         sb.AppendLine($"{Indent}<!-- Uncomment to provide keywords");

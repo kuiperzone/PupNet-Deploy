@@ -17,21 +17,16 @@
 Thumbs.db
 desktop.ini
 
-# Project specific
-Source/.git
-**/*[Ww][Ii][Nn]-[Xx]64*/
-
 
 ###############################################################################
 # Ignore Builds & Binaries
 ###############################################################################
 
-# Bin, Obj, Out, Deploy
+# Bin, Obj, Out, Output
 **/[Bb][Ii][Nn]/
 **/[Oo][Bb][Jj]/
 **/[Oo][Uu][Tt]/
 **/[Oo][Uu][Tt][Pp][Uu][Tt]/
-**/[Dd][Ee][Pp][Ll][Oo][Yy]/
 
 # Build
 **/[Bb][Ll][Dd]/
@@ -55,6 +50,10 @@ Source/.git
 # Logs
 **/[Ll][Oo][Gg]/
 **/[Ll][Oo][Gg][Ss]/
+
+# Binaries
+*.exe
+*.dll
 
 
 ###############################################################################

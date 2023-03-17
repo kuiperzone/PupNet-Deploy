@@ -20,7 +20,7 @@ namespace KuiperZone.PupNet.Test;
 
 public class DummyConf : ConfigurationReader
 {
-    public DummyConf(PackKind kind, string? omit = null)
+    public DummyConf(DeployKind kind, string? omit = null)
         : base(new ArgumentReader("-k " + kind), Create(omit))
     {
     }

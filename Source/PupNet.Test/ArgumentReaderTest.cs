@@ -34,11 +34,11 @@ public class ArgumentReaderTest
     [Fact]
     public void Help_DecodeOK()
     {
-        var args = new ArgumentReader("-h");
-        Assert.True(args.ShowHelp);
+        var args = new ArgumentReader("-h Macros");
+        Assert.Equal("macros", args.ShowHelp);
 
         args = new ArgumentReader("--help");
-        Assert.True(args.ShowHelp);
+        Assert.Equal("true", args.ShowHelp);
     }
 
     [Fact]
@@ -75,13 +75,13 @@ public class ArgumentReaderTest
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             args = new ArgumentReader("-k rpm");
-            Assert.Equal(PackKind.Rpm, args.Kind);
+            Assert.Equal(DeployKind.Rpm, args.Kind);
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             args = new ArgumentReader("-k zip");
-            Assert.Equal(PackKind.Zip, args.Kind);
+            Assert.Equal(DeployKind.Zip, args.Kind);
         }
     }
 

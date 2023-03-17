@@ -76,16 +76,16 @@ public class ArgumentReader
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            DefaultKind = PackKind.AppImage;
+            DefaultKind = DeployKind.AppImage;
         }
         else
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            DefaultKind = PackKind.Setup;
+            DefaultKind = DeployKind.Setup;
         }
         else
         {
-            DefaultKind = PackKind.Zip;
+            DefaultKind = DeployKind.Zip;
         }
     }
 
@@ -121,7 +121,9 @@ public class ArgumentReader
         _string = args.ToString();
 
         Value = args.Value;
-        New = args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None);
+
+        New = AssertEnum<NewKind>(NewShortArg, NewLongArg,
+            args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None.ToString()));
         Runtime = args.GetOrDefault(RidShortArg, RidLongArg, ArchitectureConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
@@ -129,7 +131,10 @@ public class ArgumentReader
         if (New == NewKind.None)
         {
             Value = GetDefaultValuePath(Value);
-            Kind = args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind);
+
+            Kind = AssertEnum<DeployKind>(KindShortArg, KindLongArg,
+                args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind.ToString()));
+
             AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
             Property = args.GetOrDefault(PropertyShortArg, PropertyLongArg, null);
             Arch = args.GetOrDefault(ArchShortArg, ArchLongArg, null);
@@ -139,14 +144,14 @@ public class ArgumentReader
             IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
             ShowVersion = args.GetOrDefault(VersionLongArg, false);
-            ShowHelp = args.GetOrDefault(HelpShortArg, HelpLongArg, false);
+            ShowHelp = args.GetOrDefault(HelpShortArg, HelpLongArg, null)?.ToLowerInvariant();
         }
     }
 
     /// <summary>
     /// Get the default package kind.
     /// </summary>
-    public static PackKind DefaultKind { get; }
+    public static DeployKind DefaultKind { get; }
 
     /// <summary>
     /// Gets the unknown arg value. Typically file name.
@@ -176,7 +181,7 @@ public class ArgumentReader
     /// <summary>
     /// Gets the package kinds.
     /// </summary>
-    public PackKind Kind { get; }
+    public DeployKind Kind { get; }
 
     /// <summary>
     /// Gets the application version.
@@ -219,9 +224,9 @@ public class ArgumentReader
     public bool ShowVersion { get; }
 
     /// <summary>
-    /// Gets whether to show help.
+    /// Gets whether to show help. "args", "macros" or "conf".
     /// </summary>
-    public bool ShowHelp { get; }
+    public string? ShowHelp { get; }
 
     /// <summary>
     /// Returns a command help string.
@@ -232,8 +237,8 @@ public class ArgumentReader
 
         var sb = new StringBuilder();
 
-        sb.AppendLine("Usage:");
-        sb.AppendLine($"{indent}{Program.CommandName} [file.conf] [-option-n value-n]");
+        sb.AppendLine("USAGE:");
+        sb.AppendLine($"{indent}{Program.CommandName} [file.conf] [--option-n value-n]");
         sb.AppendLine();
         sb.AppendLine("Example:");
         sb.AppendLine($"{indent}{Program.CommandName} file.conf -{SkipYesShortArg} -{RidShortArg} linux-arm64");
@@ -243,9 +248,9 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine("Build Options:");
 
-        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} value");
+        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} {string.Join('|', Enum.GetNames<DeployKind>())}");
         sb.AppendLine($"{indent}Package output kind. Default is {DefaultKind}");
-        sb.AppendLine($"{indent}Value must be one of: {string.Join(",", Enum.GetNames<PackKind>())}");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{KindShortArg} {DeployKind.Flatpak}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{RidShortArg}, --{RidLongArg} value");
         sb.AppendLine($"{indent}Dotnet publish runtime identifier. Default: {ArchitectureConverter.DefaultRuntime}.");
@@ -256,7 +261,7 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Optional build target (or 'Configuration' is dotnet terminology).");
         sb.AppendLine($"{indent}Value should be 'Release' or 'Debug'. Default: Release.");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{CleanShortArg}, --{CleanLongArg} [flag]");
+        sb.AppendLine($"{indent}-{CleanShortArg}, --{CleanLongArg} [flag only]");
         sb.AppendLine($"{indent}Specifies whether to call 'dotnet clean' prior to 'dotnet publish'. Default: false.");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{AppVersionShortArg}, --{AppVersionLongArg} value");
@@ -278,31 +283,33 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Package output filename. If omitted, the output name is derived from the application");
         sb.AppendLine($"{indent}name, version and architecture. Example: -{OutputShortArg} AppName.AppImage");
         sb.AppendLine();
-        sb.AppendLine($"{indent}--{VerboseLongArg} [flag]");
+        sb.AppendLine($"{indent}--{VerboseLongArg} [flag only]");
         sb.AppendLine($"{indent}Indicates verbose output.");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{RunShortArg}, --{RunLongArg} [flag]");
+        sb.AppendLine($"{indent}-{RunShortArg}, --{RunLongArg} [flag only]");
         sb.AppendLine($"{indent}Performs a test run of the application after successful build.");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{SkipYesShortArg}, --{SkipYesLongArg} [flag]");
+        sb.AppendLine($"{indent}-{SkipYesShortArg}, --{SkipYesLongArg} [flag only]");
         sb.AppendLine($"{indent}Skips confirmation prompts (assumes yes).");
 
         sb.AppendLine();
         sb.AppendLine("Other Options:");
 
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [value]");
-        sb.AppendLine($"{indent}Creates a new empty conf or asset file for new project. A base file name may optionally");
-        sb.AppendLine($"{indent}be given. Valid values are : {string.Join(',', Enum.GetValues<NewKind>())}.");
+        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [{string.Join('|', Enum.GetValues<NewKind>())}]");
+        sb.AppendLine($"{indent}Creates a new empty conf file or associated file for new project. A base file name may");
+        sb.AppendLine($"{indent}optionally be given. Use {NewKind.ConfMin} to generate a configuration file without verbose");
+        sb.AppendLine($"{indent}documentation. Use {NewKind.All} to generate a full set of configuration assets.");
         sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All}");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [flag]");
-        sb.AppendLine($"{indent}Show help information.");
+        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [args|macros|conf]");
+        sb.AppendLine($"{indent}Show help information. Optional value specifies what kind of information to display.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} -{HelpShortArg} macros");
         sb.AppendLine();
-        sb.AppendLine($"{indent}--{VersionLongArg} [flag]");
-        sb.AppendLine($"{indent}Show version information.");
+        sb.AppendLine($"{indent}--{VersionLongArg} [flag only]");
+        sb.AppendLine($"{indent}Show version and associated information.");
 
-        return sb.ToString();
+        return sb.ToString().TrimEnd();
     }
 
     /// <summary>
@@ -311,6 +318,18 @@ public class ArgumentReader
     public override string ToString()
     {
         return _string;
+    }
+
+    private static T AssertEnum<T>(string sname, string lname, string value) where T : struct, Enum
+    {
+        // Provides more error information
+        if (Enum.TryParse<T>(value, true, out T rslt))
+        {
+            return rslt;
+        }
+
+        throw new ArgumentException($"Invalid or absent value for -{sname}, --{lname}\n" +
+            "Use one of: " + string.Join(',', Enum.GetValues<T>()));
     }
 
     private static string? GetDefaultValuePath(string? path)

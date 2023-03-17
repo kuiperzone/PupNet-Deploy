@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <metadata_license>MIT</metadata_license>
+
+    <id>${APP_ID}</id>
+    <name>${APP_FRIENDLY_NAME}</name>
+    <summary>${SHORT_SUMMARY}</summary>
+    <developer_name>${VENDOR_NAME}</developer_name>
+    <url type="homepage">${VENDOR_URL}</url>
+    <project_license>${LICENSE_ID}</project_license>
+    <content_rating type="oars-1.1" />
+
+    <launchable type="desktop-id">${APP_ID}.desktop</launchable>
+
+    <description>
+        <p>Hello World demonstrates all the major features of building deployable packages with PupNet.
+        It can be built for all deployment package kinds, including AppImage, Flatpak, DEB and RPM for Linux,
+        and as a Setup file for Windows. It provides an example of using desktop and metainfo files,
+        as well as icons and a post-publish script.</p>
+
+        <p>For example, you will also notice that this AppStream metadata file, and the desktop file, make use of</p>
+        <p>macro variables for a high degree of automation on content, so that information need only be
+        specified once in the primary configuration.</p>
+
+        <p>On execution, the Hello World program dispays assembly information, including version. This confirms
+        that version information was supplied from the deployment configuration, via the build system, to
+        the application.</p>
+    </description>
+
+    <!-- Freedesktop Categories -->
+    <categories>
+        <category>${PRIME_CATEGORY}</category>
+    </categories>
+
+    <keywords>
+        <keyword>development</keyword>
+        <keyword>programming</keyword>
+    </keywords>
+
+    <screenshots>
+        <screenshot type="default">
+            <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
+        </screenshot>
+    </screenshots>
+
+    <releases>
+        <release version="${APP_VERSION}" date="${BUILD_DATE}">
+            <description><p>The latest release.</p></description>
+        </release>
+    </releases>
+
+</component>

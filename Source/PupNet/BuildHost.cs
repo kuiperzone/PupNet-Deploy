@@ -45,50 +45,56 @@ public class BuildHost
         Builder = new BuilderFactory().Create(Configuration);
         Macros = new MacrosExpander(Builder);
 
-        var warns = new List<string>();
+        var kind = Builder.Architecture.Kind;
 
-        if (!Builder.IsWindowsPackage)
+        if (!kind.IsWindows())
         {
             var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
 
             // Careful - filename may equal "NONE"
             if (Configuration.DesktopFile == null)
             {
+                // Magic desktop file
                 desktop = MetaTemplates.Desktop;
             }
 
             if (desktop != null && ((!desktop.Contains("Exec=") && !desktop.Contains("Exec ")) || !desktop.Contains(MacroId.DesktopExec.ToVar())))
             {
-                warns.Add($"WARNING. Desktop file does not contain Exec={MacroId.DesktopExec.ToVar()} line (macro is needed to accommodate multiple packages)");
+                Builder.WarningSink.Add($"WARNING. Desktop file does not contain Exec={MacroId.DesktopExec.ToVar()} line needed to accommodate multi-variant deployments");
             }
 
-            ExpandedDesktop = Macros.Expand(desktop, warns, Path.GetFileName(Configuration.DesktopFile));
-            ExpandedMetaInfo = Macros.Expand(Configuration.ReadAssociatedFile(Configuration.MetaFile), warns, Path.GetFileName(Configuration.MetaFile));
+            ExpandedDesktop = Macros.Expand(desktop, Path.GetFileName(Configuration.DesktopFile));
+            ExpandedMetaInfo = Macros.Expand(Configuration.ReadAssociatedFile(Configuration.MetaFile), true, Path.GetFileName(Configuration.MetaFile));
 
             if (ExpandedDesktop == null)
             {
-                warns.Add("Note. Desktop file not provided");
-
-                if (string.IsNullOrEmpty(Configuration.StartCommand))
+                // App image can launch from standalone file
+                if (string.IsNullOrEmpty(Configuration.StartCommand) && kind != DeployKind.AppImage)
                 {
-                    warns.Add($"WARNING. Desktop file and {Configuration.StartCommand} not provided (no way to start the application)");
+                    Builder.WarningSink.Add($"Note. No desktop file and no {nameof(Configuration.StartCommand)} is configured\n" +
+                        "There will be no way to start the application on the target system - are you sure?");
                 }
             }
 
             if (ExpandedMetaInfo == null)
             {
-                warns.Add("Note. AppStream metadata (.metainfo.xml) file not provided");
+                Builder.WarningSink.Add("Note. AppStream metadata (.metainfo.xml) file not provided");
             }
         }
 
-        PublishCommands = Macros.Expand(GetPublishCommands(Builder), warns, "dotnet publish");
+        if (Builder.Architecture.IsWindowsRuntime != kind.IsWindows(false))
+        {
+            Builder.WarningSink.Add($"WARNING. You are going to package a {Builder.Architecture.RuntimeId} runtime as {kind}\n"
+                + "Is this really what you want to do?");
+        }
+
+        PublishCommands = Macros.Expand(GetPublishCommands(Builder), "dotnet publish");
 
         if (Arguments.IsRun && !Builder.SupportsRunOnBuild)
         {
-            warns.Add($"{Arguments.Kind} does not support post-build run (--{ArgumentReader.RunLongArg} ignored)");
+            Builder.WarningSink.Add($"{Arguments.Kind} does not support post-build run (--{ArgumentReader.RunLongArg} ignored)");
         }
 
-        Warnings = warns;
     }
 
     /// <summary>
@@ -127,11 +133,6 @@ public class BuildHost
     public IReadOnlyCollection<string> PublishCommands { get; }
 
     /// <summary>
-    /// Gets any warning pre-build.
-    /// </summary>
-    public IReadOnlyCollection<string> Warnings { get; }
-
-    /// <summary>
     /// Runs the build process. Returns true if complete, or false if cancelled.
     /// </summary>
     public bool Run()
@@ -150,7 +151,7 @@ public class BuildHost
             }
 
             Console.WriteLine();
-            Console.WriteLine("Build Project");
+            Console.WriteLine("Building Project ...");
             Builder.Operations.Execute(PublishCommands);
 
             if (Arguments.IsVerbose)
@@ -165,7 +166,7 @@ public class BuildHost
             }
 
             Console.WriteLine();
-            Console.WriteLine("Build Package");
+            Console.WriteLine("Building Package ...");
             Builder.BuildPackage();
 
             Console.WriteLine();
@@ -200,7 +201,7 @@ public class BuildHost
         AppendPair(sb, nameof(Builder.PackRelease), Builder.PackRelease);
 
         AppendHeader(sb, "OUTPUT");
-        AppendPair(sb, nameof(PackKind), Arguments.Kind.ToString().ToLowerInvariant());
+        AppendPair(sb, nameof(DeployKind), Arguments.Kind.ToString().ToLowerInvariant());
         AppendPair(sb, nameof(Arguments.Runtime), Arguments.Runtime);
         AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Builder.Architecture})");
         AppendPair(sb, nameof(Arguments.Build), Arguments.Build);
@@ -240,7 +241,7 @@ public class BuildHost
 
         AppendSection(sb, "BUILD PROJECT", PublishCommands);
         AppendSection(sb, "BUILD PACKAGE", Builder.PackageCommands);
-        AppendSection(sb, "WARNINGS", Warnings);
+        AppendSection(sb, "WARNINGS", Builder.WarningSink);
 
         return sb.ToString().Trim();
     }
@@ -267,6 +268,11 @@ public class BuildHost
         sb.Append(name);
         sb.Append(": ");
         sb.AppendLine(value);
+    }
+
+    private static void AppendSection(StringBuilder sb, string title, ICollection<string> content)
+    {
+        AppendSection(sb, title, (IReadOnlyCollection<string>)content);
     }
 
     private static void AppendSection(StringBuilder sb, string title, IReadOnlyCollection<string> content)
@@ -298,7 +304,7 @@ public class BuildHost
         var list = new List<string>();
         var conf = builder.Configuration;
 
-        if (conf.DotnetProjectPath != ConfigurationReader.PathNone)
+        if (conf.DotnetProjectPath != ConfigurationReader.PathDisable)
         {
             var sb = new StringBuilder();
 

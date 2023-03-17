@@ -25,36 +25,32 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<None Include="$(ProjectDir)\..\..\LICENSE" Link="LICENSE.png">
+		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
-		<None Include="$(ProjectDir)\..\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
+		<None Include="$(ProjectDir)\Assets\generic.svg" Link="app.svg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\..\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage">
+		<None Include="$(ProjectDir)\Assets\generic.ico" Link="app.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-
-		<None Include="$(ProjectDir)\..\Assets\app.svg" Link="app.svg">
+		<None Include="$(ProjectDir)\Assets\generic.16x16.png" Link="app.16x16.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.ico" Link="app.ico">
+		<None Include="$(ProjectDir)\Assets\generic.24x24.png" Link="app.24x24.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.16x16.png" Link="app.16x16.png">
+		<None Include="$(ProjectDir)\Assets\generic.32x32.png" Link="app.32x32.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.24x24.png" Link="app.24x24.png">
+		<None Include="$(ProjectDir)\Assets\generic.48x48.png" Link="app.48x48.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.32x32.png" Link="app.32x32.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.48x48.png" Link="app.48x48.png">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="$(ProjectDir)\..\Assets\app.64x64.png" Link="app.64x64.png">
+		<None Include="$(ProjectDir)\Assets\generic.64x64.png" Link="app.64x64.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 

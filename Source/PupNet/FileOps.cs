@@ -235,7 +235,7 @@ public class FileOps
     /// <summary>
     /// Runs the command.
     /// </summary>
-    public void Execute(string command, bool redirect = false, bool wait = true)
+    public int Execute(string command, bool throwNonZeroExit = true)
     {
         string? args = null;
         int idx = command.IndexOf(' ');
@@ -246,13 +246,13 @@ public class FileOps
             command = command.Substring(0, idx).Trim();
         }
 
-        Execute(command, args, redirect, wait);
+        return Execute(command, args, throwNonZeroExit);
     }
 
     /// <summary>
     /// Runs the command with separate arguments.
     /// </summary>
-    public void Execute(string command, string? args, bool redirect = false, bool wait = true)
+    public int Execute(string command, string? args, bool throwNonZeroExit = true)
     {
         WriteLine($"{command} {args}");
 
@@ -261,42 +261,51 @@ public class FileOps
             Arguments = args,
             CreateNoWindow = true,
             FileName = command,
-            RedirectStandardOutput = redirect,
-            RedirectStandardError = redirect,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
             UseShellExecute = false,
         };
 
         using var proc = Process.Start(info) ??
             throw new InvalidOperationException($"{command} failed");
 
-        if (wait)
-        {
-            proc.WaitForExit();
+        WriteLine(proc.StandardOutput.ReadToEnd());
+        WriteLine(proc.StandardError.ReadToEnd());
 
-            if (proc.ExitCode != 0)
-            {
-                throw new InvalidOperationException($"{command} returned non-zero exit code");
-            }
+        proc.WaitForExit();
+
+        if (throwNonZeroExit && proc.ExitCode != 0)
+        {
+            throw new InvalidOperationException($"{command} returned non-zero exit code {proc.ExitCode}");
         }
+
+        return proc.ExitCode;
     }
 
     /// <summary>
-    /// Runs the commands.
+    /// Runs the commands. Does nothing if empty.
     /// </summary>
-    public void Execute(IEnumerable<string> commands, bool redirect = false)
+    public int Execute(IEnumerable<string> commands, bool throwNonZeroExit = true)
     {
         bool more = false;
 
         foreach (var item in commands)
         {
-            if (more && !redirect)
+            if (more)
             {
                 WriteLine(null);
             }
 
-            Execute(item, redirect);
             more = true;
+            int rslt = Execute(item, throwNonZeroExit);
+
+            if (rslt != 0)
+            {
+                return rslt;
+            }
         }
+
+        return 0;
     }
 
     private void Write(string? prefix, string? path = null)

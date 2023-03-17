@@ -196,7 +196,7 @@ public class IniReader
 
             if (Options.HasFlag(IniOptions.MultiLine) && value.StartsWith(StartMultiQuote))
             {
-                var builder = new StringBuilder();
+                var sb = new StringBuilder(1024);
                 line = value.Substring(StartMultiQuote.Length);
 
                 while (true)
@@ -206,12 +206,13 @@ public class IniReader
 
                     if (pos > -1)
                     {
-                        builder.Append(line.Substring(0, pos));
-                        value = builder.ToString().Trim();
+                        sb.Append(line.Substring(0, pos));
+                        value = sb.ToString().Trim();
                         return name;
                     }
 
-                    builder.AppendLine(line);
+                    sb.Append(line);
+                    sb.Append('\n');
 
                     if (num < content.Length)
                     {

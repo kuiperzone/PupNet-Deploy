@@ -71,7 +71,7 @@ public class ArchitectureConverter
     /// Constructor. Determines final architecture string via ToString() method. If xarch is not null or empty,
     /// ToString() returns this value.
     /// </summary>
-    public ArchitectureConverter(PackKind kind, string? runtime, string? xarch = null)
+    public ArchitectureConverter(DeployKind kind, string? runtime, string? xarch = null)
     {
         Kind = kind;
         IsUncertain = true;
@@ -111,7 +111,7 @@ public class ArchitectureConverter
 
             // Windows:
             // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
-            if (kind == PackKind.Deb)
+            if (kind == DeployKind.Deb)
             {
                 // DEB Example: amd64 (not x64 or x86_64)
                 // https://wiki.debian.org/ArchitectureSpecificsMemo
@@ -133,7 +133,7 @@ public class ArchitectureConverter
                 }
             }
             else
-            if (kind == PackKind.Rpm)
+            if (kind == DeployKind.Rpm)
             {
                 // RPM Example: (aarch64 not arm64)
                 // https://koji.fedoraproject.org/koji/buildinfo?buildID=2108850
@@ -153,7 +153,7 @@ public class ArchitectureConverter
                 }
             }
             else
-            if (kind != PackKind.Setup)
+            if (kind != DeployKind.Setup)
             {
                 if (RuntimeArch == Architecture.X64)
                 {
@@ -185,7 +185,7 @@ public class ArchitectureConverter
     /// <summary>
     /// Gets the package kind.
     /// </summary>
-    public PackKind Kind { get; }
+    public DeployKind Kind { get; }
 
     /// <summary>
     /// Gets the dotnet publish runtime ID (rid) value.
@@ -208,7 +208,7 @@ public class ArchitectureConverter
     public bool IsUncertain { get; }
 
     /// <summary>
-    /// Gets the architecture as a string. Note - this is tailored to <see cref="PackKind"/>.
+    /// Gets the architecture as a string. Note - this is tailored to <see cref="DeployKind"/>.
     /// Otherwise, use <see cref="RuntimeArch"/>.
     /// </summary>
     public override string ToString()

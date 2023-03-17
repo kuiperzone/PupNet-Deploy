@@ -35,7 +35,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// Constructor.
     /// </summary>
-    public PackageBuilder(ConfigurationReader conf, PackKind kind)
+    public PackageBuilder(ConfigurationReader conf, DeployKind kind)
     {
         Arguments = conf.Arguments;
         Configuration = conf;
@@ -103,6 +103,11 @@ public abstract class PackageBuilder
     /// Gets the thing that provides the architecture.
     /// </summary>
     public ArchitectureConverter Architecture { get; }
+
+    /// <summary>
+    /// Collects warning messages.
+    /// </summary>
+    public ICollection<string> WarningSink { get; } = new List<string>();
 
     /// <summary>
     /// Gets whether output is for Windows.
@@ -291,12 +296,6 @@ public abstract class PackageBuilder
     public abstract bool SupportsRunOnBuild { get; }
 
     /// <summary>
-    /// Checks whether the package can be built on this platform. For example, for RPM, the method will check for
-    /// Linux OS and then test the command "rpmbuild --version". Returns true on success.
-    /// </summary>
-    public abstract bool CheckInstalled();
-
-    /// <summary>
     /// Create directories tree. It will be called at the start of the build process to create all build directories
     /// and populate them with standard assets. It does not populate the application binary. The base implementation
     /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
@@ -307,6 +306,8 @@ public abstract class PackageBuilder
     /// </summary>
     public virtual void Create(string? desktop, string? metainfo)
     {
+        WarningSink.Clear();
+
         RemoveRoot();
         Operations.CreateDirectory(Root);
         Operations.CreateDirectory(AppRoot);
@@ -402,28 +403,6 @@ public abstract class PackageBuilder
         return Root;
     }
 
-    /// <summary>
-    /// For use by the <see cref="WriteVersion()"/> methods.
-    /// </summary>
-    protected bool CheckInstalled(string? cmd, string? args)
-    {
-        try
-        {
-            if (!string.IsNullOrEmpty(cmd) && Arguments.Kind.CanBuildOnSystem())
-            {
-                var ops = new FileOps();
-                ops.ShowCommands = false;
-                ops.Execute(cmd, args, true);
-                return true;
-            }
-        }
-        catch
-        {
-        }
-
-        return false;
-    }
-
     private static string SplitVersion(string version, out string release)
     {
         release = "1";
@@ -483,12 +462,12 @@ public abstract class PackageBuilder
 
         output += $".{arch}";
 
-        if (arch.Kind == PackKind.AppImage)
+        if (arch.Kind == DeployKind.AppImage)
         {
             return output + ".AppImage";
         }
 
-        if (arch.Kind == PackKind.Setup)
+        if (arch.Kind == DeployKind.Setup)
         {
             return output + ".exe";
         }
@@ -504,12 +483,12 @@ public abstract class PackageBuilder
         // Leave windows icon out - leave InnoSetup to assign own
         // list.Add(Path.Combine(AssemblyDirectory, "app.icon"));
 
-        list.Add(Path.Combine(AssemblyDirectory, "app.svg"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.16x16.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.24x24.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.32x32.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.48x48.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "app.64x64.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.svg"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.16x16.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.24x24.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.32x32.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.48x48.png"));
+        list.Add(Path.Combine(AssemblyDirectory, "generic.64x64.png"));
 
         return list;
     }
@@ -547,7 +526,7 @@ public abstract class PackageBuilder
         return 0;
     }
 
-    private static string? GetSourceIcon(PackKind kind, IEnumerable<string> paths)
+    private static string? GetSourceIcon(DeployKind kind, IEnumerable<string> paths)
     {
         int max = 0;
         string? rslt = null;

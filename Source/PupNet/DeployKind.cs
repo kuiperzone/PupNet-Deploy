@@ -21,9 +21,9 @@ using System.Runtime.InteropServices;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Defines package kinds.
+/// Defines deployable package kinds.
 /// </summary>
-public enum PackKind
+public enum DeployKind
 {
     /// <summary>
     /// Simple zip. All platforms.
@@ -59,38 +59,38 @@ public enum PackKind
 /// <summary>
 /// Extension methods.
 /// </summary>
-public static class PackKindExtension
+public static class DeployKindExtension
 {
     /// <summary>
     /// Gets file extension.
     /// </summary>
-    public static string GetFileExt(this PackKind kind)
+    public static string GetFileExt(this DeployKind kind)
     {
         switch (kind)
         {
-            case PackKind.Zip: return ".zip";
-            case PackKind.AppImage: return ".AppImage";
-            case PackKind.Deb: return ".deb";
-            case PackKind.Rpm: return ".rpm";
-            case PackKind.Flatpak: return ".flatpak";
-            case PackKind.Setup: return ".exe";
-            default: throw new ArgumentException($"Invalid {nameof(PackKind)} {kind}");
+            case DeployKind.Zip: return ".zip";
+            case DeployKind.AppImage: return ".AppImage";
+            case DeployKind.Deb: return ".deb";
+            case DeployKind.Rpm: return ".rpm";
+            case DeployKind.Flatpak: return ".flatpak";
+            case DeployKind.Setup: return ".exe";
+            default: throw new ArgumentException($"Invalid {nameof(DeployKind)} {kind}");
         }
     }
 
     /// <summary>
     /// Gets whether compatible with linux.
     /// </summary>
-    public static bool IsLinux(this PackKind kind)
+    public static bool IsLinux(this DeployKind kind, bool exclusive = false)
     {
         switch (kind)
         {
-            case PackKind.Zip:
-            case PackKind.AppImage:
-            case PackKind.Deb:
-            case PackKind.Rpm:
-            case PackKind.Flatpak:
-                return true;
+            case DeployKind.Zip:
+            case DeployKind.AppImage:
+            case DeployKind.Deb:
+            case DeployKind.Rpm:
+            case DeployKind.Flatpak:
+                return !exclusive || (!IsWindows(kind) && !IsOsx(kind));
             default:
                 return false;
         }
@@ -99,23 +99,33 @@ public static class PackKindExtension
     /// <summary>
     /// Gets whether compatible with windows.
     /// </summary>
-    public static bool IsWindows(this PackKind kind)
+    public static bool IsWindows(this DeployKind kind, bool exclusive = false)
     {
-        return kind == PackKind.Zip || kind == PackKind.Setup;
+        if (kind == DeployKind.Zip || kind == DeployKind.Setup)
+        {
+            return !exclusive || (!IsLinux(kind) && !IsOsx(kind));
+        }
+
+        return false;
     }
 
     /// <summary>
     /// Gets whether compatible with OSX.
     /// </summary>
-    public static bool IsOsx(this PackKind kind)
+    public static bool IsOsx(this DeployKind kind, bool exclusive = false)
     {
-        return kind == PackKind.Zip;
+        if (kind == DeployKind.Zip)
+        {
+            return !exclusive || (!IsLinux(kind) && !IsOsx(kind));
+        }
+
+        return false;
     }
 
     /// <summary>
     /// Returns true if the package kind can be built on this system.
     /// </summary>
-    public static bool CanBuildOnSystem(this PackKind kind)
+    public static bool CanBuildOnSystem(this DeployKind kind)
     {
         if (kind.IsLinux() && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {

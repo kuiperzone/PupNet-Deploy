@@ -36,7 +36,7 @@ public enum MacroId
     PrimeCategory,
 
     AppVersion,
-    PackKind,
+    DeployKind,
     DotnetRuntime,
     BuildArch,
     BuildTarget,
@@ -76,7 +76,7 @@ public static class MacroIdExtension
 
             // Derived
             case MacroId.AppVersion: return "APP_VERSION";
-            case MacroId.PackKind: return "PACK_KIND";
+            case MacroId.DeployKind: return "DEPLOY_KIND";
             case MacroId.DotnetRuntime: return "DOTNET_RUNTIME";
             case MacroId.BuildArch: return "BUILD_ARCH";
             case MacroId.BuildTarget: return "BUILD_TARGET";
@@ -116,7 +116,7 @@ public static class MacroIdExtension
             case MacroId.PrimeCategory: return $"{nameof(ConfigurationReader.PrimeCategory)} value from conf file";
 
             case MacroId.AppVersion: return "Application version, exluding package-release extension.";
-            case MacroId.PackKind: return "Package output kind: appimage, flatpak, rpm, deb, setup, zip";
+            case MacroId.DeployKind: return "Deployment output kind: appimage, flatpak, rpm, deb, setup, zip";
             case MacroId.DotnetRuntime: return "Dotnet publish runtime identifier used (RID)";
             case MacroId.BuildArch: return "Build architecture: x64, arm64, arm or x86. May differ from package output notation.";
             case MacroId.BuildTarget: return "Release or Debug (Release unless explicitly specified)";

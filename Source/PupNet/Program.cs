@@ -18,6 +18,7 @@
 
 using System.Reflection;
 using System.Runtime.InteropServices;
+using KuiperZone.PupNet.Builders;
 
 namespace KuiperZone.PupNet;
 
@@ -87,25 +88,37 @@ internal class Program
                 Console.WriteLine("Third-party Tools:");
 
                 Console.WriteLine();
-                Console.WriteLine("AppImageKit: {AppImageBuilder.AppImageVersion}");
+                Console.WriteLine($"AppImageKit: {AppImageBuilder.AppImageVersion}");
                 Console.WriteLine("Copyright (C) 2004-20 Simon Peter");
                 Console.WriteLine();
                 return 0;
             }
 
-            if (decoder.ShowHelp)
+            if (decoder.ShowHelp != null)
             {
                 Console.WriteLine($"{ProductName} {Version}");
+                Console.WriteLine($"See also: {ProjectUrl}");
                 Console.WriteLine();
+
+                if (decoder.ShowHelp == "macros")
+                {
+                    Console.WriteLine("MACROS:");
+                    Console.WriteLine("Always use the form ${MACRO_NAME}, and not $MACRO_NAME.");
+                    Console.WriteLine();
+                    Console.WriteLine(new MacrosExpander().ToString(true));
+                    Console.WriteLine();
+                    return 0;
+                }
+
+                if (decoder.ShowHelp == "conf")
+                {
+                    Console.WriteLine(new ConfigurationReader().ToString(true));
+                    Console.WriteLine();
+                    return 0;
+                }
+
                 Console.WriteLine(ArgumentReader.GetHelperText());
-
                 Console.WriteLine();
-                Console.WriteLine("Macro Reference:");
-                Console.WriteLine("The following macros (with example values) are supported. See online help.");
-                Console.WriteLine();
-                Console.WriteLine(new MacrosExpander().ToString());
-                Console.WriteLine();
-
                 return 0;
             }
 

@@ -23,42 +23,42 @@ public class BuildHostTest
     [Fact]
     public void AppImage_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.AppImage));
+        var host = new BuildHost(new DummyConf(DeployKind.AppImage));
         AssertOK(host);
     }
 
     [Fact]
     public void Flatpak_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.Flatpak));
+        var host = new BuildHost(new DummyConf(DeployKind.Flatpak));
         AssertOK(host);
     }
 
     [Fact]
     public void Rpm_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.Rpm));
+        var host = new BuildHost(new DummyConf(DeployKind.Rpm));
         AssertOK(host);
     }
 
     [Fact]
     public void Deb_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.Deb));
+        var host = new BuildHost(new DummyConf(DeployKind.Deb));
         AssertOK(host);
     }
 
     [Fact]
     public void Setup_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.Setup));
+        var host = new BuildHost(new DummyConf(DeployKind.Setup));
         AssertOK(host);
     }
 
     [Fact]
     public void Zip_DecodesOK()
     {
-        var host = new BuildHost(new DummyConf(PackKind.Zip));
+        var host = new BuildHost(new DummyConf(DeployKind.Zip));
         AssertOK(host);
     }
 

@@ -5,6 +5,8 @@ Hook up license to Inno
 Test Deb, RPM
 
 DONE
+Filesafe values
+Make XML safe
 Check for exec
 AssertOK() - update
 Need maintainer field

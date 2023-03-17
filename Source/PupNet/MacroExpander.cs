@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using System.Security;
 using System.Text;
 using KuiperZone.PupNet.Builders;
 
@@ -28,7 +29,7 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class MacrosExpander
 {
-    private readonly SortedDictionary<string, string> _sorted = new();
+    private readonly Dictionary<string, string> _cache = new();
 
     /// <summary>
     /// Default constructor. Example values only.
@@ -63,7 +64,7 @@ public class MacrosExpander
         dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
-        dict.Add(MacroId.PackKind, args.Kind.ToString().ToLowerInvariant());
+        dict.Add(MacroId.DeployKind, args.Kind.ToString().ToLowerInvariant());
         dict.Add(MacroId.DotnetRuntime, builder.Architecture.RuntimeId);
         dict.Add(MacroId.BuildArch, builder.Architecture.RuntimeArch.ToString().ToLowerInvariant());
         dict.Add(MacroId.BuildTarget, args.Build);
@@ -80,7 +81,7 @@ public class MacrosExpander
         foreach (var item in Dictionary)
         {
             // For operations
-            _sorted.Add(item.Key.ToVar(), item.Value);
+            _cache.Add(item.Key.ToVar(), item.Value);
         }
     }
 
@@ -98,37 +99,58 @@ public class MacrosExpander
     /// Expand all macros in text content. Simple search replace. Case sensitive.
     /// </summary>
     [return: NotNullIfNotNull("content")]
-    public string? Expand(string? content, ICollection<string>? warnings = null, string? itemName = null)
+    public string? Expand(string? content, bool escape, string? itemName = null)
     {
         if (!string.IsNullOrEmpty(content) && content.Contains("${"))
         {
-            foreach (var item in _sorted)
+            foreach (var item in _cache)
             {
-                content = content.Replace(item.Key, item.Value);
+                if (escape)
+                {
+                    content = content.Replace(item.Key, SecurityElement.Escape(item.Value));
+                }
+                else
+                {
+                    content = content.Replace(item.Key, item.Value);
+                }
             }
 
-            if (warnings != null)
-            {
-                AddInvalidMacros(content, warnings, itemName);
-            }
+            CheckForInvalidMacros(content, Builder.WarningSink, itemName);
         }
 
         return content;
     }
 
     /// <summary>
+    /// Overload.
+    /// </summary>
+    [return: NotNullIfNotNull("content")]
+    public string? Expand(string? content, string? itemName = null)
+    {
+        return Expand(content, false, itemName);
+    }
+
+    /// <summary>
     /// Expand all macros in text content items.
     /// </summary>
-    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, ICollection<string>? warnings = null, string? itemName = null)
+    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, bool escape, string? itemName = null)
     {
         var list = new List<string>();
 
         foreach (var item in content)
         {
-            list.Add(Expand(item, warnings, itemName));
+            list.Add(Expand(item, escape, itemName));
         }
 
         return list;
+    }
+
+    /// <summary>
+    /// Overload.
+    /// </summary>
+    public IReadOnlyCollection<string> Expand(IEnumerable<string> content, string? itemName = null)
+    {
+        return Expand(content, false, itemName);
     }
 
     /// <summary>
@@ -136,17 +158,46 @@ public class MacrosExpander
     /// </summary>
     public override string ToString()
     {
-        var builder = new StringBuilder();
-
-        foreach (var item in _sorted)
-        {
-            builder.AppendLine($"{item.Key} = {item.Value}");
-        }
-
-        return builder.ToString().Trim();
+        return ToString(false);
     }
 
-    private static void AddInvalidMacros(string content, ICollection<string> warnings, string? itemName)
+    /// <summary>
+    /// Provides detail information.
+    /// </summary>
+    public string ToString(bool verbose)
+    {
+        var sb = new StringBuilder();
+        var sorted = new SortedDictionary<string, MacroId>();
+
+        foreach (var item in Dictionary.Keys)
+        {
+            sorted.Add(item.ToName(), item);
+        }
+
+        bool more = false;
+
+        foreach (var item in sorted)
+        {
+            if (verbose)
+            {
+                if (more)
+                {
+                    sb.AppendLine();
+                }
+
+                more = true;
+                sb.AppendLine(item.Value.ToName());
+                sb.AppendLine(item.Value.ToHint());
+                sb.Append("Example: ");
+            }
+
+            sb.AppendLine($"{item.Value.ToVar()} = {Dictionary[item.Value]}");
+        }
+
+        return sb.ToString().Trim();
+    }
+
+    private static void CheckForInvalidMacros(string content, ICollection<string> warnings, string? itemName)
     {
         int p0 = content.IndexOf("${");
 
