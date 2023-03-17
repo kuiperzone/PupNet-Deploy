@@ -293,7 +293,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets whether package supports run after build without installation.
     /// </summary>
-    public abstract bool SupportsRunOnBuild { get; }
+    public abstract bool SupportsPostRun { get; }
 
     /// <summary>
     /// Create directories tree. It will be called at the start of the build process to create all build directories

@@ -18,6 +18,7 @@
 
 using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using Microsoft.VisualBasic.FileIO;
 
 namespace KuiperZone.PupNet;
@@ -254,6 +255,8 @@ public class FileOps
     /// </summary>
     public int Execute(string command, string? args, bool throwNonZeroExit = true)
     {
+        bool redirect = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
         WriteLine($"{command} {args}");
 
         var info = new ProcessStartInfo
@@ -261,16 +264,19 @@ public class FileOps
             Arguments = args,
             CreateNoWindow = true,
             FileName = command,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
+            RedirectStandardOutput = redirect,
+            RedirectStandardError = redirect,
             UseShellExecute = false,
         };
 
         using var proc = Process.Start(info) ??
             throw new InvalidOperationException($"{command} failed");
 
-        WriteLine(proc.StandardOutput.ReadToEnd());
-        WriteLine(proc.StandardError.ReadToEnd());
+        if (redirect)
+        {
+            Write(proc.StandardOutput.ReadToEnd());
+            Write(proc.StandardError.ReadToEnd());
+        }
 
         proc.WaitForExit();
 

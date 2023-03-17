@@ -88,9 +88,14 @@ public class BuildHost
                 + "Is this really what you want to do?");
         }
 
-        PublishCommands = Macros.Expand(GetPublishCommands(Builder), "dotnet publish");
+        if (!kind.CanBuildOnSystem())
+        {
+            Builder.WarningSink.Add($"CRITICAL. Building {kind} packages is not supported on a {ArchitectureConverter.SimpleOS} development system\n");
+        }
 
-        if (Arguments.IsRun && !Builder.SupportsRunOnBuild)
+        PublishCommands = Macros.Expand(GetPublishCommands(Builder), nameof(PublishCommands));
+
+        if (Arguments.IsRun && !Builder.SupportsPostRun)
         {
             Builder.WarningSink.Add($"{Arguments.Kind} does not support post-build run (--{ArgumentReader.RunLongArg} ignored)");
         }

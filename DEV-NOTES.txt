@@ -1,10 +1,12 @@
 
 
-Hook up license to Inno
+LICENSE causing RPM to fail. Test others
 
 Test Deb, RPM
 
+
 DONE
+Hook up license to Inno
 Filesafe values
 Make XML safe
 Check for exec
