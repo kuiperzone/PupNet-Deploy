@@ -242,7 +242,7 @@ public class ConfigurationReader
         var c = verbose ? sb : null;
 
         c?.AppendLine(breaker1);
-        c?.AppendLine($"# THIS IS A {Program.ProductName.ToUpperInvariant()} CONF FILE");
+        c?.AppendLine($"# THIS IS A {Program.CommandName.ToUpperInvariant()}.CONF FILE");
         c?.AppendLine($"# {Program.ProjectUrl}");
         c?.AppendLine(breaker1);
 
