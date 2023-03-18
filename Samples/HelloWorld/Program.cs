@@ -49,18 +49,22 @@ namespace HelloWorld
             Console.WriteLine("Assembly.GetEntryAssembly().Location: {0}", Assembly.GetEntryAssembly()?.Location ?? "null");
             Console.WriteLine();
 
-#if BUILDFLAG
-            // Test for passing property from command line
-            Console.WriteLine("BUILDFLAG constant defined OK");
-#else
-            Console.WriteLine("BUILDFLAG NOT defined!!!");
-            Console.WriteLine("Build package with publish arg: --property:DefineConstants=BUILDFLAG");
-#endif
-
             // Look for sub-directory created by DotnetPostPublish - ensures custom content is packaged
             dir = Path.Combine(dir, "subdir");
             Console.WriteLine("Packaged subdir exists: " + Directory.Exists(dir));
             Console.WriteLine("Packaged subdir/file.test exists: " + File.Exists(Path.Combine(dir, "file.test")));
+            Console.WriteLine("If the above is 'True', it indicates the PostPublish build script was run during the build");
+            Console.WriteLine();
+
+#if BUILDFLAG
+            // Test for passing property from command line
+            // NOTE. In some case, you might have to do a clean first
+            Console.WriteLine("BUILDFLAG constant defined OK");
+            Console.WriteLine("The build was called with --property:DefineConstants=BUILDFLAG");
+#else
+            Console.WriteLine("BUILDFLAG NOT defined");
+            Console.WriteLine("Build package with publish arg: --property:DefineConstants=BUILDFLAG");
+#endif
 
             Console.WriteLine();
             Console.WriteLine();

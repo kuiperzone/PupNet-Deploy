@@ -33,7 +33,7 @@ public class ConfigurationReader
         Multi = 0x01,
         Safe = 0x02,
         SafeNoSpace = Safe | 0x04,
-        IncrediblySafe = SafeNoSpace | 0x08,
+        StrictSafe = SafeNoSpace | 0x08,
         Path = Safe | 0x10,
         AssertPath = Path | 0x20,
         PathWithDisable = Path | 0x40,
@@ -61,6 +61,7 @@ public class ConfigurationReader
         Arguments = new($"-{ArgumentReader.KindShortArg} {kind}");
         Reader = new();
         LocalDirectory = "";
+        PackageName = AppBaseName;
 
         if (!string.IsNullOrEmpty(metabase))
         {
@@ -94,7 +95,7 @@ public class ConfigurationReader
 
         AppBaseName = GetMandatory(nameof(AppBaseName), ValueFlags.SafeNoSpace);
         AppFriendlyName = GetMandatory(nameof(AppFriendlyName), ValueFlags.Safe);
-        AppId = GetMandatory(nameof(AppId), ValueFlags.IncrediblySafe);
+        AppId = GetMandatory(nameof(AppId), ValueFlags.StrictSafe);
         VersionRelease = GetMandatory(nameof(VersionRelease), ValueFlags.SafeNoSpace);
         ShortSummary = GetMandatory(nameof(ShortSummary), ValueFlags.None);
         LicenseId = GetMandatory(nameof(LicenseId), ValueFlags.Safe);
@@ -105,10 +106,10 @@ public class ConfigurationReader
         VendorUrl = GetOptional(nameof(VendorUrl), ValueFlags.Safe);
         VendorEmail = GetOptional(nameof(VendorEmail), ValueFlags.None);
 
-        StartCommand = GetOptional(nameof(StartCommand), ValueFlags.IncrediblySafe);
+        StartCommand = GetOptional(nameof(StartCommand), ValueFlags.StrictSafe);
         IsTerminalApp = GetBool(nameof(IsTerminalApp));
         DesktopFile = GetOptional(nameof(DesktopFile), ValueFlags.AssertPathWithDisable);
-        PrimeCategory = GetOptional(nameof(PrimeCategory), ValueFlags.IncrediblySafe);
+        PrimeCategory = GetOptional(nameof(PrimeCategory), ValueFlags.StrictSafe);
         IconFiles = GetCollection(nameof(IconFiles), ValueFlags.AssertPath);
         MetaFile = GetOptional(nameof(MetaFile), ValueFlags.AssertPathWithDisable);
 
@@ -117,20 +118,20 @@ public class ConfigurationReader
         DotnetPostPublish = GetCollection(nameof(DotnetPostPublish), ValueFlags.None);
         DotnetPostPublishOnWindows = GetCollection(nameof(DotnetPostPublishOnWindows), ValueFlags.None);
 
-        PackageName = GetMandatory(nameof(PackageName), ValueFlags.IncrediblySafe);
+        PackageName = GetOptional(nameof(PackageName), ValueFlags.StrictSafe) ?? AppBaseName;
         OutputDirectory = GetOptional(nameof(OutputDirectory), ValueFlags.Path) ?? LocalDirectory;
         OutputVersion = GetBool(nameof(OutputVersion));
 
         AppImageArgs = GetOptional(nameof(AppImageArgs), ValueFlags.None);
 
-        FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime), ValueFlags.IncrediblySafe);
-        FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk), ValueFlags.IncrediblySafe);
-        FlatpakPlatformVersion = GetMandatory(nameof(FlatpakPlatformVersion), ValueFlags.IncrediblySafe);
+        FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime), ValueFlags.StrictSafe);
+        FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk), ValueFlags.StrictSafe);
+        FlatpakPlatformVersion = GetMandatory(nameof(FlatpakPlatformVersion), ValueFlags.StrictSafe);
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs), ValueFlags.None);
         FlatpakFinishArgs = GetCollection(nameof(FlatpakFinishArgs), ValueFlags.None, "=", "--");
 
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
-        SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.IncrediblySafe);
+        SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
 
         // Additional validation
         if (!AppId.Contains('.'))
@@ -196,7 +197,7 @@ public class ConfigurationReader
     public IReadOnlyCollection<string> DotnetPostPublish { get; } = Array.Empty<string>();
     public IReadOnlyCollection<string> DotnetPostPublishOnWindows { get; } = Array.Empty<string>();
 
-    public string PackageName { get; } = "HelloWorld";
+    public string PackageName { get; }
     public string OutputDirectory { get; } = "Deploy/bin";
     public bool OutputVersion { get; } = false;
 
@@ -248,8 +249,10 @@ public class ConfigurationReader
     /// </summary>
     public string ToString(bool verbose)
     {
+        // Convenience
         var breaker1 = new string('#', 80);
         var breaker2 = new string('#', 40);
+        string macHelp = $"{Program.CommandName} --{ArgumentReader.HelpLongArg} macro";
 
         var sb = new StringBuilder();
 
@@ -301,7 +304,7 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Optional path to a copyright/license text file. If provided, it will be packaged with the");
-        c?.AppendLine($"# application and identified to package builder where supported. Example: Copright.txt");
+        c?.AppendLine($"# application and identified to package builder where supported. Example: Copyright.txt");
         sb.AppendLine(GetHelpNameValue(nameof(LicenseFile), LicenseFile));
 
         sb.AppendLine();
@@ -350,15 +353,15 @@ public class ConfigurationReader
         c?.AppendLine($"# allows for mime-types and internationalisation. If supplied, the file MUST contain the line:");
         c?.AppendLine($"# 'Exec={MacroId.DesktopExec.ToVar()}' in order to use the correct install location. Other macros may be");
         c?.AppendLine($"# used to help automate the content. If required that no desktop be installed, set value to: '{PathDisable}.");
-        c?.AppendLine($"# Reference1: https://www.baeldung.com/linux/desktop-entry-files");
-        c?.AppendLine($"# Reference2: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
+        c?.AppendLine($"# Note. The contents of the files may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
         sb.AppendLine(GetHelpNameValue(nameof(DesktopFile), DesktopFile));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional category for the application. The value should be one of the recognised Freedesktop");
-        c?.AppendLine($"# categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value");
+        c?.AppendLine($"# top-level categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value");
         c?.AppendLine($"# should be provided here which will be used, where supported, to populate metadata. The default");
-        c?.AppendLine($"# is empty. See referece: https://specifications.freedesktop.org/menu-spec/latest/apa.html");
+        c?.AppendLine($"# is empty. See: https://specifications.freedesktop.org/menu-spec/latest/apa.html");
         c?.AppendLine($"# Example: Utility");
         sb.AppendLine(GetHelpNameValue(nameof(PrimeCategory), PrimeCategory));
 
@@ -372,8 +375,8 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
-        c?.AppendLine($"# The file content may embed supported macros such as, such as {MacroId.AppFriendlyName.ToVar()} and {MacroId.AppId.ToVar()} etc.");
-        c?.AppendLine($"# to assist in automating many fields. Refer: https://docs.appimage.org/packaging-guide/optional/appstream.html");
+        c?.AppendLine($"# Note. The contents of the files may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# See: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Deploy/app.metainfo.xml.");
         sb.AppendLine(GetHelpNameValue(nameof(MetaFile), MetaFile));
 
@@ -396,22 +399,26 @@ public class ConfigurationReader
         c?.AppendLine($"# Typically you want as a minimum: '-p:Version={MacroId.AppVersion.ToVar()} --self-contained true'. Additional");
         c?.AppendLine($"# useful arguments include: '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true");
         c?.AppendLine($"# -p:PublishReadyToRun=true -p:PublishTrimmed=true -p:TrimMode=link'.");
-        c?.AppendLine($"# Refer: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
+        c?.AppendLine($"# Note. This value may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# See: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPublishArgs), DotnetPublishArgs));
 
         c?.AppendLine();
         c?.AppendLine($"# Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands");
-        c?.AppendLine($"# may be specifed, separated by semicolon or given in multi-line form. They are called after");
+        c?.AppendLine($"# may be specified, separated by semicolon or given in multi-line form. They are called after");
         c?.AppendLine($"# dotnet publish, but before the final output is built. These could, for example, copy additional");
         c?.AppendLine($"# files into the build directory given by {MacroId.PublishBin.ToVar()}. The working directory will be the");
         c?.AppendLine($"# location of this file. This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathDisable}'.");
+        c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these are environment variables.");
+        c?.AppendLine($"# Use {macHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
         c?.AppendLine();
         c?.AppendLine($"# Post-publish (or standalone build) commands on Windows (ignored on Linux). This should perform");
-        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)},  but using DOS");
-        c?.AppendLine($"# commands and batch scripts. Multiple commands may be specifed, separated by semicolon or given");
-        c?.AppendLine($"# in multi-line form.");
+        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)}, but using DOS");
+        c?.AppendLine($"# commands and batch scripts. Multiple commands may be specified, separated by semicolon or given");
+        c?.AppendLine($"# in multi-line form. Note. This value may use macro variables. Additionally, scripts may use");
+        c?.AppendLine($"# these are environment variables. Use {macHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublishOnWindows), DotnetPostPublishOnWindows));
 
         sb.AppendLine();
@@ -420,11 +427,11 @@ public class ConfigurationReader
         c?.AppendLine(breaker2);
 
         c?.AppendLine();
-        c?.AppendLine($"# Mandatory package name (excludes version etc.). Often, this need only be set to the");
-        c?.AppendLine($"# same value as {nameof(AppBaseName)}. However, it is used not only to specify the base output");
-        c?.AppendLine($"# filename, but to identify the application in .deb and .rpm packages. Therefore, you may wish");
-        c?.AppendLine($"# to ensure that the value reqpresents a unique name. Moreover, its naming requirements are");
-        c?.AppendLine($"# strict and it must contain only alpha-numeric and '-' characters. Example: HelloWorld");
+        c?.AppendLine($"# Optional package name (excludes version etc.). If empty, defaults to {nameof(AppBaseName)}.");
+        c?.AppendLine($"# However, it is used not only to specify the base output filename, but to identify the application");
+        c?.AppendLine($"# in .deb and .rpm packages. You may wish, therefore, to ensure that the value represents a");
+        c?.AppendLine($"# unique name, such as: {nameof(AppId)}. Naming requirements for this are strict and must");
+        c?.AppendLine($"# contain only alpha-numeric and '-', '+' and '.' characters. Example: HelloWorld");
         sb.AppendLine(GetHelpNameValue(nameof(PackageName), PackageName));
 
         c?.AppendLine();
@@ -631,7 +638,7 @@ public class ConfigurationReader
 
         if (flags.HasFlag(ValueFlags.Safe))
         {
-            // Path safe
+            // File path safe
             const string Invalid = "*?\"<>|";
 
             foreach (var c in value)
@@ -650,13 +657,30 @@ public class ConfigurationReader
                 }
             }
 
-            if (flags.HasFlag(ValueFlags.IncrediblySafe))
+            if (flags.HasFlag(ValueFlags.StrictSafe))
             {
-                // Alpha-num (no space) + extra chars
+                // Strict rules for debian package name. RPM is similar, but less strict. Follow these:
+                // Package names (both source and binary, see Package) must consist only of lower case letters (a-z),
+                // digits (0-9), plus (+) and minus (-) signs, and periods (.). They must be at least two characters
+                // long and must start with an alphanumeric character.
+                if (value.Length < 2)
+                {
+                    throw new ArgumentException($"Configuration {name} must contain at least 2 characters");
+                }
+
+                /*
+                // Don't do this - too strict for many fields
+                // Leave it to Debian to fail if this is a problem
+                if (char.IsDigit(value[0]))
+                {
+                    throw new ArgumentException($"Configuration {name} cannot start with a numeric digit");
+                }
+                */
+
                 foreach (var c in value)
                 {
-                    // Allow '.' - otherwise would break AppId
-                    if (c != '-' && c != '.' && !Char.IsAsciiLetterOrDigit(c))
+                    // Not force lower case, but we will convert as needed
+                    if (c != '-' && c != '+' && c != '.' && !char.IsAsciiLetterOrDigit(c))
                     {
                         if (c != '\n' || !flags.HasFlag(ValueFlags.Multi))
                         {

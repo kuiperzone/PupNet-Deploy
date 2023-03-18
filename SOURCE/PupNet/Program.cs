@@ -103,7 +103,14 @@ internal class Program
                 if (decoder.ShowHelp == "macros")
                 {
                     Console.WriteLine("MACROS:");
-                    Console.WriteLine("Always use the form ${MACRO_NAME}, and not $MACRO_NAME.");
+
+                    Console.WriteLine("Macro variables may be used with the following configuration items:");
+
+                    Console.WriteLine($"{nameof(ConfigurationReader.DesktopFile)}, {nameof(ConfigurationReader.MetaFile)}, {nameof(ConfigurationReader.DotnetPublishArgs)}, " +
+                    $"{nameof(ConfigurationReader.DotnetPostPublish)} and {nameof(ConfigurationReader.DotnetPostPublishOnWindows)}.");
+
+                    Console.WriteLine();
+                    Console.WriteLine("IMPORTANT: Always use the ${MACRO_NAME} form, and not $MACRO_NAME.");
                     Console.WriteLine();
                     Console.WriteLine(new MacrosExpander().ToString(true));
                     Console.WriteLine();
@@ -122,6 +129,18 @@ internal class Program
                 return 0;
             }
 
+            if (decoder.Parser.GetOrDefault("update-conf", false))
+            {
+                // Undocumented feature - may add later
+                var conf = new ConfigurationReader(decoder, false);
+                var path = conf.Reader.Filepath;
+
+                var ops = new FileOps();
+                ops.CopyFile(path, path + ".old");
+                ops.WriteFile(path, conf.ToString(decoder.IsVerbose), true);
+                return 0;
+            }
+
             // BUILD AND RUN
             Console.WriteLine($"{ProductName} {Version}");
             Console.WriteLine($"Conf File: {decoder.Value ?? "[None]"}");
@@ -137,8 +156,8 @@ internal class Program
             Console.WriteLine();
             Console.WriteLine("FAILED");
 
-            Console.WriteLine(e);
-            // Console.WriteLine(e.Message);
+            // Console.WriteLine(e);
+            Console.WriteLine(e.Message);
             Console.WriteLine();
             return 1;
         }
@@ -151,12 +170,6 @@ internal class Program
         if (all || args.New == NewKind.Conf)
         {
             CreateNewSingleFile(NewKind.Conf, args);
-        }
-
-        if (args.New == NewKind.ConfMin)
-        {
-            // Not all
-            CreateNewSingleFile(NewKind.ConfMin, args);
         }
 
         if (all || args.New == NewKind.Desktop)
@@ -189,16 +202,13 @@ internal class Program
             switch (kind)
             {
                 case NewKind.Conf:
-                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(true));
-                    break;
-                case NewKind.ConfMin:
-                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(false));
+                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(args.IsVerbose), true);
                     break;
                 case NewKind.Desktop:
-                    fop.WriteFile(path, MetaTemplates.Desktop);
+                    fop.WriteFile(path, MetaTemplates.Desktop, true);
                     break;
                 case NewKind.Meta:
-                    fop.WriteFile(path, MetaTemplates.MetaInfo);
+                    fop.WriteFile(path, MetaTemplates.MetaInfo, true);
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid {kind} value");
@@ -208,7 +218,7 @@ internal class Program
 
     private static string GetNewPath(NewKind kind, string? baseName)
     {
-        const string Default = "app";
+        const string Default = "Deploy";
         var ext = kind.GetFileExt();
 
         if (!string.IsNullOrEmpty(baseName))

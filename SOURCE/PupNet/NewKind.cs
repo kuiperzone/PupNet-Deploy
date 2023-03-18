@@ -29,14 +29,9 @@ public enum NewKind
     None = 0,
 
     /// <summary>
-    /// Conf file with comments.
+    /// Conf file.
     /// </summary>
     Conf,
-
-    /// <summary>
-    /// Conf file without comments.
-    /// </summary>
-    ConfMin,
 
     /// <summary>
     /// Desktop file.
@@ -66,8 +61,7 @@ public static class NewKindExtension
     {
         switch (kind)
         {
-            case NewKind.Conf:
-            case NewKind.ConfMin: return $".{Program.CommandName}.conf";
+            case NewKind.Conf: return $".{Program.CommandName}.conf";
             case NewKind.Desktop: return ".desktop";
             case NewKind.Meta: return ".metainfo.xml";
             default: return "";

@@ -119,14 +119,20 @@ public class ArgumentReader
     public ArgumentReader(ArgumentParser args)
     {
         _string = args.ToString();
+        Parser = args;
 
         Value = args.Value;
 
         New = AssertEnum<NewKind>(NewShortArg, NewLongArg,
             args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None.ToString()));
+
+        Arch = args.GetOrDefault(ArchShortArg, ArchLongArg, null);
         Runtime = args.GetOrDefault(RidShortArg, RidLongArg, ArchitectureConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
+        AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
+        IsVerbose = args.GetOrDefault(VerboseLongArg, false);
+        IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
         if (New == NewKind.None)
         {
@@ -135,13 +141,9 @@ public class ArgumentReader
             Kind = AssertEnum<DeployKind>(KindShortArg, KindLongArg,
                 args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind.ToString()));
 
-            AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
             Property = args.GetOrDefault(PropertyShortArg, PropertyLongArg, null);
-            Arch = args.GetOrDefault(ArchShortArg, ArchLongArg, null);
             Output = args.GetOrDefault(OutputShortArg, OutputLongArg, null);
             IsRun = args.GetOrDefault(RunShortArg, RunLongArg, false);
-            IsVerbose = args.GetOrDefault(VerboseLongArg, false);
-            IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
             ShowVersion = args.GetOrDefault(VersionLongArg, false);
             ShowHelp = args.GetOrDefault(HelpShortArg, HelpLongArg, null)?.ToLowerInvariant();
@@ -152,6 +154,11 @@ public class ArgumentReader
     /// Get the default package kind.
     /// </summary>
     public static DeployKind DefaultKind { get; }
+
+    /// <summary>
+    /// Gets internal parser instance.
+    /// </summary>
+    public ArgumentParser Parser { get; }
 
     /// <summary>
     /// Gets the unknown arg value. Typically file name.
@@ -298,9 +305,9 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [{string.Join('|', Enum.GetValues<NewKind>())}]");
         sb.AppendLine($"{indent}Creates a new empty conf file or associated file for new project. A base file name may");
-        sb.AppendLine($"{indent}optionally be given. Use {NewKind.ConfMin} to generate a configuration file without verbose");
-        sb.AppendLine($"{indent}documentation. Use {NewKind.All} to generate a full set of configuration assets.");
-        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All}");
+        sb.AppendLine($"{indent}optionally be given. If --{VerboseLongArg} also given, generates a configuration file");
+        sb.AppendLine($"{indent}with docmentation comments. Use {NewKind.All} to generate a full set of configuration assets.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All} --{VerboseLongArg}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [args|macros|conf]");
         sb.AppendLine($"{indent}Show help information. Optional value specifies what kind of information to display.");

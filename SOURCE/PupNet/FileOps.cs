@@ -189,9 +189,9 @@ public class FileOps
     /// <summary>
     /// Writes file content. Does nothing if either value is null.
     /// </summary>
-    public void WriteFile(string? path, string? content)
+    public void WriteFile(string? path, string? content, bool replace = false)
     {
-        if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(content) && !File.Exists(path))
+        if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(content) && (replace || !File.Exists(path)))
         {
             try
             {

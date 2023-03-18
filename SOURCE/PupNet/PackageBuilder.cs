@@ -261,23 +261,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written. If null, no file is saved.
     /// </summary>
-    public abstract string? ManifestDest { get; }
-
-    /// <summary>
-    /// Gets the destination path of the license file in the build directory.
-    /// </summary>
-    public string? LicenseDest
-    {
-        get
-        {
-            if (Configuration.LicenseFile != null)
-            {
-                return Path.Combine(PublishBin, Path.GetFileName(Configuration.LicenseFile));
-            }
-
-            return null;
-        }
-    }
+    public abstract string? ManifestDestination { get; }
 
     /// <summary>
     /// Gets the "manifest content" specific to the package kind provided for display purposes. For RPM, this is the
@@ -296,12 +280,28 @@ public abstract class PackageBuilder
     public abstract bool SupportsPostRun { get; }
 
     /// <summary>
+    /// Gets the destination path of the license file in the build directory.
+    /// </summary>
+    public string? LicenseDestination
+    {
+        get
+        {
+            if (Configuration.LicenseFile != null)
+            {
+                return Path.Combine(PublishBin, Path.GetFileName(Configuration.LicenseFile));
+            }
+
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Create directories tree. It will be called at the start of the build process to create all build directories
     /// and populate them with standard assets. It does not populate the application binary. The base implementation
     /// writes the "desktop" and "metainfo" (expanded) content to locations under <see cref="DesktopPath"/> and
     /// <see cref="MetaInfoPath"/> respectively. It does nothing for these for Windows packages or if the respective
     /// string is null or empty. It copies <see cref="IconPaths"/> to their respective destinations, and writes
-    /// <see cref="ManifestContent"/> to <see cref="ManifestDest"/>. Finally, it ensures that <see cref="OutputDirectory"/>
+    /// <see cref="ManifestContent"/> to <see cref="ManifestDestination"/>. Finally, it ensures that <see cref="OutputDirectory"/>
     /// exists. It should be overridden to perform additional tasks, but subclass should call this base method first.
     /// </summary>
     public virtual void Create(string? desktop, string? metainfo)
@@ -317,6 +317,11 @@ public abstract class PackageBuilder
         Operations.CreateDirectory(BuildShareApplications);
         Operations.CreateDirectory(BuildShareMeta);
         Operations.CreateDirectory(PublishBin);
+
+        // For example, debian needs subdirectories for these files.
+        // Calls do nothing if respective property is null
+        Operations.CreateDirectory(Path.GetDirectoryName(ManifestDestination));
+        Operations.CreateDirectory(Path.GetDirectoryName(LicenseDestination));
 
         if (!IsWindowsPackage)
         {
@@ -382,21 +387,22 @@ public abstract class PackageBuilder
         // Must exist
         Operations.AssertExists(Path.Combine(PublishBin, AppExecName));
 
-        // Write manifest just before build, as ManifestContents may
-        // change Before Create() and build in some deployments.
-        Operations.WriteFile(ManifestDest, ManifestContent);
-
-        if (Configuration.LicenseFile != null && LicenseDest != null)
+        // Must come before we call ManifestContent
+        if (Configuration.LicenseFile != null && LicenseDestination != null)
         {
-           var content = Configuration.ReadAssociatedFile(Configuration.LicenseFile);
-            Operations.WriteFile(LicenseDest, content);
+            var content = Configuration.ReadAssociatedFile(Configuration.LicenseFile);
+            Operations.WriteFile(LicenseDestination, content);
         }
+
+        // Write manifest just before build, as ManifestContents is virtual and
+        // may change after Create() and dotnet publish in some deployments.
+        Operations.WriteFile(ManifestDestination, ManifestContent);
 
         Operations.Execute(PackageCommands);
     }
 
     /// <summary>
-    /// Overrides. Provides console output.
+    /// Overrides.
     /// </summary>
     public override string ToString()
     {
