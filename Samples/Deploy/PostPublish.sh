@@ -1,10 +1,10 @@
 #!/bin/bash
-# This is a dummy script only used for test. It output a few variables and creates
-# a dummy file in the application directory which will be detected by the program.
+# This is a dummy bash script used for demonstration and test. It outputs a few variables
+# and creates a dummy file in the application directory which will be detected by the program.
 
 echo
 echo "==========================="
-echo "POST_PUBLISH SCRIPT"
+echo "POST_PUBLISH BASH SCRIPT"
 echo "==========================="
 echo
 
@@ -17,8 +17,10 @@ echo
 
 # Directory and file will be detected by HelloWorld Program
 echo "Do work..."
+set -x #echo on
 mkdir -p "${PUBLISH_BIN}/subdir"
 touch "${PUBLISH_BIN}/subdir/file.test"
+set +x #echo off
 
 echo
 echo "==========================="

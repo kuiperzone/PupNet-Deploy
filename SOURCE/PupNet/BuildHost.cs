@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -47,11 +48,18 @@ public class BuildHost
 
         var kind = Builder.Architecture.Kind;
 
+        // Additional validation
+        if (!Configuration.AppId.Contains('.'))
+        {
+            // AppId must have a '.'
+            Builder.WarningSink.Add($"WARNING. Configuration item {nameof(Configuration.AppId)} should be in reverse DNS form, i.e. 'net.example.appname'");
+        }
+
         if (!kind.IsWindows())
         {
             var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
 
-            // Careful - filename may equal "NONE"
+            // Careful - check filename, not content as filename may equal "NONE"
             if (Configuration.DesktopFile == null)
             {
                 // Magic desktop file
@@ -82,15 +90,31 @@ public class BuildHost
             }
         }
 
+        if (Configuration.DotnetProjectPath == ConfigurationReader.PathDisable)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (Configuration.DotnetPostPublishOnWindows == null)
+                {
+                    Builder.WarningSink.Add($"CRITICAL. Configuration of {nameof(Configuration.DotnetPostPublishOnWindows)} is mandatory where {nameof(Configuration.DotnetProjectPath)} = {ConfigurationReader.PathDisable}");
+                }
+            }
+            else
+            if (Configuration.DotnetPostPublish == null)
+            {
+                Builder.WarningSink.Add($"CRITICAL. Configuration of {nameof(Configuration.DotnetPostPublish)} is mandatory where {nameof(Configuration.DotnetProjectPath)} = {ConfigurationReader.PathDisable}");
+            }
+        }
+
         if (Builder.Architecture.IsWindowsRuntime != kind.IsWindows(false))
         {
-            Builder.WarningSink.Add($"WARNING. You are going to package a {Builder.Architecture.RuntimeId} runtime as {kind}\n"
-                + "Is this really what you want to do?");
+            Builder.WarningSink.Add($"WARNING. You are going to package a {Builder.Architecture.RuntimeId} runtime as {kind}\n" +
+                "Is this really what you want to do?");
         }
 
         if (!kind.CanBuildOnSystem())
         {
-            Builder.WarningSink.Add($"CRITICAL. Building {kind} packages is not supported on a {ArchitectureConverter.SimpleOS} development system\n");
+            Builder.WarningSink.Add($"CRITICAL. Building {kind} packages is not supported on a {ArchitectureConverter.SimpleOS} development system");
         }
 
         PublishCommands = Macros.Expand(GetPublishCommands(Builder), nameof(PublishCommands));
@@ -162,7 +186,7 @@ public class BuildHost
             if (Arguments.IsVerbose)
             {
                 Console.WriteLine();
-                Console.WriteLine("BuildRoot:");
+                Console.WriteLine("Files to be deployed:");
 
                 foreach (var item in Builder.ListBuild(false))
                 {
@@ -199,13 +223,13 @@ public class BuildHost
     {
         var sb = new StringBuilder();
 
-        AppendHeader(sb, "APPLICATION");
+        AppendHeader(sb, $"APPLICATION: {Configuration.AppBaseName}");
         AppendPair(sb, nameof(Configuration.AppBaseName), Configuration.AppBaseName);
         AppendPair(sb, nameof(Configuration.AppId), Configuration.AppId);
         AppendPair(sb, nameof(Builder.AppVersion), Builder.AppVersion);
         AppendPair(sb, nameof(Builder.PackRelease), Builder.PackRelease);
 
-        AppendHeader(sb, "OUTPUT");
+        AppendHeader(sb, $"OUTPUT: {Arguments.Kind.ToString().ToUpperInvariant()}");
         AppendPair(sb, nameof(DeployKind), Arguments.Kind.ToString().ToLowerInvariant());
         AppendPair(sb, nameof(Arguments.Runtime), Arguments.Runtime);
         AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Builder.Architecture})");
@@ -215,10 +239,10 @@ public class BuildHost
 
         if (verbose)
         {
-            AppendSection(sb, "CONFIGURATION", Configuration.ToString(false));
+            AppendSection(sb, $"CONFIGURATION: {Path.GetFileName(Configuration.Reader.Filepath)}", Configuration.ToString(false));
         }
 
-        AppendSection(sb, "DESKTOP", ExpandedDesktop);
+        AppendSection(sb, $"DESKTOP: {Path.GetFileName(Configuration.DesktopFile)}", ExpandedDesktop);
 
         if (verbose)
         {
@@ -239,13 +263,20 @@ public class BuildHost
                 temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, Builder.MetaInfoPath));
             }
 
-            AppendSection(sb, "ASSETS", temp.ToString().TrimEnd());
-            AppendSection(sb, "METAINFO", ExpandedMetaInfo);
-            AppendSection(sb, "MANIFEST", Builder.ManifestContent?.TrimEnd());
+            AppendSection(sb, "DEPLOY ASSETS", temp.ToString().TrimEnd());
+            AppendSection(sb, $"METAINFO: {Path.GetFileName(Configuration.MetaFile)}", ExpandedMetaInfo);
+            AppendSection(sb, $"MANIFEST: {Path.GetFileName(Builder.ManifestDestination)}", Builder.ManifestContent?.TrimEnd());
         }
 
-        AppendSection(sb, "BUILD PROJECT", PublishCommands);
-        AppendSection(sb, "BUILD PACKAGE", Builder.PackageCommands);
+        string? proj = Path.GetFileName(Configuration.DotnetProjectPath);
+
+        if (!string.IsNullOrEmpty(proj))
+        {
+            proj = ": " + proj;
+        }
+
+        AppendSection(sb, $"BUILD PROJECT{proj}", PublishCommands);
+        AppendSection(sb, $"BUILD PACKAGE: {Builder.OutputName}", Builder.PackageCommands);
         AppendSection(sb, "WARNINGS", Builder.WarningSink);
 
         return sb.ToString().Trim();
@@ -258,9 +289,9 @@ public class BuildHost
             sb.AppendLine();
         }
 
-        sb.AppendLine(new string('=', 40));
+        sb.AppendLine(new string('=', 60));
         sb.AppendLine(title);
-        sb.AppendLine(new string('=', 40));
+        sb.AppendLine(new string('=', 60));
 
         if (spacer)
         {
@@ -384,11 +415,15 @@ public class BuildHost
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            list.AddRange(conf.DotnetPostPublishOnWindows);
+            if (conf.DotnetPostPublishOnWindows != null)
+            {
+                list.Add(conf.DotnetPostPublishOnWindows);
+            }
         }
         else
+        if (conf.DotnetPostPublish != null)
         {
-            list.AddRange(conf.DotnetPostPublish);
+            list.Add(conf.DotnetPostPublish);
         }
 
         return list;

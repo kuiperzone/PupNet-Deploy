@@ -86,8 +86,15 @@ public class ConfigurationReaderTest
     [Fact]
     public void DotnetPostPublish_Optional_DecodeOK()
     {
-        Assert.Equal(new string[]{"PostPublishCommand.sh"}, new DummyConf(DeployKind.AppImage).DotnetPostPublish);
-        Assert.Empty(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPostPublish)).DotnetPostPublish);
+        Assert.Equal("PostPublishCommand.sh", new DummyConf(DeployKind.AppImage).DotnetPostPublish);
+        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPostPublish)).DotnetPostPublish);
+    }
+
+    [Fact]
+    public void DotnetPostPublishOnWindows_Optional_DecodeOK()
+    {
+        Assert.Equal("PostPublishCommandOnWindows.bat", new DummyConf(DeployKind.AppImage).DotnetPostPublishOnWindows);
+        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPostPublishOnWindows)).DotnetPostPublishOnWindows);
     }
 
     [Fact]

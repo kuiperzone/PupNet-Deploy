@@ -40,7 +40,7 @@ public abstract class PackageBuilder
         Arguments = conf.Arguments;
         Configuration = conf;
         Architecture = new ArchitectureConverter(kind, Arguments.Runtime, Arguments.Arch);
-        IsWindowsPackage = kind.IsWindows();
+        IsNonWindowsPackage = !kind.IsWindows();
 
         AppVersion = SplitVersion(conf.VersionRelease, out string temp);
         PackRelease = temp;
@@ -110,9 +110,9 @@ public abstract class PackageBuilder
     public ICollection<string> WarningSink { get; } = new List<string>();
 
     /// <summary>
-    /// Gets whether output is for Windows.
+    /// Gets whether output is for a non-Windows system (i.e. Linux).
     /// </summary>
-    public bool IsWindowsPackage { get; }
+    public bool IsNonWindowsPackage { get; }
 
     /// <summary>
     /// Gets the application version. This is the configured version, excluding any Release suffix.
@@ -162,47 +162,47 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the build usr/bin directory, "${BuildRoot}/usr/bin". We do not necessarily publish here.
-    /// See <see cref="AppBin"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// See <see cref="AppBin"/>. Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? BuildUsrBin
     {
-        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "bin"); }
+        get { return IsNonWindowsPackage ? Path.Combine(AppRoot, "usr", "bin") : null; }
     }
 
     /// <summary>
-    /// Gets the build share directory, i.e. "${BuildRoot}/usr/share". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the build share directory, i.e. "${BuildRoot}/usr/share". Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? BuildUsrShare
     {
-        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share"); }
+        get { return IsNonWindowsPackage ? Path.Combine(AppRoot, "usr", "share") : null; }
     }
 
     /// <summary>
-    /// Gets the app metainfo directory, i.e. "${BuildRoot}/usr/share/metainfo". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the app metainfo directory, i.e. "${BuildRoot}/usr/share/metainfo". Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? BuildShareMeta
     {
-        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "metainfo"); }
+        get { return IsNonWindowsPackage ? Path.Combine(AppRoot, "usr", "share", "metainfo") : null; }
     }
 
     /// <summary>
-    /// Gets the build metainfo directory, i.e. "${BuildRoot}/usr/share/applications". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the build metainfo directory, i.e. "${BuildRoot}/usr/share/applications". Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? BuildShareApplications
     {
-        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "applications"); }
+        get { return IsNonWindowsPackage ? Path.Combine(AppRoot, "usr", "share", "applications") : null; }
     }
 
     /// <summary>
-    /// Gets the build icons directory, i.e. "${BuildRoot}/usr/share/icons". Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the build icons directory, i.e. "${BuildRoot}/usr/share/icons". Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? BuildShareIcons
     {
-        get { return IsWindowsPackage ? null : Path.Combine(AppRoot, "usr", "share", "icons"); }
+        get { return IsNonWindowsPackage ? Path.Combine(AppRoot, "usr", "share", "icons") : null; }
     }
 
     /// <summary>
-    /// Gets the desktop build file path. Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// Gets the desktop build file path. Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public string? DesktopPath
     {
@@ -219,7 +219,7 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the AppStream build file path. AppImage needs to override, otherwise default is standard under
-    /// <see cref="BuildShareMeta"/>. Returns null if <see cref="IsWindowsPackage"/> is true.
+    /// <see cref="BuildShareMeta"/>. Returns null if <see cref="IsNonWindowsPackage"/> is false
     /// </summary>
     public virtual string? MetaInfoPath
     {
@@ -323,9 +323,8 @@ public abstract class PackageBuilder
         Operations.CreateDirectory(Path.GetDirectoryName(ManifestDestination));
         Operations.CreateDirectory(Path.GetDirectoryName(LicenseDestination));
 
-        if (!IsWindowsPackage)
+        if (IsNonWindowsPackage)
         {
-            // Non-Windows only
             Operations.WriteFile(DesktopPath, desktop);
             Operations.WriteFile(MetaInfoPath, metainfo);
 
@@ -355,18 +354,14 @@ public abstract class PackageBuilder
         {
             var files = FileOps.ListFiles(AppRoot, "*");
 
-            for (int n = 0; n < files.Length; ++n)
+            if (sysrooted)
             {
-                if (sysrooted)
+                for (int n = 0; n < files.Length; ++n)
                 {
                     if (!files[n].StartsWith('/'))
                     {
                         files[n] = "/" + files[n];
                     }
-                }
-                else
-                {
-                    files[n] = Path.Combine(AppRootName, files[n]);
                 }
             }
 

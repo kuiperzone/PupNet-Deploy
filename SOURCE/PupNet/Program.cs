@@ -131,7 +131,7 @@ internal class Program
 
             if (decoder.Parser.GetOrDefault("update-conf", false))
             {
-                // Undocumented feature - may add later
+                // Undocumented feature. Internal use
                 var conf = new ConfigurationReader(decoder, false);
                 var path = conf.Reader.Filepath;
 
@@ -156,8 +156,11 @@ internal class Program
             Console.WriteLine();
             Console.WriteLine("FAILED");
 
-            // Console.WriteLine(e);
+#if DEBUG
+            Console.WriteLine(e);
+#else
             Console.WriteLine(e.Message);
+#endif
             Console.WriteLine();
             return 1;
         }
@@ -218,7 +221,7 @@ internal class Program
 
     private static string GetNewPath(NewKind kind, string? baseName)
     {
-        const string Default = "Deploy";
+        const string Default = "app";
         var ext = kind.GetFileExt();
 
         if (!string.IsNullOrEmpty(baseName))

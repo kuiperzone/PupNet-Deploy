@@ -115,8 +115,8 @@ public class ConfigurationReader
 
         DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable);
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs), ValueFlags.None);
-        DotnetPostPublish = GetCollection(nameof(DotnetPostPublish), ValueFlags.None);
-        DotnetPostPublishOnWindows = GetCollection(nameof(DotnetPostPublishOnWindows), ValueFlags.None);
+        DotnetPostPublish = GetOptional(nameof(DotnetPostPublish), ValueFlags.AssertPath);
+        DotnetPostPublishOnWindows = GetOptional(nameof(DotnetPostPublishOnWindows), ValueFlags.AssertPath);
 
         PackageName = GetOptional(nameof(PackageName), ValueFlags.StrictSafe) ?? AppBaseName;
         OutputDirectory = GetOptional(nameof(OutputDirectory), ValueFlags.Path) ?? LocalDirectory;
@@ -132,24 +132,6 @@ public class ConfigurationReader
 
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
-
-        // Additional validation
-        if (!AppId.Contains('.'))
-        {
-            // AppId must have a '.'
-            throw new ArgumentException($"{nameof(AppId)} must be in reverse DNS form, i.e. 'net.example.appname'");
-        }
-
-        if (DotnetProjectPath == PathDisable)
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                if (DotnetPostPublish.Count == 0)
-                {
-                    throw new ArgumentException($"{nameof(DotnetPostPublish)} is mandatory where {nameof(DotnetProjectPath)} = {PathDisable}");
-                }
-            }
-        }
     }
 
     /// <summary>
@@ -194,8 +176,8 @@ public class ConfigurationReader
 
     public string? DotnetProjectPath { get; }
     public string? DotnetPublishArgs { get; } = $"-p:Version={MacroId.AppVersion.ToVar()} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
-    public IReadOnlyCollection<string> DotnetPostPublish { get; } = Array.Empty<string>();
-    public IReadOnlyCollection<string> DotnetPostPublishOnWindows { get; } = Array.Empty<string>();
+    public string? DotnetPostPublish { get; }
+    public string? DotnetPostPublishOnWindows { get; }
 
     public string PackageName { get; }
     public string OutputDirectory { get; } = "Deploy/bin";
@@ -252,7 +234,7 @@ public class ConfigurationReader
         // Convenience
         var breaker1 = new string('#', 80);
         var breaker2 = new string('#', 40);
-        string macHelp = $"{Program.CommandName} --{ArgumentReader.HelpLongArg} macro";
+        string macHelp = $"'{Program.CommandName} --{ArgumentReader.HelpLongArg} macro'";
 
         var sb = new StringBuilder();
 
@@ -409,16 +391,16 @@ public class ConfigurationReader
         c?.AppendLine($"# dotnet publish, but before the final output is built. These could, for example, copy additional");
         c?.AppendLine($"# files into the build directory given by {MacroId.PublishBin.ToVar()}. The working directory will be the");
         c?.AppendLine($"# location of this file. This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathDisable}'.");
-        c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these are environment variables.");
+        c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these as environment variables.");
         c?.AppendLine($"# Use {macHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
         c?.AppendLine();
         c?.AppendLine($"# Post-publish (or standalone build) commands on Windows (ignored on Linux). This should perform");
-        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)}, but using DOS");
-        c?.AppendLine($"# commands and batch scripts. Multiple commands may be specified, separated by semicolon or given");
-        c?.AppendLine($"# in multi-line form. Note. This value may use macro variables. Additionally, scripts may use");
-        c?.AppendLine($"# these are environment variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)}, but using DOS commands and batch scripts.");
+        c?.AppendLine($"# Multiple commands may be specified, separated by semicolon or given in multi-line form. Note. This value");
+        c?.AppendLine($"# may use macro variables. Additionally, scripts may use these as environment variables.");
+        c?.AppendLine($"# Use {macHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublishOnWindows), DotnetPostPublishOnWindows));
 
         sb.AppendLine();
@@ -430,7 +412,7 @@ public class ConfigurationReader
         c?.AppendLine($"# Optional package name (excludes version etc.). If empty, defaults to {nameof(AppBaseName)}.");
         c?.AppendLine($"# However, it is used not only to specify the base output filename, but to identify the application");
         c?.AppendLine($"# in .deb and .rpm packages. You may wish, therefore, to ensure that the value represents a");
-        c?.AppendLine($"# unique name, such as: {nameof(AppId)}. Naming requirements for this are strict and must");
+        c?.AppendLine($"# unique name, such as the {nameof(AppId)}. Naming requirements for this are strict and must");
         c?.AppendLine($"# contain only alpha-numeric and '-', '+' and '.' characters. Example: HelloWorld");
         sb.AppendLine(GetHelpNameValue(nameof(PackageName), PackageName));
 

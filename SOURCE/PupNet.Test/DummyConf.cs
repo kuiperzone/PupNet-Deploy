@@ -57,6 +57,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.DotnetProjectPath)} = HelloProject");
         lines.Add($"{nameof(ConfigurationReader.DotnetPublishArgs)} = --self-contained true");
         lines.Add($"{nameof(ConfigurationReader.DotnetPostPublish)} = PostPublishCommand.sh");
+        lines.Add($"{nameof(ConfigurationReader.DotnetPostPublishOnWindows)} = PostPublishCommandOnWindows.bat");
 
         lines.Add($"{nameof(ConfigurationReader.OutputDirectory)} = Deploy");
         lines.Add($"{nameof(ConfigurationReader.OutputVersion)} = true");

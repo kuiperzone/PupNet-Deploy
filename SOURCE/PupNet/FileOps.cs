@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -255,9 +256,31 @@ public class FileOps
     /// </summary>
     public int Execute(string command, string? args, bool throwNonZeroExit = true)
     {
-        bool redirect = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        bool redirect = false;
+        string orig = command.ToLowerInvariant();
 
-        WriteLine($"{command} {args}");
+        if (orig == "rem" || orig == "::" || orig == "#")
+        {
+            // Ignore commands which look like comments
+            return 0;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            redirect = true;
+
+            if (orig != "cmd" && orig != "cmd.exe")
+            {
+                // Fix up dos command
+                args = $"/C {command} {args}";
+                command = "cmd";
+            }
+        }
+
+        if (orig != "echo")
+        {
+            WriteLine($"{command} {args}");
+        }
 
         var info = new ProcessStartInfo
         {
