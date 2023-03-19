@@ -8,9 +8,9 @@
 
     <IsPackable>false</IsPackable>
 	<IsPublishable>true</IsPublishable>
+	<PublishReadyToRun>true</PublishReadyToRun>
 	<ApplicationIcon>Assets/app.ico</ApplicationIcon>
 
-    <Version>1.0.0</Version>
     <PackageId>KuiperZone.PupNet</PackageId>
     <Product>PupNet Deploy</Product>
     <Authors>Andy Thomas</Authors>
@@ -28,10 +28,12 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
+		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage"
+			Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage">
+		<None Include="$(ProjectDir)\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage"
+			Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
