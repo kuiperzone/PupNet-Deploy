@@ -22,6 +22,8 @@ desktop.ini
 # Ignore Builds & Binaries
 ###############################################################################
 
+INTERNAL/
+
 # Bin, Obj, Out, Output
 **/[Bb][Ii][Nn]/
 **/[Oo][Bb][Jj]/
