@@ -8,18 +8,19 @@
 
     <IsPackable>false</IsPackable>
 	<IsPublishable>true</IsPublishable>
+	<ApplicationIcon>Assets/app.ico</ApplicationIcon>
 
     <Version>1.0.0</Version>
     <PackageId>KuiperZone.PupNet</PackageId>
-    <Product>PupNet</Product>
+    <Product>PupNet Deploy</Product>
     <Authors>Andy Thomas</Authors>
     <Copyright>© Andy Thomas 2022-23</Copyright>
     <Company>KuiperZone</Company>
-    <Description>Publish and Package to AppImage, RPM, Deb, Flatpak and Windows Setup</Description>
-    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux;setup</PackageTags>
+    <Description>Publish, Package and Deploy to AppImage, Windows Setup Flatpak, Deb, RPM</Description>
+    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux;</PackageTags>
     <Language>en-US</Language>
-    <PackageProjectUrl>https://github.com/kuiperzone/PupNet</PackageProjectUrl>
-    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/kuiperzone/PupNet-Deploy</PackageProjectUrl>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 
   </PropertyGroup>
   <ItemGroup>
