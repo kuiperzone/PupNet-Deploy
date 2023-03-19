@@ -1,0 +1,30 @@
+
+
+LICENSE causing RPM to fail. Test others
+
+Test Deb, RPM
+
+
+DONE
+Hook up license to Inno
+Filesafe values
+Make XML safe
+Check for exec
+AssertOK() - update
+Need maintainer field
+Need PackageName field (lowercase in rpm/deb)
+Rigorous checks on name,id, PackageName
+Warning for no desktop or appstream
+BuildArch in rpm
+File to value arg
+Fully qualified files
+Conf categories
+Macro final output
+PackRelease
+Embed AppImage
+Default conf file -- look in directories
+Icons
+
+RPM build warnings:
+    source_date_epoch_from_changelog set but %changelog is missing
+
