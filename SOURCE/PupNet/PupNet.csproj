@@ -5,7 +5,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsPackable>true</IsPackable>
+
+    <IsPackable>false</IsPackable>
+	<IsPublishable>true</IsPublishable>
 
     <Version>1.0.0</Version>
     <PackageId>KuiperZone.PupNet</PackageId>
@@ -13,8 +15,8 @@
     <Authors>Andy Thomas</Authors>
     <Copyright>© Andy Thomas 2022-23</Copyright>
     <Company>KuiperZone</Company>
-    <Description>Publish and deploy to AppImage,RPM,Deb,Flatpak and Windwos</Description>
-    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux</PackageTags>
+    <Description>Publish and Package to AppImage, RPM, Deb, Flatpak and Windows Setup</Description>
+    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux;setup</PackageTags>
     <Language>en-US</Language>
     <PackageProjectUrl>https://github.com/kuiperzone/PupNet</PackageProjectUrl>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
@@ -32,25 +34,25 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
-		<None Include="$(ProjectDir)\Assets\generic.svg" Link="app.svg">
+		<None Include="$(ProjectDir)\Assets\generic.svg" Link="generic.svg">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.ico" Link="app.ico">
+		<None Include="$(ProjectDir)\Assets\generic.ico" Link="generic.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.16x16.png" Link="app.16x16.png">
+		<None Include="$(ProjectDir)\Assets\generic.16x16.png" Link="generic.16x16.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.24x24.png" Link="app.24x24.png">
+		<None Include="$(ProjectDir)\Assets\generic.24x24.png" Link="generic.24x24.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.32x32.png" Link="app.32x32.png">
+		<None Include="$(ProjectDir)\Assets\generic.32x32.png" Link="generic.32x32.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.48x48.png" Link="app.48x48.png">
+		<None Include="$(ProjectDir)\Assets\generic.48x48.png" Link="generic.48x48.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\generic.64x64.png" Link="app.64x64.png">
+		<None Include="$(ProjectDir)\Assets\generic.64x64.png" Link="generic.64x64.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 

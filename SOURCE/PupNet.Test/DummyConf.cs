@@ -18,15 +18,27 @@
 
 namespace KuiperZone.PupNet.Test;
 
+/// <summary>
+/// Dummy configuration with test values. Used in unit tests.
+/// </summary>
 public class DummyConf : ConfigurationReader
 {
-    public DummyConf(DeployKind kind, string? omit = null)
-        : base(new ArgumentReader("-k " + kind), Create(omit))
+    public DummyConf()
+        : base(new ArgumentReader(), Create())
     {
     }
 
     public DummyConf(ArgumentReader args)
         : base(args, Create())
+    {
+    }
+
+    /// <summary>
+    /// Creates demo of given kind. If omit is not null, the property name given
+    /// will be removed from the content, leaving the value to fall back to its default.
+    /// </summary>
+    public DummyConf(PackageKind kind, string? omit = null)
+        : base(new ArgumentReader("-k " + kind), Create(omit))
     {
     }
 
@@ -37,16 +49,18 @@ public class DummyConf : ConfigurationReader
         // Quote variations
         lines.Add($"{nameof(ConfigurationReader.AppBaseName)} = 'HelloWorld'");
         lines.Add($"{nameof(ConfigurationReader.AppFriendlyName)} = Hello World");
-        lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloword\"");
-        lines.Add($"{nameof(ConfigurationReader.VersionRelease)} = 5.4.3[2]");
+        lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloworld\"");
+        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
         lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
-        lines.Add($"{nameof(ConfigurationReader.ShortSummary)} = Test application only");
-        lines.Add($"{nameof(ConfigurationReader.LicenseId)} = LicenseRef-LICENSE");
+        lines.Add($"{nameof(ConfigurationReader.AppShortSummary)} = Test <application> only");
+        lines.Add($"{nameof(ConfigurationReader.AppLicenseId)} = LicenseRef-LICENSE");
+        lines.Add($"{nameof(ConfigurationReader.AppLicenseFile)} = LICENSE");
 
-        lines.Add($"{nameof(ConfigurationReader.VendorName)} = KuiperZone");
-        lines.Add($"{nameof(ConfigurationReader.VendorCopyright)} = Copyright KuiperZone");
-        lines.Add($"{nameof(ConfigurationReader.VendorUrl)} = https://kuiper.zone");
-        lines.Add($"{nameof(ConfigurationReader.VendorEmail)} = email@example.net");
+        lines.Add($"{nameof(ConfigurationReader.PublisherName)} = Kuiper Zone");
+        lines.Add($"{nameof(ConfigurationReader.PublisherCopyright)} = Copyright Kuiper Zone");
+        lines.Add($"{nameof(ConfigurationReader.PublisherLinkName)} = kuiper.zone");
+        lines.Add($"{nameof(ConfigurationReader.PublisherLinkUrl)} = https://kuiper.zone");
+        lines.Add($"{nameof(ConfigurationReader.PublisherEmail)} = email@example.net");
 
         lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
         lines.Add($"{nameof(ConfigurationReader.IsTerminalApp)} = True");
@@ -70,8 +84,9 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
         lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
 
-        lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
+        lines.Add($"{nameof(ConfigurationReader.SetupPrompt)} = Command Prompt");
         lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
+        lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
 
         Remove(lines, omit);
 

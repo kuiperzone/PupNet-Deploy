@@ -12,14 +12,14 @@ echo
 echo "BUILD_ARCH: ${BUILD_ARCH}"
 echo "BUILD_TARGET: ${BUILD_TARGET}"
 echo "BUILD_SHARE: ${BUILD_SHARE}"
-echo "PUBLISH_BIN: ${PUBLISH_BIN}"
+echo "BUILD_APP_BIN: ${BUILD_APP_BIN}"
 echo
 
 # Directory and file will be detected by HelloWorld Program
 echo "Do work..."
 set -x #echo on
-mkdir -p "${PUBLISH_BIN}/subdir"
-touch "${PUBLISH_BIN}/subdir/file.test"
+mkdir -p "${BUILD_APP_BIN}/subdir"
+touch "${BUILD_APP_BIN}/subdir/file.test"
 set +x #echo off
 
 echo

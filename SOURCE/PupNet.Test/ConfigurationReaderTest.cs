@@ -23,105 +23,163 @@ public class ConfigurationReaderTest
     [Fact]
     public void AppBaseName_Mandatory_DecodeOK()
     {
-        Assert.Equal("HelloWorld", new DummyConf(DeployKind.AppImage).AppBaseName);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.AppBaseName)));
+        Assert.Equal("HelloWorld", new DummyConf(PackageKind.AppImage).AppBaseName);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppBaseName)));
     }
 
     [Fact]
     public void AppId_Mandatory_DecodeOK()
     {
-        Assert.Equal("net.example.helloword", new DummyConf(DeployKind.AppImage).AppId);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.AppId)));
+        Assert.Equal("net.example.helloworld", new DummyConf(PackageKind.AppImage).AppId);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppId)));
     }
 
     [Fact]
     public void AppFriendlyName_Mandatory_DecodeOK()
     {
-        Assert.Equal("Hello World", new DummyConf(DeployKind.AppImage).AppFriendlyName);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.AppFriendlyName)));
+        Assert.Equal("Hello World", new DummyConf(PackageKind.AppImage).AppFriendlyName);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppFriendlyName)));
     }
 
     [Fact]
-    public void VersionRelease_Mandatory_DecodeOK()
+    public void AppVersionRelease_Mandatory_DecodeOK()
     {
-        Assert.Equal("5.4.3[2]", new DummyConf(DeployKind.AppImage).VersionRelease);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.VersionRelease)).VersionRelease);
+        Assert.Equal("5.4.3[2]", new DummyConf(PackageKind.AppImage).AppVersionRelease);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppVersionRelease)).AppVersionRelease);
     }
 
     [Fact]
-    public void ShortSummary_Mandatory_DecodeOK()
+    public void AppShortSummary_Mandatory_DecodeOK()
     {
-        Assert.Equal("Test application only", new DummyConf(DeployKind.AppImage).ShortSummary);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.ShortSummary)).ShortSummary);
+        // Use of angle brackets deliberate
+        Assert.Equal("Test <application> only", new DummyConf(PackageKind.AppImage).AppShortSummary);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppShortSummary)).AppShortSummary);
+    }
+
+    [Fact]
+    public void AppLicenseId_Mandatory_DecodeOK()
+    {
+        Assert.Equal("LicenseRef-LICENSE", new DummyConf(PackageKind.AppImage).AppLicenseId);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppLicenseId)).AppLicenseId);
+    }
+
+    [Fact]
+    public void AppLicenseFile_Optional_DecodeOK()
+    {
+        Assert.Equal("LICENSE", new DummyConf(PackageKind.AppImage).AppLicenseFile);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.AppLicenseFile)).AppLicenseFile);
+    }
+
+    [Fact]
+    public void PublisherName_Mandatory_DecodeOK()
+    {
+        // Use of angle brackets deliberate
+        Assert.Equal("Kuiper Zone", new DummyConf(PackageKind.AppImage).PublisherName);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.PublisherName)).PublisherName);
+    }
+
+    [Fact]
+    public void PublisherCopyright_Optional_DecodeOK()
+    {
+        Assert.Equal("Copyright Kuiper Zone", new DummyConf(PackageKind.AppImage).PublisherCopyright);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.PublisherCopyright)).PublisherCopyright);
+    }
+
+    [Fact]
+    public void PublisherLinkName_Optional_DecodeOK()
+    {
+        Assert.Equal("kuiper.zone", new DummyConf(PackageKind.AppImage).PublisherLinkName);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.PublisherLinkName)).PublisherLinkName);
+    }
+
+    [Fact]
+    public void PublisherLinkUrl_Optional_DecodeOK()
+    {
+        Assert.Equal("https://kuiper.zone", new DummyConf(PackageKind.AppImage).PublisherLinkUrl);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.PublisherLinkUrl)).PublisherLinkUrl);
+    }
+
+    [Fact]
+    public void PublisherEmail_Optional_DecodeOK()
+    {
+        Assert.Equal("email@example.net", new DummyConf(PackageKind.AppImage).PublisherEmail);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.PublisherEmail)).PublisherEmail);
     }
 
     [Fact]
     public void DesktopFile_Optional_DecodeOK()
     {
-        Assert.Equal("app.desktop", new DummyConf(DeployKind.AppImage).DesktopFile);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DesktopFile)).DesktopFile);
+        Assert.Equal("app.desktop", new DummyConf(PackageKind.AppImage).DesktopFile);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DesktopFile)).DesktopFile);
     }
 
     [Fact]
     public void MetaFile_Optional_DecodeOK()
     {
-        Assert.Equal("metainfo.xml", new DummyConf(DeployKind.AppImage).MetaFile);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.MetaFile)).MetaFile);
+        Assert.Equal("metainfo.xml", new DummyConf(PackageKind.AppImage).MetaFile);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.MetaFile)).MetaFile);
     }
 
     [Fact]
     public void DotnetProjectPath_Optional_DecodeOK()
     {
-        Assert.Equal("HelloProject", new DummyConf(DeployKind.AppImage).DotnetProjectPath);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetProjectPath)).DotnetProjectPath);
+        Assert.Equal("HelloProject", new DummyConf(PackageKind.AppImage).DotnetProjectPath);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetProjectPath)).DotnetProjectPath);
     }
 
     [Fact]
     public void DotnetPublishArgs_Optional_DecodeOK()
     {
-        Assert.Equal("--self-contained true", new DummyConf(DeployKind.AppImage).DotnetPublishArgs);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPublishArgs)).DotnetPublishArgs);
+        Assert.Equal("--self-contained true", new DummyConf(PackageKind.AppImage).DotnetPublishArgs);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetPublishArgs)).DotnetPublishArgs);
     }
 
     [Fact]
     public void DotnetPostPublish_Optional_DecodeOK()
     {
-        Assert.Equal("PostPublishCommand.sh", new DummyConf(DeployKind.AppImage).DotnetPostPublish);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPostPublish)).DotnetPostPublish);
+        Assert.Equal("PostPublishCommand.sh", new DummyConf(PackageKind.AppImage).DotnetPostPublish);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetPostPublish)).DotnetPostPublish);
     }
 
     [Fact]
     public void DotnetPostPublishOnWindows_Optional_DecodeOK()
     {
-        Assert.Equal("PostPublishCommandOnWindows.bat", new DummyConf(DeployKind.AppImage).DotnetPostPublishOnWindows);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.DotnetPostPublishOnWindows)).DotnetPostPublishOnWindows);
+        Assert.Equal("PostPublishCommandOnWindows.bat", new DummyConf(PackageKind.AppImage).DotnetPostPublishOnWindows);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetPostPublishOnWindows)).DotnetPostPublishOnWindows);
     }
 
     [Fact]
     public void OutputVersionName_Mandatory_DecodeOK()
     {
-        Assert.True(new DummyConf(DeployKind.AppImage).OutputVersion);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.OutputVersion)));
+        Assert.True(new DummyConf(PackageKind.AppImage).OutputVersion);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.OutputVersion)));
     }
 
     [Fact]
-    public void SetupMinWindowsVersion_Mandatory_DecodeOK()
+    public void SetupCommandPrompt_Optional_DecodeOK()
     {
-        Assert.Equal("6.9", new DummyConf(DeployKind.AppImage).SetupMinWindowsVersion);
-        Assert.Throws<ArgumentException>(() => new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.SetupMinWindowsVersion)));
+        Assert.Equal("Command Prompt", new DummyConf(PackageKind.AppImage).SetupPrompt);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.SetupPrompt)).SetupPrompt);
     }
 
     [Fact]
     public void SetupSignTool_Optional_DecodeOK()
     {
-        Assert.Equal("signtool.exe", new DummyConf(DeployKind.AppImage).SetupSignTool);
-        Assert.Null(new DummyConf(DeployKind.AppImage, nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
+        Assert.Equal("signtool.exe", new DummyConf(PackageKind.AppImage).SetupSignTool);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
+    }
+
+    [Fact]
+    public void SetupMinWindowsVersion_Mandatory_DecodeOK()
+    {
+        Assert.Equal("6.9", new DummyConf(PackageKind.AppImage).SetupMinWindowsVersion);
+        Assert.Throws<ArgumentException>(() => new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.SetupMinWindowsVersion)));
     }
 
     [Fact]
     public void ToString_VisualInspection()
     {
-        Console.WriteLine(new DummyConf(DeployKind.AppImage).ToString());
+        Console.WriteLine(new DummyConf(PackageKind.AppImage).ToString(false));
     }
 
 }

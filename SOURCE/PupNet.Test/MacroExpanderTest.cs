@@ -23,10 +23,10 @@ namespace KuiperZone.PupNet.Test;
 public class MacroExpanderTest
 {
     [Fact]
-    public void Expand_ReplacesAllMacros()
+    public void Expand_EnsureNoMacroOmitted()
     {
         // Use factory to create one
-        var host = new BuildHost(new DummyConf(DeployKind.AppImage));
+        var host = new BuildHost(new DummyConf(PackageKind.AppImage));
 
         var sb = new StringBuilder();
 
@@ -40,6 +40,16 @@ public class MacroExpanderTest
         // Expect no remaining macros
         Console.WriteLine(test);
         Assert.DoesNotContain("${", test);
+    }
+
+    [Fact]
+    public void Expand_EscapeXMLCharacters()
+    {
+        var host = new BuildHost(new DummyConf(PackageKind.AppImage));
+
+        // Has XML chars
+        var summary = host.Macros.Expand("${APP_SHORT_SUMMARY}", true);
+        Assert.Equal("Test &lt;application&gt; only", summary);
     }
 
 }

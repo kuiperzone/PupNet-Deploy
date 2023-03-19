@@ -57,7 +57,7 @@ public class ArgumentReaderTest
     {
         // Default - changes depending on system
         var args = new ArgumentReader();
-        Assert.Equal(ArchitectureConverter.DefaultRuntime, args.Runtime);
+        Assert.Equal(RuntimeConverter.DefaultRuntime, args.Runtime);
 
         args = new ArgumentReader("-r test1");
         Assert.Equal("test1", args.Runtime);
@@ -69,33 +69,36 @@ public class ArgumentReaderTest
     [Fact]
     public void Kind_DecodeOK()
     {
-        var args = new ArgumentReader();
-        Assert.Equal(ArgumentReader.DefaultKind, args.Kind);
-
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
+            var args = new ArgumentReader();
+            Assert.Equal(PackageKind.AppImage, args.Kind);
+
             args = new ArgumentReader("-k rpm");
-            Assert.Equal(DeployKind.Rpm, args.Kind);
+            Assert.Equal(PackageKind.Rpm, args.Kind);
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
+            var args = new ArgumentReader();
+            Assert.Equal(PackageKind.Setup, args.Kind);
+
             args = new ArgumentReader("-k zip");
-            Assert.Equal(DeployKind.Zip, args.Kind);
+            Assert.Equal(PackageKind.Zip, args.Kind);
         }
     }
 
     [Fact]
-    public void AppVersion_DecodeOK()
+    public void VersionRelease_DecodeOK()
     {
         var args = new ArgumentReader();
-        Assert.Null(args.AppVersion);
+        Assert.Null(args.VersionRelease);
 
         args = new ArgumentReader("-v 5.4.3[2]");
-        Assert.Equal("5.4.3[2]", args.AppVersion);
+        Assert.Equal("5.4.3[2]", args.VersionRelease);
 
         args = new ArgumentReader("--app-version 5.4.3[2]");
-        Assert.Equal("5.4.3[2]", args.AppVersion);
+        Assert.Equal("5.4.3[2]", args.VersionRelease);
     }
 
     [Fact]
@@ -130,11 +133,8 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.Arch);
 
-        args = new ArgumentReader("-a arch1");
-        Assert.Equal("arch1", args.Arch);
-
-        args = new ArgumentReader("--arch arch2");
-        Assert.Equal("arch2", args.Arch);
+        args = new ArgumentReader("--arch archname");
+        Assert.Equal("archname", args.Arch);
     }
 
     [Fact]

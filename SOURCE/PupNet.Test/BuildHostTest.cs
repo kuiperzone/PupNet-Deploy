@@ -21,52 +21,51 @@ namespace KuiperZone.PupNet.Test;
 public class BuildHostTest
 {
     [Fact]
-    public void AppImage_DecodesOK()
+    public void Constructor_AppImage_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.AppImage));
-        AssertOK(host);
+        var host = new BuildHost(new DummyConf(PackageKind.AppImage));
+        Assert.Equal(PackageKind.AppImage, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 
     [Fact]
-    public void Flatpak_DecodesOK()
+    public void Constructor_Flatpak_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.Flatpak));
-        AssertOK(host);
+        var host = new BuildHost(new DummyConf(PackageKind.Flatpak));
+        Assert.Equal(PackageKind.Flatpak, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 
     [Fact]
-    public void Rpm_DecodesOK()
+    public void Constructor_Rpm_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.Rpm));
-        AssertOK(host);
+        var host = new BuildHost(new DummyConf(PackageKind.Rpm));
+        Assert.Equal(PackageKind.Rpm, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 
     [Fact]
-    public void Deb_DecodesOK()
+    public void Constructor_Debian_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.Deb));
-        AssertOK(host);
+        var host = new BuildHost(new DummyConf(PackageKind.Deb));
+        Assert.Equal(PackageKind.Deb, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 
     [Fact]
-    public void Setup_DecodesOK()
+    public void Constructor_Setup_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.Setup));
-        AssertOK(host);
+        var host = new BuildHost(new DummyConf(PackageKind.Setup));
+        Assert.Equal(PackageKind.Setup, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 
     [Fact]
-    public void Zip_DecodesOK()
+    public void Constructor_Zip_OK()
     {
-        var host = new BuildHost(new DummyConf(DeployKind.Zip));
-        AssertOK(host);
-    }
-
-    private void AssertOK(BuildHost host)
-    {
-        Console.WriteLine("DUMMY: " + host.GetType().Name);
-        Console.WriteLine(host.ToString(true));
-        Console.WriteLine();
-        Console.WriteLine();
+        var host = new BuildHost(new DummyConf(PackageKind.Zip));
+        Assert.Equal(PackageKind.Zip, host.Builder.Kind);
+        Assert.Equal(2, host.PublishCommands.Count);
     }
 }
+

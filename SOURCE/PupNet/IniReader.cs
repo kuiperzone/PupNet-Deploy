@@ -151,7 +151,7 @@ public class IniReader
             }
         }
 
-        return sb.ToString().Trim();
+        return sb.ToString().Trim().ReplaceLineEndings("\n");
     }
 
     private Dictionary<string, string> Parse(string[] content)

@@ -11,14 +11,14 @@ echo
 :: Some useful macros / environment variables
 echo BUILD_ARCH: %BUILD_ARCH%
 echo BUILD_TARGET: %BUILD_TARGET%
-echo PUBLISH_BIN: %PUBLISH_BIN%
+echo BUILD_APP_BIN: %BUILD_APP_BIN%
 echo
 
 :: Directory and file will be detected by HelloWorld Program
 echo Do work...
 @echo on
-mkdir "%PUBLISH_BIN%/subdir"
-copy NUL "%PUBLISH_BIN%/subdir/file.test"
+mkdir "%BUILD_APP_BIN%/subdir"
+copy NUL "%BUILD_APP_BIN%/subdir/file.test"
 @echo off
 
 echo

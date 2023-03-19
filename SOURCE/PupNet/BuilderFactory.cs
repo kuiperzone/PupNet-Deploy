@@ -32,20 +32,20 @@ public class BuilderFactory
     {
         switch (conf.Arguments.Kind)
         {
-            case DeployKind.AppImage: return new AppImageBuilder(conf);
-            case DeployKind.Flatpak: return new FlatpakBuilder(conf);
-            case DeployKind.Rpm: return new RpmBuilder(conf);
-            case DeployKind.Deb: return new DebBuilder(conf);
-            case DeployKind.Setup: return new SetupBuilder(conf);
-            case DeployKind.Zip: return new ZipBuilder(conf);
-            default: throw new ArgumentException($"Invalid or unsupported {nameof(DeployKind)} {conf.Arguments.Kind}");
+            case PackageKind.AppImage: return new AppImageBuilder(conf);
+            case PackageKind.Flatpak: return new FlatpakBuilder(conf);
+            case PackageKind.Rpm: return new RpmBuilder(conf);
+            case PackageKind.Deb: return new DebianBuilder(conf);
+            case PackageKind.Setup: return new SetupBuilder(conf);
+            case PackageKind.Zip: return new ZipBuilder(conf);
+            default: throw new ArgumentException($"Invalid or unsupported {nameof(PackageKind)} {conf.Arguments.Kind}");
         }
     }
 
     /// <summary>
     /// Creates with dummy configuration.
     /// </summary>
-    public PackageBuilder Create(DeployKind kind)
+    public PackageBuilder Create(PackageKind kind)
     {
         return Create(new ConfigurationReader(kind));
     }

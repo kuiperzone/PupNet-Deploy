@@ -23,7 +23,7 @@ namespace KuiperZone.PupNet;
 /// <summary>
 /// Defines deployable package kinds.
 /// </summary>
-public enum DeployKind
+public enum PackageKind
 {
     /// <summary>
     /// Simple zip. All platforms.
@@ -64,33 +64,33 @@ public static class DeployKindExtension
     /// <summary>
     /// Gets file extension.
     /// </summary>
-    public static string GetFileExt(this DeployKind kind)
+    public static string GetFileExt(this PackageKind kind)
     {
         switch (kind)
         {
-            case DeployKind.Zip: return ".zip";
-            case DeployKind.AppImage: return ".AppImage";
-            case DeployKind.Deb: return ".deb";
-            case DeployKind.Rpm: return ".rpm";
-            case DeployKind.Flatpak: return ".flatpak";
-            case DeployKind.Setup: return ".exe";
-            default: throw new ArgumentException($"Invalid {nameof(DeployKind)} {kind}");
+            case PackageKind.Zip: return ".zip";
+            case PackageKind.AppImage: return ".AppImage";
+            case PackageKind.Deb: return ".deb";
+            case PackageKind.Rpm: return ".rpm";
+            case PackageKind.Flatpak: return ".flatpak";
+            case PackageKind.Setup: return ".exe";
+            default: throw new ArgumentException($"Invalid {nameof(PackageKind)} {kind}");
         }
     }
 
     /// <summary>
     /// Gets whether compatible with linux.
     /// </summary>
-    public static bool IsLinux(this DeployKind kind, bool exclusive = false)
+    public static bool TargetsLinux(this PackageKind kind, bool exclusive = false)
     {
         switch (kind)
         {
-            case DeployKind.Zip:
-            case DeployKind.AppImage:
-            case DeployKind.Deb:
-            case DeployKind.Rpm:
-            case DeployKind.Flatpak:
-                return !exclusive || (!IsWindows(kind) && !IsOsx(kind));
+            case PackageKind.Zip:
+            case PackageKind.AppImage:
+            case PackageKind.Deb:
+            case PackageKind.Rpm:
+            case PackageKind.Flatpak:
+                return !exclusive || (!TargetsWindows(kind) && !TargetsOsx(kind));
             default:
                 return false;
         }
@@ -99,11 +99,11 @@ public static class DeployKindExtension
     /// <summary>
     /// Gets whether compatible with windows.
     /// </summary>
-    public static bool IsWindows(this DeployKind kind, bool exclusive = false)
+    public static bool TargetsWindows(this PackageKind kind, bool exclusive = false)
     {
-        if (kind == DeployKind.Zip || kind == DeployKind.Setup)
+        if (kind == PackageKind.Zip || kind == PackageKind.Setup)
         {
-            return !exclusive || (!IsLinux(kind) && !IsOsx(kind));
+            return !exclusive || (!TargetsLinux(kind) && !TargetsOsx(kind));
         }
 
         return false;
@@ -112,11 +112,11 @@ public static class DeployKindExtension
     /// <summary>
     /// Gets whether compatible with OSX.
     /// </summary>
-    public static bool IsOsx(this DeployKind kind, bool exclusive = false)
+    public static bool TargetsOsx(this PackageKind kind, bool exclusive = false)
     {
-        if (kind == DeployKind.Zip)
+        if (kind == PackageKind.Zip)
         {
-            return !exclusive || (!IsLinux(kind) && !IsOsx(kind));
+            return !exclusive || (!TargetsLinux(kind) && !TargetsOsx(kind));
         }
 
         return false;
@@ -125,19 +125,19 @@ public static class DeployKindExtension
     /// <summary>
     /// Returns true if the package kind can be built on this system.
     /// </summary>
-    public static bool CanBuildOnSystem(this DeployKind kind)
+    public static bool CanBuildOnSystem(this PackageKind kind)
     {
-        if (kind.IsLinux() && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        if (kind.TargetsLinux() && RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
             return true;
         }
 
-        if (kind.IsWindows() && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if (kind.TargetsWindows() && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return true;
         }
 
-        if (kind.IsOsx() && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        if (kind.TargetsOsx() && RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
             return true;
         }

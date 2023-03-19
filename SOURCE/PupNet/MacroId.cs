@@ -26,16 +26,18 @@ public enum MacroId
     AppBaseName,
     AppFriendlyName,
     AppId,
-    ShortSummary,
-    LicenseId,
-    VendorName,
-    VendorCopyright,
-    VendorUrl,
-    VendorEmail,
+    AppShortSummary,
+    AppLicenseId,
+    PublisherName,
+    PublisherCopyright,
+    PublisherLinkName,
+    PublisherLinkUrl,
+    PublisherEmail,
     IsTerminalApp,
     PrimeCategory,
 
     AppVersion,
+    PackageRelease,
     DeployKind,
     DotnetRuntime,
     BuildArch,
@@ -44,8 +46,10 @@ public enum MacroId
     BuildYear,
     BuildRoot,
     BuildShare,
-    PublishBin,
-    DesktopExec,
+    BuildAppBin,
+
+    InstallBin,
+    InstallExec,
 }
 
 /// <summary>
@@ -61,21 +65,23 @@ public static class MacroIdExtension
         // Do not change names as will break configs out in the wild
         switch (id)
         {
-            // Conf only
+            // Direct from config
             case MacroId.AppBaseName: return "APP_BASE_NAME";
             case MacroId.AppFriendlyName: return "APP_FRIENDLY_NAME";
             case MacroId.AppId: return "APP_ID";
-            case MacroId.ShortSummary: return "SHORT_SUMMARY";
-            case MacroId.LicenseId: return "LICENSE_ID";
-            case MacroId.VendorName: return "VENDOR_NAME";
-            case MacroId.VendorCopyright: return "VENDOR_COPYRIGHT";
-            case MacroId.VendorUrl: return "VENDOR_URL";
-            case MacroId.VendorEmail: return "VENDOR_EMAIL";
+            case MacroId.AppShortSummary: return "APP_SHORT_SUMMARY";
+            case MacroId.AppLicenseId: return "APP_LICENSE_ID";
+            case MacroId.PublisherName: return "PUBLISHER_NAME";
+            case MacroId.PublisherCopyright: return "PUBLISHER_COPYRIGHT";
+            case MacroId.PublisherLinkName: return "PUBLISHER_LINK_NAME";
+            case MacroId.PublisherLinkUrl: return "PUBLISHER_LINK_URL";
+            case MacroId.PublisherEmail: return "PUBLISHER_EMAIL";
             case MacroId.IsTerminalApp: return "IS_TERMINAL_APP";
             case MacroId.PrimeCategory: return "PRIME_CATEGORY";
 
-            // Derived
+            // Others
             case MacroId.AppVersion: return "APP_VERSION";
+            case MacroId.PackageRelease: return "PACKAGE_RELEASE";
             case MacroId.DeployKind: return "DEPLOY_KIND";
             case MacroId.DotnetRuntime: return "DOTNET_RUNTIME";
             case MacroId.BuildArch: return "BUILD_ARCH";
@@ -84,8 +90,11 @@ public static class MacroIdExtension
             case MacroId.BuildYear: return "BUILD_YEAR";
             case MacroId.BuildRoot: return "BUILD_ROOT";
             case MacroId.BuildShare: return "BUILD_SHARE";
-            case MacroId.PublishBin: return "PUBLISH_BIN";
-            case MacroId.DesktopExec: return "DESKTOP_EXEC";
+            case MacroId.BuildAppBin: return "BUILD_APP_BIN";
+
+            // Install locations
+            case MacroId.InstallBin: return "INSTALL_BIN";
+            case MacroId.InstallExec: return "INSTALL_EXEC";
 
             default: throw new ArgumentException("Unknown macro " + id);
         }
@@ -106,26 +115,33 @@ public static class MacroIdExtension
             case MacroId.AppBaseName: return $"{nameof(ConfigurationReader.AppBaseName)} value from conf file";
             case MacroId.AppFriendlyName: return $"{nameof(ConfigurationReader.AppFriendlyName)} value from conf file";
             case MacroId.AppId: return $"{nameof(ConfigurationReader.AppId)} value from conf file";
-            case MacroId.ShortSummary: return $"{nameof(ConfigurationReader.ShortSummary)} value from conf file";
-            case MacroId.LicenseId: return $"{nameof(ConfigurationReader.LicenseId)} value from conf file";
-            case MacroId.VendorName: return $"{nameof(ConfigurationReader.VendorName)} value from conf file";
-            case MacroId.VendorCopyright: return $"{nameof(ConfigurationReader.VendorCopyright)} value from conf file";
-            case MacroId.VendorUrl: return $"{nameof(ConfigurationReader.VendorUrl)} value from conf file";
-            case MacroId.VendorEmail: return $"{nameof(ConfigurationReader.VendorName)} value from conf file";
+            case MacroId.AppShortSummary: return $"{nameof(ConfigurationReader.AppShortSummary)} value from conf file";
+            case MacroId.AppLicenseId: return $"{nameof(ConfigurationReader.AppLicenseId)} value from conf file";
+
+            case MacroId.PublisherName: return $"{nameof(ConfigurationReader.PublisherName)} value from conf file";
+            case MacroId.PublisherCopyright: return $"{nameof(ConfigurationReader.PublisherCopyright)} value from conf file";
+            case MacroId.PublisherLinkName: return $"{nameof(ConfigurationReader.PublisherLinkName)} value from conf file";
+            case MacroId.PublisherLinkUrl: return $"{nameof(ConfigurationReader.PublisherLinkUrl)} value from conf file";
+            case MacroId.PublisherEmail: return $"{nameof(ConfigurationReader.PublisherEmail)} value from conf file";
+
             case MacroId.IsTerminalApp: return $"{nameof(ConfigurationReader.IsTerminalApp)} value from conf file";
             case MacroId.PrimeCategory: return $"{nameof(ConfigurationReader.PrimeCategory)} value from conf file";
 
-            case MacroId.AppVersion: return "Application version, exluding package-release extension.";
+            case MacroId.AppVersion: return "Application version, exluding package-release extension";
+            case MacroId.PackageRelease: return "Package release version";
             case MacroId.DeployKind: return "Deployment output kind: appimage, flatpak, rpm, deb, setup, zip";
             case MacroId.DotnetRuntime: return "Dotnet publish runtime identifier used (RID)";
-            case MacroId.BuildArch: return "Build architecture: x64, arm64, arm or x86. May differ from package output notation.";
+
+            case MacroId.BuildArch: return "Build architecture: x64, arm64, arm or x86 (may differ from package output notation)";
             case MacroId.BuildTarget: return "Release or Debug (Release unless explicitly specified)";
-            case MacroId.BuildDate: return "Date in 'yyyy-MM-dd' format";
-            case MacroId.BuildYear: return "Current year as 'yyyy'";
-            case MacroId.BuildRoot: return "Root of the temporary directory used to build the application";
-            case MacroId.BuildShare: return $"The Linux 'share' build directory under {nameof(MacroId.BuildRoot)} (maybe empty for certain deployments)";
-            case MacroId.PublishBin: return "Directory for dotnet publish output (i.e. application binary directory)";
-            case MacroId.DesktopExec: return "Path to executable on target system (variable according to package kind)";
+            case MacroId.BuildDate: return "Build date in 'yyyy-MM-dd' format";
+            case MacroId.BuildYear: return "Build year as 'yyyy'";
+            case MacroId.BuildRoot: return "Root of the temporary application build directory";
+            case MacroId.BuildShare: return $"Linux 'usr/share' build directory under {nameof(MacroId.BuildRoot)} (empty for some deployments)";
+            case MacroId.BuildAppBin: return "Application build directory (i.e. the output of dotnet publish or C++ make)";
+
+            case MacroId.InstallBin: return "Path to application directory on target system (not the build system)";
+            case MacroId.InstallExec: return "Path to application executable on target system (not the build system)";
 
             default: throw new ArgumentException("Unknown macro " + id);
         }

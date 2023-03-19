@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Runtime.InteropServices;
 using System.Text;
 using KuiperZone.Utility.Yaap;
 
@@ -39,13 +38,12 @@ public class ArgumentReader
     public const string CleanShortArg = "e";
     public const string CleanLongArg = "clean";
 
-    public const string AppVersionShortArg = "v";
-    public const string AppVersionLongArg = "app-version";
+    public const string VersionReleaseShortArg = "v";
+    public const string VersionReleaseLongArg = "app-version";
 
     public const string PropertyShortArg = "p";
     public const string PropertyLongArg = "property";
 
-    public const string ArchShortArg = "a";
     public const string ArchLongArg = "arch";
 
     public const string OutputShortArg = "o";
@@ -68,26 +66,6 @@ public class ArgumentReader
     public const string HelpLongArg = "help";
 
     private string _string;
-
-    /// <summary>
-    /// Static constructor.
-    /// </summary>
-    static ArgumentReader()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            DefaultKind = DeployKind.AppImage;
-        }
-        else
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            DefaultKind = DeployKind.Setup;
-        }
-        else
-        {
-            DefaultKind = DeployKind.Zip;
-        }
-    }
 
     /// <summary>
     /// Default constructor. Values are defaults only.
@@ -126,10 +104,10 @@ public class ArgumentReader
         New = AssertEnum<NewKind>(NewShortArg, NewLongArg,
             args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None.ToString()));
 
-        Arch = args.GetOrDefault(ArchShortArg, ArchLongArg, null);
-        Runtime = args.GetOrDefault(RidShortArg, RidLongArg, ArchitectureConverter.DefaultRuntime);
+        Arch = args.GetOrDefault(ArchLongArg, null);
+        Runtime = args.GetOrDefault(RidShortArg, RidLongArg, RuntimeConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
-        AppVersion = args.GetOrDefault(AppVersionShortArg, AppVersionLongArg, null);
+        VersionRelease = args.GetOrDefault(VersionReleaseShortArg, VersionReleaseLongArg, null);
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
         IsVerbose = args.GetOrDefault(VerboseLongArg, false);
         IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
@@ -138,8 +116,8 @@ public class ArgumentReader
         {
             Value = GetDefaultValuePath(Value);
 
-            Kind = AssertEnum<DeployKind>(KindShortArg, KindLongArg,
-                args.GetOrDefault(KindShortArg, KindLongArg, DefaultKind.ToString()));
+            Kind = AssertEnum<PackageKind>(KindShortArg, KindLongArg,
+                args.GetOrDefault(KindShortArg, KindLongArg, new RuntimeConverter(Runtime).DefaultPackage.ToString()));
 
             Property = args.GetOrDefault(PropertyShortArg, PropertyLongArg, null);
             Output = args.GetOrDefault(OutputShortArg, OutputLongArg, null);
@@ -149,11 +127,6 @@ public class ArgumentReader
             ShowHelp = args.GetOrDefault(HelpShortArg, HelpLongArg, null)?.ToLowerInvariant();
         }
     }
-
-    /// <summary>
-    /// Get the default package kind.
-    /// </summary>
-    public static DeployKind DefaultKind { get; }
 
     /// <summary>
     /// Gets internal parser instance.
@@ -188,12 +161,12 @@ public class ArgumentReader
     /// <summary>
     /// Gets the package kinds.
     /// </summary>
-    public DeployKind Kind { get; }
+    public PackageKind Kind { get; }
 
     /// <summary>
     /// Gets the application version.
     /// </summary>
-    public string? AppVersion { get; }
+    public string? VersionRelease { get; }
 
     /// <summary>
     /// Gets the property string.
@@ -248,20 +221,20 @@ public class ArgumentReader
         sb.AppendLine($"{indent}{Program.CommandName} [file.conf] [--option-n value-n]");
         sb.AppendLine();
         sb.AppendLine("Example:");
-        sb.AppendLine($"{indent}{Program.CommandName} file.conf -{SkipYesShortArg} -{RidShortArg} linux-arm64");
+        sb.AppendLine($"{indent}{Program.CommandName} app.{Program.CommandName}.conf -{SkipYesShortArg} -{RidShortArg} linux-arm64");
         sb.AppendLine();
         sb.AppendLine($"If conf file is omitted, one in the working directory will be selected.");
 
         sb.AppendLine();
         sb.AppendLine("Build Options:");
 
-        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} {string.Join('|', Enum.GetNames<DeployKind>())}");
-        sb.AppendLine($"{indent}Package output kind. Default is {DefaultKind}");
-        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{KindShortArg} {DeployKind.Flatpak}");
+        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} {string.Join('|', Enum.GetNames<PackageKind>())}");
+        sb.AppendLine($"{indent}Package output kind. If omitted, one is chosen according to the runtime.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{KindShortArg} {PackageKind.Flatpak}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{RidShortArg}, --{RidLongArg} value");
-        sb.AppendLine($"{indent}Dotnet publish runtime identifier. Default: {ArchitectureConverter.DefaultRuntime}.");
-        sb.AppendLine($"{indent}Valid examples include: 'linux-x64' and 'linux-arm64'.");
+        sb.AppendLine($"{indent}Dotnet publish runtime identifier. Default: {RuntimeConverter.DefaultRuntime}.");
+        sb.AppendLine($"{indent}Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.");
         sb.AppendLine($"{indent}See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{BuildShortArg}, --{BuildLongArg} value");
@@ -271,30 +244,31 @@ public class ArgumentReader
         sb.AppendLine($"{indent}-{CleanShortArg}, --{CleanLongArg} [flag only]");
         sb.AppendLine($"{indent}Specifies whether to call 'dotnet clean' prior to 'dotnet publish'. Default: false.");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{AppVersionShortArg}, --{AppVersionLongArg} value");
+        sb.AppendLine($"{indent}-{VersionReleaseShortArg}, --{VersionReleaseLongArg} value");
         sb.AppendLine($"{indent}Specifies application version-release in form 'VERSION[RELEASE]', where value in square");
-        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.VersionRelease)} in conf file.");
+        sb.AppendLine($"{indent}brackets is package release. Overrides {nameof(ConfigurationReader.AppVersionRelease)} in conf file.");
         sb.AppendLine($"{indent}Example: 1.2.3[1].");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{PropertyShortArg}, --{PropertyLongArg} value");
         sb.AppendLine($"{indent}Specifies a property to be supplied to dotnet publish command. Do not use for");
         sb.AppendLine($"{indent}app versioning. Example: -{PropertyShortArg} DefineConstants=TRACE;DEBUG");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{ArchShortArg}, --{ArchLongArg} value");
-        sb.AppendLine($"{indent}Force target architecture, i.e. as 'x86_64' or 'aarch64'. Note this is optional and");
-        sb.AppendLine($"{indent}not normally necessary as, in most cases, the architecture is defined by the dotnet");
-        sb.AppendLine($"{indent}runtime-id and detected automatically. However, in the event of a problem, the value");
-        sb.AppendLine($"{indent}may be supplied explicitly.");
+        sb.AppendLine($"{indent}--{ArchLongArg} value");
+        sb.AppendLine($"{indent}Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is");
+        sb.AppendLine($"{indent}not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id");
+        sb.AppendLine($"{indent}and will be successfully detected automatically. However, in the event of a problem, the value");
+        sb.AppendLine($"{indent}explicitly supplied here will be used to override. It should be provided in the form");
+        sb.AppendLine($"{indent}expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{OutputShortArg}, --{OutputLongArg} value");
-        sb.AppendLine($"{indent}Package output filename. If omitted, the output name is derived from the application");
-        sb.AppendLine($"{indent}name, version and architecture. Example: -{OutputShortArg} AppName.AppImage");
+        sb.AppendLine($"{indent}Force package output filename. Normally this is derived from parameters in the configuration.");
+        sb.AppendLine($"{indent}This value will be used to override. Example: -{OutputShortArg} AppName.AppImage");
         sb.AppendLine();
         sb.AppendLine($"{indent}--{VerboseLongArg} [flag only]");
-        sb.AppendLine($"{indent}Indicates verbose output.");
+        sb.AppendLine($"{indent}Indicates verbose output when building. It can also used with --{NewLongArg}.");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{RunShortArg}, --{RunLongArg} [flag only]");
-        sb.AppendLine($"{indent}Performs a test run of the application after successful build.");
+        sb.AppendLine($"{indent}Performs a test run of the application after successful build (where supported).");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{SkipYesShortArg}, --{SkipYesLongArg} [flag only]");
         sb.AppendLine($"{indent}Skips confirmation prompts (assumes yes).");
@@ -303,15 +277,15 @@ public class ArgumentReader
         sb.AppendLine("Other Options:");
 
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} [{string.Join('|', Enum.GetValues<NewKind>())}]");
-        sb.AppendLine($"{indent}Creates a new empty conf file or associated file for new project. A base file name may");
-        sb.AppendLine($"{indent}optionally be given. If --{VerboseLongArg} also given, generates a configuration file");
-        sb.AppendLine($"{indent}with docmentation comments. Use {NewKind.All} to generate a full set of configuration assets.");
-        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All} --{VerboseLongArg}");
+        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} {string.Join('|', Enum.GetValues<NewKind>())}");
+        sb.AppendLine($"{indent}Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.");
+        sb.AppendLine($"{indent}A base file name may optionally be given. If --{VerboseLongArg} is used, a configuration file");
+        sb.AppendLine($"{indent}with full docmentation comments is generated. Use {NewKind.All} to generate a full set of");
+        sb.AppendLine($"{indent}configuration assets. Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewKind.All} --{VerboseLongArg}");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} [args|macros|conf]");
+        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} args|macros|conf");
         sb.AppendLine($"{indent}Show help information. Optional value specifies what kind of information to display.");
-        sb.AppendLine($"{indent}Example: {Program.CommandName} -{HelpShortArg} macros");
+        sb.AppendLine($"{indent}Default is 'args'. Example: {Program.CommandName} -{HelpShortArg} macros");
         sb.AppendLine();
         sb.AppendLine($"{indent}--{VersionLongArg} [flag only]");
         sb.AppendLine($"{indent}Show version and associated information.");
@@ -341,12 +315,19 @@ public class ArgumentReader
 
     private static string? GetDefaultValuePath(string? path)
     {
+        var dir = "./";
+
         if (!string.IsNullOrEmpty(path))
         {
-            return path;
+            if (!Directory.Exists(path))
+            {
+                return path;
+            }
+
+            dir = path;
         }
 
-        var files = Directory.GetFiles("./", "*.conf", SearchOption.TopDirectoryOnly);
+        var files = Directory.GetFiles(dir, "*.conf", SearchOption.TopDirectoryOnly);
         return files.Length == 1 ? files[0] : null;
     }
 

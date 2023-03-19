@@ -72,7 +72,7 @@ internal class Program
                 Console.WriteLine($"{ProductName} {Version}");
                 Console.WriteLine($"{Copyright}");
                 Console.WriteLine($"{ProjectUrl}");
-                Console.WriteLine($"System: {ArchitectureConverter.SimpleOS} {RuntimeInformation.OSArchitecture}");
+                Console.WriteLine($"System: {RuntimeConverter.SystemOS} {RuntimeInformation.OSArchitecture}");
 
                 Console.WriteLine();
                 Console.WriteLine($"{ProductName} is free software: you can redistribute it and/or modify it under");

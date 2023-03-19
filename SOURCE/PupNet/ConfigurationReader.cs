@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace KuiperZone.PupNet;
@@ -46,18 +45,25 @@ public class ConfigurationReader
     public const string PathDisable = "NONE";
 
     /// <summary>
+    /// Default demo or unit test kind. Used in default constructor.
+    /// </summary>
+    public const PackageKind DemoKind = PackageKind.Rpm;
+
+    /// <summary>
     /// Default constructor. No arguments. Test or demo only.
     /// </summary>
     public ConfigurationReader(string? metabase = null)
-        : this(DeployKind.AppImage, metabase)
+        : this(DemoKind, metabase)
     {
     }
 
     /// <summary>
     /// Constructor with kind. No other arguments. Test or demo only.
     /// </summary>
-    public ConfigurationReader(DeployKind kind, string? metabase = null)
+    public ConfigurationReader(PackageKind kind, string? metabase = null)
     {
+        // Used default options. Useful in unit test
+        // generating example reference information.
         Arguments = new($"-{ArgumentReader.KindShortArg} {kind}");
         Reader = new();
         LocalDirectory = "";
@@ -71,18 +77,20 @@ public class ConfigurationReader
     }
 
     /// <summary>
-    /// Production constructor. Reads from file.
+    /// Constructor with supplied content. For unit test only.
     /// </summary>
-    public ConfigurationReader(ArgumentReader args, bool assertPaths = true)
-        : this(args, new IniReader(AssertConfPath(args.Value, assertPaths)), assertPaths)
+    public ConfigurationReader(ArgumentReader args, string[] content, bool assertPaths = false)
+        : this(args, new IniReader(content), assertPaths)
     {
     }
 
     /// <summary>
-    /// Constructor with content. For unit test.
+    /// Production constructor. Reads from file. If assertPaths is true, it ensures that all reference
+    /// files exist and populates property values with fully qualified names. Where relative paths are
+    /// given, these are treated as relative to this file location.
     /// </summary>
-    public ConfigurationReader(ArgumentReader args, string[] content, bool assertPaths = false)
-        : this(args, new IniReader(content), assertPaths)
+    public ConfigurationReader(ArgumentReader args, bool assertPaths = true)
+        : this(args, new IniReader(AssertConfPath(args.Value, assertPaths)), assertPaths)
     {
     }
 
@@ -96,15 +104,16 @@ public class ConfigurationReader
         AppBaseName = GetMandatory(nameof(AppBaseName), ValueFlags.SafeNoSpace);
         AppFriendlyName = GetMandatory(nameof(AppFriendlyName), ValueFlags.Safe);
         AppId = GetMandatory(nameof(AppId), ValueFlags.StrictSafe);
-        VersionRelease = GetMandatory(nameof(VersionRelease), ValueFlags.SafeNoSpace);
-        ShortSummary = GetMandatory(nameof(ShortSummary), ValueFlags.None);
-        LicenseId = GetMandatory(nameof(LicenseId), ValueFlags.Safe);
-        LicenseFile = GetOptional(nameof(LicenseFile), ValueFlags.AssertPathWithDisable);
+        AppVersionRelease = GetMandatory(nameof(AppVersionRelease), ValueFlags.SafeNoSpace);
+        AppShortSummary = GetMandatory(nameof(AppShortSummary), ValueFlags.None);
+        AppLicenseId = GetMandatory(nameof(AppLicenseId), ValueFlags.Safe);
+        AppLicenseFile = GetOptional(nameof(AppLicenseFile), ValueFlags.AssertPathWithDisable);
 
-        VendorName = GetMandatory(nameof(VendorName), ValueFlags.Safe);
-        VendorCopyright = GetOptional(nameof(VendorCopyright), ValueFlags.Safe);
-        VendorUrl = GetOptional(nameof(VendorUrl), ValueFlags.Safe);
-        VendorEmail = GetOptional(nameof(VendorEmail), ValueFlags.None);
+        PublisherName = GetMandatory(nameof(PublisherName), ValueFlags.Safe);
+        PublisherCopyright = GetOptional(nameof(PublisherCopyright), ValueFlags.Safe);
+        PublisherLinkName = GetOptional(nameof(PublisherLinkName), ValueFlags.Safe);
+        PublisherLinkUrl = GetOptional(nameof(PublisherLinkUrl), ValueFlags.Safe);
+        PublisherEmail = GetOptional(nameof(PublisherEmail), ValueFlags.None);
 
         StartCommand = GetOptional(nameof(StartCommand), ValueFlags.StrictSafe);
         IsTerminalApp = GetBool(nameof(IsTerminalApp));
@@ -130,8 +139,9 @@ public class ConfigurationReader
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs), ValueFlags.None);
         FlatpakFinishArgs = GetCollection(nameof(FlatpakFinishArgs), ValueFlags.None, "=", "--");
 
-        SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
+        SetupPrompt = GetOptional(nameof(SetupPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
+        SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
     }
 
     /// <summary>
@@ -157,15 +167,16 @@ public class ConfigurationReader
     public string AppBaseName { get; } = "HelloWorld";
     public string AppFriendlyName { get; } = "Hello World";
     public string AppId { get; } = "net.example.helloworld";
-    public string VersionRelease { get; } = "1.0.0[1]";
-    public string ShortSummary { get; } = "A HelloWorld application";
-    public string LicenseId { get; } = "LicenseRef-Proprietary";
-    public string? LicenseFile { get; }
+    public string AppVersionRelease { get; } = "1.0.0[1]";
+    public string AppShortSummary { get; } = "A HelloWorld application";
+    public string AppLicenseId { get; } = "LicenseRef-Proprietary";
+    public string? AppLicenseFile { get; }
 
-    public string VendorName { get; } = "HelloWorld Team";
-    public string? VendorCopyright = "Copyright (C) HelloWorld Team 1970";
-    public string? VendorUrl { get; } = "https://example.net";
-    public string? VendorEmail { get; } = "helloworld@example.net";
+    public string PublisherName { get; } = "Your Name";
+    public string? PublisherCopyright = "Copyright (C) Your Name 1970";
+    public string? PublisherLinkName { get; } = "Home Page";
+    public string? PublisherLinkUrl { get; } = "https://example.net";
+    public string? PublisherEmail { get; } = "contact@example.net";
 
     public string? StartCommand { get; }
     public bool IsTerminalApp { get; } = true;
@@ -192,8 +203,9 @@ public class ConfigurationReader
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
 
-    public string? SetupSignTool { get; }
+    public string? SetupPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
+    public string? SetupSignTool { get; }
 
     /// <summary>
     /// Reads file associated with this configuration and returns the text. Returns null if path is null or
@@ -234,7 +246,7 @@ public class ConfigurationReader
         // Convenience
         var breaker1 = new string('#', 80);
         var breaker2 = new string('#', 40);
-        string macHelp = $"'{Program.CommandName} --{ArgumentReader.HelpLongArg} macro'";
+        string macroHelp = $"'{Program.CommandName} --{ArgumentReader.HelpLongArg} macro'";
 
         var sb = new StringBuilder();
 
@@ -272,44 +284,50 @@ public class ConfigurationReader
         c?.AppendLine($"# a change to the deployment package, rather the application. If release part is absent");
         c?.AppendLine($"# (i.e. '1.2.3'), the release value defaults to '1'. Note that the version-release value");
         c?.AppendLine($"# given here may be overidden from the command line.");
-        sb.AppendLine(GetHelpNameValue(nameof(VersionRelease), VersionRelease));
+        sb.AppendLine(GetHelpNameValue(nameof(AppVersionRelease), AppVersionRelease));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory single line application description. Example: Yet another Hello World application.");
-        sb.AppendLine(GetHelpNameValue(nameof(ShortSummary), ShortSummary));
+        sb.AppendLine(GetHelpNameValue(nameof(AppShortSummary), AppShortSummary));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory application license name. This should be one of the recognised SPDX license");
         c?.AppendLine($"# identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a properietary or");
         c?.AppendLine($"# custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'.");
-        sb.AppendLine(GetHelpNameValue(nameof(LicenseId), LicenseId));
+        sb.AppendLine(GetHelpNameValue(nameof(AppLicenseId), AppLicenseId));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional path to a copyright/license text file. If provided, it will be packaged with the");
         c?.AppendLine($"# application and identified to package builder where supported. Example: Copyright.txt");
-        sb.AppendLine(GetHelpNameValue(nameof(LicenseFile), LicenseFile));
+        sb.AppendLine(GetHelpNameValue(nameof(AppLicenseFile), AppLicenseFile));
 
         sb.AppendLine();
         c?.AppendLine(breaker2);
-        sb.AppendLine("# VENDOR");
+        sb.AppendLine("# PUBLISHER");
         c?.AppendLine(breaker2);
 
         c?.AppendLine();
-        c?.AppendLine($"# Mandatory vendor, group or creator. Example: Acme Ltd, or HelloWorld Team");
-        sb.AppendLine(GetHelpNameValue(nameof(VendorName), VendorName));
+        c?.AppendLine($"# Mandatory publisher, group or creator. Example: Acme Ltd, or HelloWorld Team");
+        sb.AppendLine(GetHelpNameValue(nameof(PublisherName), PublisherName));
 
         c?.AppendLine();
         c?.AppendLine($"# Optional copyright statement. Example: Copyright (C) HelloWorld Team 1970");
-        sb.AppendLine(GetHelpNameValue(nameof(VendorCopyright), VendorCopyright));
+        sb.AppendLine(GetHelpNameValue(nameof(PublisherCopyright), PublisherCopyright));
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional vendor or application homepage URL. Example: https://example.net");
-        sb.AppendLine(GetHelpNameValue(nameof(VendorUrl), VendorUrl));
+        c?.AppendLine($"# Optional publisher or application web-link name. Note that Windows {nameof(PackageKind.Setup)} packages");
+        c?.AppendLine($"# require both {nameof(PublisherLinkName)} and {nameof(PublisherLinkUrl)} in order to include the link as an item");
+        c?.AppendLine($"# in program menu entries. Default is: Home Page. Examples: Example.net, or: Hello World Online");
+        sb.AppendLine(GetHelpNameValue(nameof(PublisherLinkName), PublisherLinkName));
 
         c?.AppendLine();
-        c?.AppendLine($"# Vendor or maintainer email contact. Although optional, some packages (such as Debian)");
+        c?.AppendLine($"# Optional publisher or application web-link URL. Example: https://example.net");
+        sb.AppendLine(GetHelpNameValue(nameof(PublisherLinkUrl), PublisherLinkUrl));
+
+        c?.AppendLine();
+        c?.AppendLine($"# publisher or maintainer email contact. Although optional, some packages (such as Debian)");
         c?.AppendLine($"# require it and will fail unless provided. Example: <hello> helloworld@example.net");
-        sb.AppendLine(GetHelpNameValue(nameof(VendorEmail), VendorEmail));
+        sb.AppendLine(GetHelpNameValue(nameof(PublisherEmail), PublisherEmail));
 
         sb.AppendLine();
         c?.AppendLine(breaker2);
@@ -317,11 +335,13 @@ public class ConfigurationReader
         c?.AppendLine(breaker2);
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional command name to start the application from the terminal. If, for example, {nameof(AppBaseName)}");
-        c?.AppendLine($"# is 'HelloWorld', the value here may be set to the same or a lower-case 'helloworld' variant.");
-        c?.AppendLine($"# It must not contain spaces or invalid filename characters. If empty, the application will");
-        c?.AppendLine($"# not be in the path and cannot be started from the command line. This value is not supported");
-        c?.AppendLine($"# for {nameof(DeployKind.AppImage)} and {nameof(DeployKind.Flatpak)} and will be ignored. Default is empty.");
+        c?.AppendLine($"# Optional command name to start the application from the terminal. If, for example,");
+        c?.AppendLine($"# {nameof(AppBaseName)} is 'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or");
+        c?.AppendLine($"# lower-case variant (i.e. 'helloworld'). It must not contain spaces or invalid filename characters.");
+        c?.AppendLine($"# Do not add any extension such as '.exe'. If empty, the application will not be in the path and cannot");
+        c?.AppendLine($"# be started from the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupPrompt)}.");
+        c?.AppendLine($"# The {nameof(StartCommand)} is not supported for all packages.");
+        c?.AppendLine($"# kinds. Default is empty (none).");
         sb.AppendLine(GetHelpNameValue(nameof(StartCommand), StartCommand));
 
         c?.AppendLine();
@@ -330,12 +350,14 @@ public class ConfigurationReader
         sb.AppendLine(GetHelpNameValue(nameof(IsTerminalApp), IsTerminalApp));
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional path to a Linux desktop file (ignored for Windows). If empty (default), one will be");
-        c?.AppendLine($"# generated automatically from the information in this file. Supplying a custom file, however,");
-        c?.AppendLine($"# allows for mime-types and internationalisation. If supplied, the file MUST contain the line:");
-        c?.AppendLine($"# 'Exec={MacroId.DesktopExec.ToVar()}' in order to use the correct install location. Other macros may be");
-        c?.AppendLine($"# used to help automate the content. If required that no desktop be installed, set value to: '{PathDisable}.");
-        c?.AppendLine($"# Note. The contents of the files may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# Optional path to a Linux desktop file. If empty (default), one will be generated automatically");
+        c?.AppendLine($"# from the information in this file. Supplying a custom file, however, allows for mime-types and");
+        c?.AppendLine($"# internationalisation. If supplied, the file MUST contain the line: 'Exec={MacroId.InstallExec.ToVar()}'");
+        c?.AppendLine($"# in order to use the correct install location. Other macros may be used to help automate the content.");
+        c?.AppendLine($"# If no desktop entry is required, set the value to: '{PathDisable}'. It has little effect for");
+        c?.AppendLine($"# Windows {nameof(PackageKind.Setup)}, except that setting it to '{PathDisable}' will cause the");
+        c?.AppendLine($"# application start menu entry to be omitted. Note. The contents of the files may use macro variables.");
+        c?.AppendLine($"# Use {macroHelp} for reference.");
         c?.AppendLine($"# See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html");
         sb.AppendLine(GetHelpNameValue(nameof(DesktopFile), DesktopFile));
 
@@ -357,7 +379,7 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.");
-        c?.AppendLine($"# Note. The contents of the files may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# Note. The contents of the files may use macro variables. Use {macroHelp} for reference.");
         c?.AppendLine($"# See: https://docs.appimage.org/packaging-guide/optional/appstream.html");
         c?.AppendLine($"# Example: Deploy/app.metainfo.xml.");
         sb.AppendLine(GetHelpNameValue(nameof(MetaFile), MetaFile));
@@ -377,11 +399,11 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version,");
-        c?.AppendLine($"# or '-c' (configuration) here as they will be added (i.e. via {nameof(VersionRelease)}).");
+        c?.AppendLine($"# or '-c' (configuration) here as they will be added (i.e. via {nameof(AppVersionRelease)}).");
         c?.AppendLine($"# Typically you want as a minimum: '-p:Version={MacroId.AppVersion.ToVar()} --self-contained true'. Additional");
         c?.AppendLine($"# useful arguments include: '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true");
         c?.AppendLine($"# -p:PublishReadyToRun=true -p:PublishTrimmed=true -p:TrimMode=link'.");
-        c?.AppendLine($"# Note. This value may use macro variables. Use {macHelp} for reference.");
+        c?.AppendLine($"# Note. This value may use macro variables. Use {macroHelp} for reference.");
         c?.AppendLine($"# See: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPublishArgs), DotnetPublishArgs));
 
@@ -389,10 +411,10 @@ public class ConfigurationReader
         c?.AppendLine($"# Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands");
         c?.AppendLine($"# may be specified, separated by semicolon or given in multi-line form. They are called after");
         c?.AppendLine($"# dotnet publish, but before the final output is built. These could, for example, copy additional");
-        c?.AppendLine($"# files into the build directory given by {MacroId.PublishBin.ToVar()}. The working directory will be the");
+        c?.AppendLine($"# files into the build directory given by {MacroId.BuildAppBin.ToVar()}. The working directory will be the");
         c?.AppendLine($"# location of this file. This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathDisable}'.");
         c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these as environment variables.");
-        c?.AppendLine($"# Use {macHelp} for reference.");
+        c?.AppendLine($"# Use {macroHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
         c?.AppendLine();
@@ -400,7 +422,7 @@ public class ConfigurationReader
         c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)}, but using DOS commands and batch scripts.");
         c?.AppendLine($"# Multiple commands may be specified, separated by semicolon or given in multi-line form. Note. This value");
         c?.AppendLine($"# may use macro variables. Additionally, scripts may use these as environment variables.");
-        c?.AppendLine($"# Use {macHelp} for reference.");
+        c?.AppendLine($"# Use {macroHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublishOnWindows), DotnetPostPublishOnWindows));
 
         sb.AppendLine();
@@ -481,16 +503,24 @@ public class ConfigurationReader
         c?.AppendLine(breaker2);
 
         c?.AppendLine();
-        c?.AppendLine($"# Optional name and parameters of the Sign Tool to be used to digitally sign: the installer, ");
-        c?.AppendLine($"# uninstaller, and contained exe and dll files. If empty, files will not be signed.");
-        c?.AppendLine($"# See 'SignTool' parameter in: https://jrsoftware.org/ishelp/");
-        sb.AppendLine(GetHelpNameValue(nameof(SetupSignTool), SetupSignTool));
+        c?.AppendLine($"# Optional command prompt title. The Windows installer will not add your application to the");
+        c?.AppendLine($"# path. However, if your package contains a command-line utility, setting this value will");
+        c?.AppendLine($"# ensure that a 'Command Prompt' menu entry is added which, when launched, will open a command");
+        c?.AppendLine($"# window with your application directory in its path. See also {nameof(StartCommand)}.");
+        c?.AppendLine($"# Examples: Command Prompt, or: Command Prompt for Hello World");
+        sb.AppendLine(GetHelpNameValue(nameof(SetupPrompt), SetupPrompt));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory value which specifies minimum version of Windows that your software runs on.");
         c?.AppendLine($"# Windows 8 = 6.2, Windows 10/11 = 10. Default: 10.");
         c?.AppendLine($"# See 'MinVersion' parameter in: https://jrsoftware.org/ishelp/");
         sb.AppendLine(GetHelpNameValue(nameof(SetupMinWindowsVersion), SetupMinWindowsVersion));
+
+        c?.AppendLine();
+        c?.AppendLine($"# Optional name and parameters of the Sign Tool to be used to digitally sign: the installer,");
+        c?.AppendLine($"# uninstaller, and contained exe and dll files. If empty, files will not be signed.");
+        c?.AppendLine($"# See 'SignTool' parameter in: https://jrsoftware.org/ishelp/");
+        sb.AppendLine(GetHelpNameValue(nameof(SetupSignTool), SetupSignTool));
 
         return sb.ToString().Trim();
     }

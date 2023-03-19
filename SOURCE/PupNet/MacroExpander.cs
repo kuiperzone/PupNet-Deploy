@@ -32,15 +32,15 @@ public class MacrosExpander
     private readonly Dictionary<string, string> _cache = new();
 
     /// <summary>
-    /// Default constructor. Example values only.
+    /// Default constructor. Example values and unit test only.
     /// </summary>
     public MacrosExpander()
-        : this(new AppImageBuilder(new ConfigurationReader()))
+        : this(new BuilderFactory().Create(new ConfigurationReader()))
     {
     }
 
     /// <summary>
-    /// Constructor.
+    /// Production constructor.
     /// </summary>
     public MacrosExpander(PackageBuilder builder)
     {
@@ -54,26 +54,30 @@ public class MacrosExpander
         dict.Add(MacroId.AppBaseName, conf.AppBaseName);
         dict.Add(MacroId.AppFriendlyName, conf.AppFriendlyName);
         dict.Add(MacroId.AppId, conf.AppId);
-        dict.Add(MacroId.ShortSummary, conf.ShortSummary);
-        dict.Add(MacroId.LicenseId, conf.LicenseId);
-        dict.Add(MacroId.VendorName, conf.VendorName);
-        dict.Add(MacroId.VendorCopyright, conf.VendorCopyright ?? "");
-        dict.Add(MacroId.VendorUrl, conf.VendorUrl ?? "");
-        dict.Add(MacroId.VendorEmail, conf.VendorEmail ?? "");
+        dict.Add(MacroId.AppShortSummary, conf.AppShortSummary);
+        dict.Add(MacroId.AppLicenseId, conf.AppLicenseId);
+        dict.Add(MacroId.PublisherName, conf.PublisherName);
+        dict.Add(MacroId.PublisherCopyright, conf.PublisherCopyright ?? "");
+        dict.Add(MacroId.PublisherLinkName, conf.PublisherLinkName ?? "");
+        dict.Add(MacroId.PublisherLinkUrl, conf.PublisherLinkUrl ?? "");
+        dict.Add(MacroId.PublisherEmail, conf.PublisherEmail ?? "");
         dict.Add(MacroId.IsTerminalApp, conf.IsTerminalApp.ToString().ToLowerInvariant());
         dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
+        dict.Add(MacroId.PackageRelease, builder.PackageRelease);
         dict.Add(MacroId.DeployKind, args.Kind.ToString().ToLowerInvariant());
-        dict.Add(MacroId.DotnetRuntime, builder.Architecture.RuntimeId);
-        dict.Add(MacroId.BuildArch, builder.Architecture.RuntimeArch.ToString().ToLowerInvariant());
+        dict.Add(MacroId.DotnetRuntime, builder.Runtime.RuntimeId);
+        dict.Add(MacroId.BuildArch, builder.Runtime.RuntimeArch.ToString().ToLowerInvariant());
         dict.Add(MacroId.BuildTarget, args.Build);
         dict.Add(MacroId.BuildDate, DateTime.UtcNow.ToString("yyyy-MM-dd"));
         dict.Add(MacroId.BuildYear, DateTime.UtcNow.ToString("yyyy"));
-        dict.Add(MacroId.BuildRoot, builder.AppRoot);
+        dict.Add(MacroId.BuildRoot, builder.BuildRoot);
         dict.Add(MacroId.BuildShare, builder.BuildUsrShare ?? "");
-        dict.Add(MacroId.PublishBin, builder.PublishBin);
-        dict.Add(MacroId.DesktopExec, builder.DesktopExec);
+        dict.Add(MacroId.BuildAppBin, builder.BuildAppBin);
+
+        dict.Add(MacroId.InstallBin, builder.InstallBin);
+        dict.Add(MacroId.InstallExec, builder.InstallExec);
 
         // For lookup
         Dictionary = dict;

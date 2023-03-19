@@ -42,9 +42,9 @@ public static class MetaTemplates
         list.Add($"Type=Application");
         list.Add($"Name={MacroId.AppFriendlyName.ToVar()}");
         list.Add($"Icon={MacroId.AppId.ToVar()}");
-        list.Add($"Comment={MacroId.ShortSummary.ToVar()}");
-        list.Add($"Exec={MacroId.DesktopExec.ToVar()}");
-        list.Add($"TryExec={MacroId.DesktopExec.ToVar()}");
+        list.Add($"Comment={MacroId.AppShortSummary.ToVar()}");
+        list.Add($"Exec={MacroId.InstallExec.ToVar()}");
+        list.Add($"TryExec={MacroId.InstallExec.ToVar()}");
         list.Add($"Terminal={MacroId.IsTerminalApp.ToVar()}");
         list.Add($"Categories={MacroId.PrimeCategory.ToVar()}");
         list.Add($"MimeType=");
@@ -66,10 +66,10 @@ public static class MetaTemplates
         sb.AppendLine();
         sb.AppendLine($"{Indent}<id>{MacroId.AppId.ToVar()}</id>");
         sb.AppendLine($"{Indent}<name>{MacroId.AppFriendlyName.ToVar()}</name>");
-        sb.AppendLine($"{Indent}<summary>{MacroId.ShortSummary.ToVar()}</summary>");
-        sb.AppendLine($"{Indent}<developer_name>{MacroId.VendorName.ToVar()}</developer_name>");
-        sb.AppendLine($"{Indent}<url type=\"homepage\">{MacroId.VendorUrl.ToVar()}</url>");
-        sb.AppendLine($"{Indent}<project_license>{MacroId.LicenseId.ToVar()}</project_license>");
+        sb.AppendLine($"{Indent}<summary>{MacroId.AppShortSummary.ToVar()}</summary>");
+        sb.AppendLine($"{Indent}<developer_name>{MacroId.PublisherName.ToVar()}</developer_name>");
+        sb.AppendLine($"{Indent}<url type=\"homepage\">{MacroId.PublisherLinkUrl.ToVar()}</url>");
+        sb.AppendLine($"{Indent}<project_license>{MacroId.AppLicenseId.ToVar()}</project_license>");
         sb.AppendLine($"{Indent}<content_rating type=\"oars-1.1\" />");
         sb.AppendLine();
 	    sb.AppendLine($"{Indent}<launchable type=\"desktop-id\">{MacroId.AppId.ToVar()}.desktop</launchable>");

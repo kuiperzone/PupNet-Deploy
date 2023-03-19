@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -46,16 +45,19 @@ public class BuildHost
         Builder = new BuilderFactory().Create(Configuration);
         Macros = new MacrosExpander(Builder);
 
-        var kind = Builder.Architecture.Kind;
-
-        // Additional validation
         if (!Configuration.AppId.Contains('.'))
         {
             // AppId must have a '.'
             Builder.WarningSink.Add($"WARNING. Configuration item {nameof(Configuration.AppId)} should be in reverse DNS form, i.e. 'net.example.appname'");
         }
 
-        if (!kind.IsWindows())
+        if (Configuration.PublisherLinkUrl != null && !Configuration.PublisherLinkUrl.Contains("://") && !Configuration.PublisherLinkUrl.Contains('.'))
+        {
+            // AppId must have a '://' and '.'
+            Builder.WarningSink.Add($"WARNING. Configuration item {nameof(Configuration.PublisherLinkUrl)} doesn't look like a valid URL (a valid example is: http://example.net)");
+        }
+
+        if (Builder.BuildShareApplications != null)
         {
             var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
 
@@ -66,21 +68,32 @@ public class BuildHost
                 desktop = MetaTemplates.Desktop;
             }
 
-            if (desktop != null && ((!desktop.Contains("Exec=") && !desktop.Contains("Exec ")) || !desktop.Contains(MacroId.DesktopExec.ToVar())))
+            if (desktop != null)
             {
-                Builder.WarningSink.Add($"WARNING. Desktop file does not contain Exec={MacroId.DesktopExec.ToVar()} line needed to accommodate multi-variant deployments");
+                // Not fool-proof but a fair check
+                bool hasExec = desktop.Contains("Exec=") || desktop.Contains("Exec ");
+                bool hasInstall = desktop.Contains(MacroId.InstallBin.ToVar()) || desktop.Contains(MacroId.InstallExec.ToVar());
+
+                if (!hasExec || !hasInstall)
+                {
+                    Builder.WarningSink.Add($"WARNING. Desktop file does not contain line needed to accommodate multi-variant deployments: 'Exec={MacroId.InstallExec.ToVar()}' or 'Exec={MacroId.InstallBin.ToVar()}/app-name'");
+                }
             }
 
             ExpandedDesktop = Macros.Expand(desktop, Path.GetFileName(Configuration.DesktopFile));
+        }
+
+        if (Builder.BuildShareMeta != null)
+        {
             ExpandedMetaInfo = Macros.Expand(Configuration.ReadAssociatedFile(Configuration.MetaFile), true, Path.GetFileName(Configuration.MetaFile));
 
             if (ExpandedDesktop == null)
             {
-                // App image can launch from standalone file
-                if (string.IsNullOrEmpty(Configuration.StartCommand) && kind != DeployKind.AppImage)
+                // AppImage can launch from standalone file, desktop not required
+                if (string.IsNullOrEmpty(Configuration.StartCommand) && Builder.Kind != PackageKind.AppImage && Builder.Kind != PackageKind.Zip)
                 {
-                    Builder.WarningSink.Add($"Note. No desktop file and no {nameof(Configuration.StartCommand)} is configured\n" +
-                        "There will be no way to start the application on the target system - are you sure?");
+                    Builder.WarningSink.Add($"Note. No desktop file or {nameof(Configuration.StartCommand)} is configured\n" +
+                        "There will be no way to start the application once installed - are you sure?");
                 }
             }
 
@@ -92,29 +105,33 @@ public class BuildHost
 
         if (Configuration.DotnetProjectPath == ConfigurationReader.PathDisable)
         {
+            var name = nameof(Configuration.DotnetPostPublish);
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                if (Configuration.DotnetPostPublishOnWindows == null)
-                {
-                    Builder.WarningSink.Add($"CRITICAL. Configuration of {nameof(Configuration.DotnetPostPublishOnWindows)} is mandatory where {nameof(Configuration.DotnetProjectPath)} = {ConfigurationReader.PathDisable}");
-                }
+                name = nameof(Configuration.DotnetPostPublishOnWindows);
             }
-            else
-            if (Configuration.DotnetPostPublish == null)
-            {
-                Builder.WarningSink.Add($"CRITICAL. Configuration of {nameof(Configuration.DotnetPostPublish)} is mandatory where {nameof(Configuration.DotnetProjectPath)} = {ConfigurationReader.PathDisable}");
-            }
+
+            Builder.WarningSink.Add($"CRITICAL. Configuration of {name} is mandatory where {nameof(Configuration.DotnetProjectPath)} = {ConfigurationReader.PathDisable}");
         }
 
-        if (Builder.Architecture.IsWindowsRuntime != kind.IsWindows(false))
+        if (Builder.Runtime.IsArchUncertain)
         {
-            Builder.WarningSink.Add($"WARNING. You are going to package a {Builder.Architecture.RuntimeId} runtime as {kind}\n" +
-                "Is this really what you want to do?");
+            Builder.WarningSink.Add($"WARNING. Package architecture {Builder.Runtime.GetPackageArch(Builder.Kind)} is uncertain for the runtime {Builder.Runtime}\n" +
+                $"Use the argument --{ArgumentReader.ArchLongArg} to specify.");
         }
 
-        if (!kind.CanBuildOnSystem())
+        if ((Builder.Runtime.IsLinuxRuntime && !Builder.Kind.TargetsLinux()) ||
+            (Builder.Runtime.IsWindowsRuntime && !Builder.Kind.TargetsWindows()) ||
+            (Builder.Runtime.IsOsxRuntime && !Builder.Kind.TargetsOsx()))
         {
-            Builder.WarningSink.Add($"CRITICAL. Building {kind} packages is not supported on a {ArchitectureConverter.SimpleOS} development system");
+            Builder.WarningSink.Add($"WARNING. You are going to package the runtime '{Builder.Runtime.RuntimeId}' as {Builder.Kind}\n" +
+                "Are you sure?");
+        }
+
+        if (!Builder.Kind.CanBuildOnSystem())
+        {
+            Builder.WarningSink.Add($"CRITICAL. Building {Builder.Kind} packages is not supported on a {RuntimeConverter.SystemOS} development system");
         }
 
         PublishCommands = Macros.Expand(GetPublishCommands(Builder), nameof(PublishCommands));
@@ -123,7 +140,6 @@ public class BuildHost
         {
             Builder.WarningSink.Add($"{Arguments.Kind} does not support post-build run (--{ArgumentReader.RunLongArg} ignored)");
         }
-
     }
 
     /// <summary>
@@ -186,7 +202,7 @@ public class BuildHost
             if (Arguments.IsVerbose)
             {
                 Console.WriteLine();
-                Console.WriteLine("Files to be deployed:");
+                Console.WriteLine("Deploy Files:");
 
                 foreach (var item in Builder.ListBuild(false))
                 {
@@ -223,14 +239,28 @@ public class BuildHost
     {
         var sb = new StringBuilder();
 
-        AppendHeader(sb, $"APPLICATION: {Configuration.AppBaseName}");
+        AppendHeader(sb, $"APPLICATION: {Configuration.AppBaseName} {Builder.AppVersion} [{Builder.PackageRelease}]");
         AppendPair(sb, nameof(Configuration.AppBaseName), Configuration.AppBaseName);
         AppendPair(sb, nameof(Configuration.AppId), Configuration.AppId);
         AppendPair(sb, nameof(Builder.AppVersion), Builder.AppVersion);
-        AppendPair(sb, nameof(Builder.PackRelease), Builder.PackRelease);
+        AppendPair(sb, nameof(Builder.PackageRelease), Builder.PackageRelease);
+
+        if (Configuration.StartCommand != null && Builder.SupportsStartCommand)
+        {
+            AppendPair(sb, nameof(Configuration.StartCommand), Configuration.StartCommand);
+        }
+        else
+        {
+            AppendPair(sb, nameof(Configuration.StartCommand), Configuration.StartCommand + " [Not Supported]");
+        }
+
+        if (Builder.Kind == PackageKind.Setup)
+        {
+            AppendPair(sb, nameof(Configuration.SetupPrompt), Configuration.SetupPrompt);
+        }
 
         AppendHeader(sb, $"OUTPUT: {Arguments.Kind.ToString().ToUpperInvariant()}");
-        AppendPair(sb, nameof(DeployKind), Arguments.Kind.ToString().ToLowerInvariant());
+        AppendPair(sb, nameof(PackageKind), Arguments.Kind.ToString());
         AppendPair(sb, nameof(Arguments.Runtime), Arguments.Runtime);
         AppendPair(sb, nameof(Arguments.Arch), Arguments.Arch ?? $"Auto ({Builder.Architecture})");
         AppendPair(sb, nameof(Arguments.Build), Arguments.Build);
@@ -250,22 +280,24 @@ public class BuildHost
 
             foreach (var item in Builder.IconPaths)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, item.Value));
+                // IconPaths are fully qualified - make appear relative to root
+                // for info otherwise the full path could be long and cryptic
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, item.Value));
             }
 
-            if (Builder.DesktopPath != null)
+            if (Builder.DesktopBuildPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, Builder.DesktopPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.DesktopBuildPath));
             }
 
-            if (Builder.MetaInfoPath != null)
+            if (Builder.MetaBuildPath != null)
             {
-                temp.AppendLine(Path.GetRelativePath(Builder.AppRoot, Builder.MetaInfoPath));
+                temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.MetaBuildPath));
             }
 
             AppendSection(sb, "DEPLOY ASSETS", temp.ToString().TrimEnd());
             AppendSection(sb, $"METAINFO: {Path.GetFileName(Configuration.MetaFile)}", ExpandedMetaInfo);
-            AppendSection(sb, $"MANIFEST: {Path.GetFileName(Builder.ManifestDestination)}", Builder.ManifestContent?.TrimEnd());
+            AppendSection(sb, $"MANIFEST: {Path.GetFileName(Builder.ManifestBuildPath)}", Builder.ManifestContent?.TrimEnd());
         }
 
         string? proj = Path.GetFileName(Configuration.DotnetProjectPath);
@@ -277,7 +309,8 @@ public class BuildHost
 
         AppendSection(sb, $"BUILD PROJECT{proj}", PublishCommands);
         AppendSection(sb, $"BUILD PACKAGE: {Builder.OutputName}", Builder.PackageCommands);
-        AppendSection(sb, "WARNINGS", Builder.WarningSink);
+
+        AppendSection(sb, "ISSUES", Builder.WarningSink.Count > 0 ? Builder.WarningSink : new string[] { "[None Detected]" });
 
         return sb.ToString().Trim();
     }
@@ -407,7 +440,7 @@ public class BuildHost
             }
 
             sb.Append(" -o \"");
-            sb.Append(builder.PublishBin);
+            sb.Append(builder.BuildAppBin);
             sb.Append("\"");
 
             list.Add(sb.ToString());

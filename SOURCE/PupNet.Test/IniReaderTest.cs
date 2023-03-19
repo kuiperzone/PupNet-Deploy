@@ -52,7 +52,7 @@ public class IniReaderTest
         var sb = new StringBuilder();
         sb.AppendLine("Hello World");
         sb.Append("Hello World");
-        Assert.Equal(sb.ToString(), Create().Values["MultiLine2"]);
+        Assert.Equal(sb.ToString().ReplaceLineEndings("\n"), Create().Values["MultiLine2"]);
 
         sb.Clear();
         sb.AppendLine("Hello World");
@@ -63,7 +63,7 @@ public class IniReaderTest
         sb.AppendLine();
         sb.AppendLine();
         sb.Append("Hello World");
-        Assert.Equal(sb.ToString(), Create().Values["MultiLine3"]);
+        Assert.Equal(sb.ToString().ReplaceLineEndings("\n"), Create().Values["MultiLine3"]);
     }
 
     [Fact]
