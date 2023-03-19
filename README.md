@@ -4,16 +4,19 @@
 
 # Publish and Package for .NET #
 
+
 ## Introduction ##
 
-### In a Sentence ###
-**PupNet** is cross-platform deployment utility that will publish your .NET project and package the output as a ready-to-ship installation file in a single step.
+### In a Sentence ... ###
+**PupNet** is cross-platform deployment utility that will publish your .NET project and package the output as a
+ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
 
-Downloads include AppImage, Deb and RPM for Linux and a Setup file for Windows.
+PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this is not intend to
+prevent its use in deploying commercial applications.
 
-### More Detail... ###
+### More Detail ... ###
 It has been possible to cross-compile command-line C# applications for sometime now. More recently, the
 [Avalonia](https://github.com/AvaloniaUI/Avalonia) WPF replacement allows fully-featured GUI applications to be
 built for a range of platforms, including: Linux, Windows, MacOS and Android.
@@ -46,6 +49,7 @@ Although developed for .NET, it is also possible to use it to deploy C++ and oth
 The output of PupNet is a distributable local file, such as an AppImage, flatpak or Setup.exe file -- it does
 not auto-submit your project to a repository. Note also that, in order to build a Linux deployment, the build system
 must be a Linux box and, likewise to build a Windows Setup file, a Windows system (hint: virtual machines are handy).
+
 
 ## Prerequisites ##
 
@@ -109,6 +113,10 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
     <img src="Media/Screenie-InnoPath.png" style="width:40%;max-width:400px;"/>
 </p>
 
+
+## Getting Started ##
+
+### Build & Package the Hello World Demo ###
 
 
 
