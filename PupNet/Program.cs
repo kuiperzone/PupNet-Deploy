@@ -32,7 +32,7 @@ internal class Program
     /// <summary>
     /// Gets the program product name.
     /// </summary>
-    public const string ProductName = "PupNet";
+    public const string ProductName = "PupNet Deploy";
 
     /// <summary>
     /// Gets the program product name.
@@ -42,7 +42,7 @@ internal class Program
     /// <summary>
     /// Gets the project URL.
     /// </summary>
-    public const string ProjectUrl = "https://github.com/kuiperzone/PupNet";
+    public const string ProjectUrl = "https://github.com/kuiperzone/PupNet-Deploy";
 
     /// <summary>
     /// Gets the application version.

@@ -6,16 +6,14 @@
 
 ## Introduction ##
 
-### In a Sentence ... ###
 **PupNet** is cross-platform deployment utility that will publish your .NET project and package the output as a
 ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
 
 PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this does not prevent
-its use with commercial applications.
+its use in commercial projects provided the terms are respected.
 
-### More Detail ... ###
 It has been possible to cross-compile command-line C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
 GUI applications to be built for a range of platforms, including: Linux, Windows, MacOS and Android.
@@ -52,13 +50,13 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 
 ## Prerequisites ##
 
-Install **PupNet** from the Download Page. If you are using the AppImage download, add it to your path and
-consider renaming the AppImage to `pupnet`.
+Install **PupNet** from the Download Page. If you use the AppImage deployment of PupNet, add it to your path and
+consider renaming the AppImage file to `pupnet` so that the instructions below will match your system.
 
 Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
 you must first install the appropriate third-party builder tool against which PupNet will call.
 
-### Flatpak on Linux ###
+### Flatpaks on Linux ###
 PupNet requires `flatpak` and `flatpak-builder`. It will also be necessary to install a flatpak platform SDK
 and runtime. As appropriate:
 
@@ -72,8 +70,8 @@ And then use flatpak to install:
 
     sudo flatpak install flathub org.freedesktop.Platform//22.08 org.freedesktop.Sdk//22.08
 
-Note the version number (22.08) was the latest at the time of writing, but will be subject to update.
-See (Flatpak Available Runtimes)[https://docs.flatpak.org/en/latest/available-runtimes.html].
+Here, the version number (22.08) was the latest at the time of writing, but will be subject to update.
+See [Flatpak Available Runtimes](https://docs.flatpak.org/en/latest/available-runtimes.html).
 
 ### Deb Packages on Linux ###
 
@@ -103,7 +101,7 @@ should not attempt to install such a package on the system itself (use a virtual
 
 ### Setup Files on Windows ###
 
-PupNet leverages (InnoSetup)[https://jrsoftware.org/isinfo.php] on Windows. Download and install it.
+PupNet leverages [InnoSetup](https://jrsoftware.org/isinfo.php) on Windows. Download and install it.
 
 It will also be necessary to manually add the InnoSetup location to the PATH variable so that PupNet can call the
 `iscc` compiler. See below:
@@ -116,6 +114,32 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
 ## Getting Started ##
 
 ### Build & Package the Hello World Demo ###
+
+**Hello World for PupNet** is a demonstration project for use with PupNet Deploy. It lives in a separate
+git repo of its own.
+
+<p style="text-align:left;margin-bottom:4em;">
+    <a href="https://github.com/kuiperzone/PupNet-HelloWorld" style="outline-style:none;">
+        <img src="Media/HelloWorld.1280x388.png" style="width:40%;max-width:400px;"/>
+    </a>
+</p>
+
+Hello World demonstrates all the major features of building distributable packages with PupNet.
+It can be built for all package kinds, including AppImage, Flatpak, DEB and RPM formats on Linux,
+and as a Setup file on Windows. It provides an example of using desktop and AppStream metadata files,
+as well as icons and a post-publish script.
+
+It will be instructive to discuss the major elements of this simple project here. **But first...**
+
+Clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld) to your local drive.
+Ensure that you have installed the prerequisites above, or at least those you wish to use.
+
+<p style="text-align:left;margin-top:2em;margin-bottom:2em;">
+    <img src="Media/Screenie-Configuration.png" style="width:40%;max-width:400px;"/>
+</p>
+
+
+
 
 
 
