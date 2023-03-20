@@ -11,14 +11,11 @@ ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
 
-PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this does not prevent
-its use in commercial projects to generate application installation files.
-
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
 GUI applications to be target a range of platforms, including: Linux, Windows, MacOS and Android.
 
-**PupNet Deploy** is a command-line utility which allows you to ship your dotnet application as:
+Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
 * AppImage for Linux
 * Setup File for Windows
