@@ -30,6 +30,11 @@ internal class Program
     public const string CommandName = "pupnet";
 
     /// <summary>
+    /// Gets the conf file extension.
+    /// </summary>
+    public const string ConfExt = ".pupnet.conf";
+
+    /// <summary>
     /// Gets the program product name.
     /// </summary>
     public const string ProductName = "PupNet Deploy";

@@ -61,7 +61,7 @@ public static class NewKindExtension
     {
         switch (kind)
         {
-            case NewKind.Conf: return $".{Program.CommandName}.conf";
+            case NewKind.Conf: return Program.ConfExt;
             case NewKind.Desktop: return ".desktop";
             case NewKind.Meta: return ".metainfo.xml";
             default: return "";

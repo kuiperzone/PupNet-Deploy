@@ -13,24 +13,50 @@
     <launchable type="desktop-id">${APP_ID}.desktop</launchable>
 
     <description>
-        <p>REPLACE WITH YOUR OWN DESCRIPTION. This is a longer application description than the summary.
-        IMPORTANT: Many of the values in this file may be automated with macros. See --help for details.</p>
+        <p>PupNet Deploy is a cross-platform deployment utility publishes your .NET project and
+        packages it as a ready-to-ship installation file in a single step.</p>
+
+        <p>It has been possible to cross-compile console C# applications for sometime now. More recently, the
+        cross-platform Avalonia replacement for WPF allows fully-featured GUI applications to target a range of
+        platforms, including: Linux, Windows, MacOS and Android.</p>
+
+        <p>Now, PupNet Deploy allows you to ship your dotnet application as:</p>
+
+        <ul>
+            <li>AppImage for Linux</li>
+            <li>Setup File for Windows</li>
+            <li>Flatpak</li>
+            <li>Deb Package</li>
+            <li>RPM Package</li>
+            <li>Plain old Zip</li>
+        </ul>
+
+        <p>PupNet has good support for internationalization, desktop icons, publisher metadata and custom build
+        operations. Although developed for .NET, it is also possible to use it to deploy C++ and other kinds of applications.</p>
     </description>
 
     <!-- Freedesktop Categories -->
     <categories>
-        <category>${PRIME_CATEGORY}</category>
+        <category>Development</category>
+        <category>Utility</category>
     </categories>
 
-    <!-- Uncomment to provide keywords
     <keywords>
-        <keyword translate="no">IDE</keyword>
+        <keyword translate="no">appimage</keyword>
+        <keyword translate="no">flatpak</keyword>
+        <keyword translate="no">dotnet</keyword>
+        <keyword translate="no">csharp</keyword>
+        <keyword>installation</keyword>
         <keyword>development</keyword>
         <keyword>programming</keyword>
         <keyword xml:lang="de">entwicklung</keyword>
         <keyword xml:lang="de">programmierung</keyword>
+        <keyword translate="no">windows</keyword>
+        <keyword translate="no">linux</keyword>
+        <keyword translate="no">setup</keyword>
+        <keyword translate="no">debian</keyword>
+        <keyword translate="no">rpm</keyword>
     </keywords>
-    -->
 
     <!-- Uncomment to provide screenshots
     <screenshots>
@@ -41,8 +67,8 @@
     -->
 
     <releases>
-        <release version="${APP_VERSION}" date="${BUILD_DATE}">
-            <description><p>The latest release.</p></description>
+        <release version="0.0.1" date="2023-03-20">
+            <description><p>Initial pre-release</p></description>
         </release>
     </releases>
 

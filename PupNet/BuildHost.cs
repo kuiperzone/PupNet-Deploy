@@ -62,9 +62,10 @@ public class BuildHost
             var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
 
             // Careful - check filename, not content as filename may equal "NONE"
-            if (Configuration.DesktopFile == null)
+            if (desktop == null && (Configuration.DesktopFile != ConfigurationReader.PathDisable || Arguments.Kind == PackageKind.AppImage))
             {
                 // Magic desktop file
+                // NOTE. AppImage MUST have desktop - we make one if not provided
                 desktop = MetaTemplates.Desktop;
             }
 

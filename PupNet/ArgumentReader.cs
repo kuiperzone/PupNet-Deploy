@@ -218,10 +218,10 @@ public class ArgumentReader
         var sb = new StringBuilder();
 
         sb.AppendLine("USAGE:");
-        sb.AppendLine($"{indent}{Program.CommandName} [file.conf] [--option-n value-n]");
+        sb.AppendLine($"{indent}{Program.CommandName} [file{Program.ConfExt}] [--option-n value-n]");
         sb.AppendLine();
         sb.AppendLine("Example:");
-        sb.AppendLine($"{indent}{Program.CommandName} app.{Program.CommandName}.conf -{SkipYesShortArg} -{RidShortArg} linux-arm64");
+        sb.AppendLine($"{indent}{Program.CommandName} app.{Program.ConfExt} -{SkipYesShortArg} -{RidShortArg} linux-arm64");
         sb.AppendLine();
         sb.AppendLine($"If conf file is omitted, one in the working directory will be selected.");
 
@@ -327,7 +327,7 @@ public class ArgumentReader
             dir = path;
         }
 
-        var files = Directory.GetFiles(dir, "*.conf", SearchOption.TopDirectoryOnly);
+        var files = Directory.GetFiles(dir, "*" + Program.ConfExt, SearchOption.TopDirectoryOnly);
         return files.Length == 1 ? files[0] : null;
     }
 

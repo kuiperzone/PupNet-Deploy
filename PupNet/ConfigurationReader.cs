@@ -564,11 +564,11 @@ public class ConfigurationReader
         {
             if (assert)
             {
-                throw new ArgumentException($"Specify .conf file (directory does not contain exactly one file).");
+                throw new ArgumentException($"Specify {Program.ConfExt} file (directory must contain a single file with the {Program.ConfExt} extension)");
             }
 
             // Dummy only (not in production)
-            return "file.conf";
+            return $"file{Program.ConfExt}";
         }
 
         return path;

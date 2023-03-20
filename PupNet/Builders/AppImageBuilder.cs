@@ -22,6 +22,7 @@ namespace KuiperZone.PupNet.Builders;
 
 /// <summary>
 /// Extends <see cref="PackageBuilder"/> for AppImage package.
+/// https://docs.appimage.org/reference/appdir.html
 /// </summary>
 public class AppImageBuilder : PackageBuilder
 {
