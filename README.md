@@ -41,7 +41,7 @@ Likewise, to package the same project for Windows:
 PupNet has good support for internationalization, desktop icons, publisher metadata and custom build operations.
 Although developed for .NET, it is also possible to use it to deploy C++ and other kinds of applications.
 
-The output of PupNet is a distributable local file, such as an AppImage, flatpak or Setup.exe file -- it does
+The output of PupNet is a distributable file, such as an AppImage, flatpak or Setup.exe file -- it does
 not auto-submit your project to a repository. Note also that, in order to build a Linux deployment, the build system
 must be a Linux box and, likewise to build a Windows Setup file, a Windows system (hint: virtual machines are handy).
 
@@ -225,7 +225,7 @@ your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that t
 however. This is because the `pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
 
 If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you may leave `DotnetProjectPath`
-empty. Otherwise use this field specify the path to your solution or project file or directory relative to the location
+empty. Otherwise use this field to specify the path to your solution or project file or directory relative to the location
 of the configuration file.
 
 ### Dotnet Publish Arguments ###
@@ -441,7 +441,7 @@ included a link to our home page, which is optional.
     <img src="Media/Screenie-StartMenu.png" style="width:40%;max-width:800px;"/>
 </p>
 
-Moreover, there is a "Command Prompt" option to launch a dedicated Console windows, as described above.
+Moreover, there is a "Command Prompt" option to launch a dedicated command window, as described above.
 
 
 ## Creating New PupNet Project Files ##
@@ -470,7 +470,7 @@ This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainf
 
 ### Command Arguments ###
 
-Type `pupnet --help` displays command arguments as expected.
+Type `pupnet --help` to display command arguments as expected.
 
     USAGE:
         pupnet [file.conf] [--option-n value-n]
@@ -654,7 +654,7 @@ Type `pupnet --help macros` to see supported macro reference information:
 
 ### Configuration Reference ###
 
-Type `pupnet --help conf` to see supported macro reference information:
+Type `pupnet --help conf` to see supported configuration reference information:
 
     ########################################
     # APP PREAMBLE
@@ -908,7 +908,7 @@ PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/Publish-AppImage">
-        <img title="Publish-AppImage" alt="Publish-AppImage" src="Images/Publish-AppImage.png" style="width:40%;max-width:250px;"/>
+        <img title="Publish-AppImage" alt="Publish-AppImage" src="Media/Publish-AppImage.png" style="width:40%;max-width:250px;"/>
     </a>
 </p>
 
