@@ -98,9 +98,9 @@ public class SetupBuilder : PackageBuilder
             Operations.WriteFile(path, script);
         }
 
-        if (Configuration.SetupPrompt != null)
+        if (Configuration.SetupCommandPrompt != null)
         {
-            var title = EscapeBat(Configuration.SetupPrompt);
+            var title = EscapeBat(Configuration.SetupCommandPrompt);
             var path  = Path.Combine(BuildAppBin, PromptBat);
             var script = $"start cmd /k \"cd /D %userprofile% & title {title} & set path=%path%;%~dp0\"";
             Operations.WriteFile(path, script);
@@ -177,9 +177,9 @@ public class SetupBuilder : PackageBuilder
             sb.AppendLine($"Name: \"{{userdesktop}}\\{Configuration.AppFriendlyName}\"; Filename: \"{{app}}\\{AppExecName}\"; Tasks: desktopicon");
         }
 
-        if (Configuration.SetupPrompt != null)
+        if (Configuration.SetupCommandPrompt != null)
         {
-            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupPrompt}\"; Filename: \"{{app}}\\{PromptBat}\"");
+            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupCommandPrompt}\"; Filename: \"{{app}}\\{PromptBat}\"");
         }
 
         if (Configuration.PublisherLinkName != null && Configuration.PublisherLinkUrl != null)

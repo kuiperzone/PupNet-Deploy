@@ -256,7 +256,7 @@ public class BuildHost
 
         if (Builder.Kind == PackageKind.Setup)
         {
-            AppendPair(sb, nameof(Configuration.SetupPrompt), Configuration.SetupPrompt);
+            AppendPair(sb, nameof(Configuration.SetupCommandPrompt), Configuration.SetupCommandPrompt);
         }
 
         AppendHeader(sb, $"OUTPUT: {Arguments.Kind.ToString().ToUpperInvariant()}");

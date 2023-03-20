@@ -124,7 +124,7 @@ public class ConfigurationReaderTest
     public void DotnetProjectPath_Optional_DecodeOK()
     {
         Assert.Equal("HelloProject", new DummyConf(PackageKind.AppImage).DotnetProjectPath);
-        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetProjectPath)).DotnetProjectPath);
+        Assert.NotNull(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.DotnetProjectPath)).DotnetProjectPath);
     }
 
     [Fact]
@@ -158,8 +158,8 @@ public class ConfigurationReaderTest
     [Fact]
     public void SetupCommandPrompt_Optional_DecodeOK()
     {
-        Assert.Equal("Command Prompt", new DummyConf(PackageKind.AppImage).SetupPrompt);
-        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.SetupPrompt)).SetupPrompt);
+        Assert.Equal("Command Prompt", new DummyConf(PackageKind.AppImage).SetupCommandPrompt);
+        Assert.Null(new DummyConf(PackageKind.AppImage, nameof(ConfigurationReader.SetupCommandPrompt)).SetupCommandPrompt);
     }
 
     [Fact]

@@ -68,6 +68,7 @@ public class ConfigurationReader
         Reader = new();
         LocalDirectory = "";
         PackageName = AppBaseName;
+        DotnetProjectPath = "";
 
         if (!string.IsNullOrEmpty(metabase))
         {

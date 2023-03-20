@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=${APP_FRIENDLY_NAME}
+Icon=${APP_ID}
+Comment=${APP_SHORT_SUMMARY}
+Exec=${INSTALL_EXEC}
+TryExec=${INSTALL_EXEC}
+Terminal=${IS_TERMINAL_APP}
+Categories=${PRIME_CATEGORY}
+MimeType=
+Keywords=
