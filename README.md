@@ -412,7 +412,7 @@ as shown below.
 On installation, we Program Menu entries as follows:
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
-    <img src="Media/Screenie-Setup.png" style="width:40%;max-width:800px;"/>
+    <img src="Media/Screenie-StartMenu.png" style="width:40%;max-width:800px;"/>
 </p>
 
 
