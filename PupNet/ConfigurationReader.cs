@@ -408,21 +408,20 @@ public class ConfigurationReader
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPublishArgs), DotnetPublishArgs));
 
         c?.AppendLine();
-        c?.AppendLine($"# Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands");
-        c?.AppendLine($"# may be specified, separated by semicolon or given in multi-line form. They are called after");
-        c?.AppendLine($"# dotnet publish, but before the final output is built. These could, for example, copy additional");
-        c?.AppendLine($"# files into the build directory given by {MacroId.BuildAppBin.ToVar()}. The working directory will be the");
-        c?.AppendLine($"# location of this file. This value is optional, but becomes mandatory if {nameof(DotnetProjectPath)} equals '{PathDisable}'.");
-        c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these as environment variables.");
-        c?.AppendLine($"# Use {macroHelp} for reference.");
+        c?.AppendLine($"# Post-publish (or standalone build) command on Linux (ignored on Windows). It is called after");
+        c?.AppendLine($"# dotnet publish, but before the final output is built. This could, for example, be a script which");
+        c?.AppendLine($"# copies additional files into the build directory given by {MacroId.BuildAppBin.ToVar()}. The working");
+        c?.AppendLine($"# directory will be the location of this file. This value is optional, but becomes mandatory if");
+        c?.AppendLine($"# {nameof(DotnetProjectPath)} equals '{PathDisable}'. Note. This value may use macro variables.");
+        c?.AppendLine($"# Additionally, scripts may use these as environment variables. Use {macroHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublish), DotnetPostPublish));
 
         c?.AppendLine();
-        c?.AppendLine($"# Post-publish (or standalone build) commands on Windows (ignored on Linux). This should perform");
-        c?.AppendLine($"# the equivalent operations, as required, as {nameof(DotnetPostPublish)}, but using DOS commands and batch scripts.");
-        c?.AppendLine($"# Multiple commands may be specified, separated by semicolon or given in multi-line form. Note. This value");
-        c?.AppendLine($"# may use macro variables. Additionally, scripts may use these as environment variables.");
-        c?.AppendLine($"# Use {macroHelp} for reference.");
+        c?.AppendLine($"# Post-publish (or standalone build) command on Windows (ignored on Linux). This should perform");
+        c?.AppendLine($"# the equivalent operation, as required, as {nameof(DotnetPostPublish)}, but using DOS commands and batch");
+        c?.AppendLine($"# scripts. Multiple commands may be specified, separated by semicolon or given in multi-line form.");
+        c?.AppendLine($"# Note. This value may use macro variables. Additionally, scripts may use these as environment");
+        c?.AppendLine($"# variables. Use {macroHelp} for reference.");
         sb.AppendLine(GetHelpNameValue(nameof(DotnetPostPublishOnWindows), DotnetPostPublishOnWindows));
 
         sb.AppendLine();

@@ -111,7 +111,7 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
 </p>
 
 
-## Build & Package the Hello World Demo ##
+## PupNet Configuration ##
 
 **Hello World for PupNet** is a demonstration project for use with PupNet Deploy. It lives in [a separate
 git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own.
@@ -127,23 +127,25 @@ It can be built for all package kinds, including AppImage, Flatpak, DEB and RPM 
 and as a Setup file on Windows. It provides an example of using desktop and AppStream metadata files,
 as well as icons and a post-publish script.
 
-It will be instructive to discuss the major elements of this simple project here. **But first...**
+It will be instructive to discuss the major configuration elements with reference to this simple project. **But first...**
 
-Clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld) to your local drive.
-Ensure that you have installed the prerequisites above, or at least those you wish to use.
+If you wish to build and try the demo, clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld)
+to your local drive. Ensure that you have installed the prerequisites above, or at least those you wish to use.
+
+Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-Configuration.png" style="width:60%;max-width:400px;"/>
 </p>
 
-Take a look at the `HelloWorld.pupnet.conf` in the root of the project. This is a simple ini file in which your
-deployment project is configured. You will see that each parameter is documented.
+This is a simple ini file in which the deployment project is configured. You will see that each parameter
+is documented. Where local paths are given, they are local to the `.conf` file, and not your current working directory.
 
 ### Desktop File ###
 
 Note the `DesktopFile` parameter which specifies the path (local to the conf file) to a Linux `.desktop` file.
-This describes how your application will appear on the Linux desktop. If you leave it blank, one will be generated
-automatically. In the Hello World demo, we have specified a file path, however, in order to show the contents...
+If you leave it blank, one will be generated automatically. In the Hello World demo, we have specified a file path
+in order to show the contents...
 
 Open the file `Deploy/app.desktop`, and you will see:
 
@@ -160,7 +162,8 @@ Open the file `Deploy/app.desktop`, and you will see:
     Keywords=
 
 Note that the contents above are entirely populated using macro variables (more below on these). However, you can
-easily extend this file to specify a `MimeType` and `Keywords`, as well as adding international translations.
+easily extend this file to specify a `MimeType` and `Keywords`, as well as adding international translations and
+additional entries.
 
 IMPORTANT: While you can edit this file as you wish, the file must contain the line below with its macro:
 
@@ -170,21 +173,22 @@ Or, if you prefer:
 
     Exec=${INSTALL_BIN}/app-name
 
-The reason for this is that the actual path on installation will depend on the package type. You cannot hard code it,
-as Flatpak and Deb packages, for example, will install to different paths. It is important also that you use macros as
-shown with their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search-and-replace operation is
+The reason for this is that the actual path on installation will depend on the package type. You cannot hard code this
+here as Flatpak and Deb packages, for example, will install to different paths. It is important also that you use macros
+as shown with their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search-and-replace operation is
 used to populate them.
 
-In the event that you explicitly require no desktop file, you would declare: `DesktopFile = NONE`. The `DesktopFile`
+In the event that you explicitly require no desktop file, you may declare: `DesktopFile = NONE`. The `DesktopFile`
 parameter is mostly ignored for Windows `Setup`, except that setting it to `NONE` is used indicate that you wish
-no programs entry to be written under the Windows Start Menu (i.e. synonymous behavior with that on Linux).
+no entry for your main application executable to be written under the Windows Start Menu (i.e. almost synonymous
+behavior with that on Linux).
 
 ### AppStream Metadata ###
 
 The `MetaFile` parameter specifies the path to a local AppStream metadata XML file. It is optional and, if
 omitted, no `.metainfo.xml` file is shipped with your application.
 
-Take a look at the file provided under: `Deploy/app.metainfo.xml`.
+Take a look, for example, at the file provided under: `Deploy/app.metainfo.xml`.
 
 Again, you will notice that macro variables are used. These are entirely optional here and simply mean, that as far
 as possible, deployment configuration data is specified in one place only (i.e. your `pupnet.conf` file).
@@ -195,12 +199,11 @@ Hint: You can use PupNet to generate a metadata template file:
 
 This will create a new file for you under: `name.metainfo.xml`
 
-See the [AppStream Packaging Guide](https://docs.appimage.org/packaging-guide/optional/appstream.html) for reference.
 
 ### Icons ###
 
-Multiple desktop icons may be specified with the `IconPaths` parameter. You can use semi-colon as a separator, as:
-`IconPaths = icon1.ico;icon2.64x64.png;icon3.svg`, or in multi-line form as used in the Hello World demo:
+Multiple desktop icons may be specified with the `IconPaths` parameter. You can use semi-colon as a separator, such
+as: `IconPaths = icon1.ico;icon2.64x64.png;icon3.svg`, or in multi-line form as shown in the Hello World demo:
 
     IconFiles = """
         Deploy/HelloWorld.16x16.png
@@ -212,21 +215,20 @@ Multiple desktop icons may be specified with the `IconPaths` parameter. You can 
         Deploy/HelloWorld.ico
     """
 
-Note the use of type quotes for multi-line values.
+Note the use of *triple quotes* for multi-line values. Use only the `svg`, `png` and `ico` file types.
 
-On Linux, `svg` and `png` files will be used and installed appropriately (the Windows `ico` will be ignored). It is
+On Linux, `svg` and `png` files will be installed appropriately and the Windows `ico` file ignored. It is
 important to specify the size of PNG files by embedding their size in the filename, as shown, or simply as: `name.64.png`.
 
 For Windows `Setup` packages, only the `ico` file is used.
 
 ### Dotnet Project Path ###
 
-When building a deployment package, PupNet first calls `dotnet publish` on your project.
+When building the deployment, PupNet first calls `dotnet publish` on your project. To do this, it needs to know where
+your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that the `DotnetProjectPath` value is empty,
+however. This is because the `pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
 
-In the `HelloWorld.pupnet.conf` file, you may note that the `DotnetProjectPath` value is empty. This is because the
-`pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
-
-If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you leave `DotnetProjectPath`
+If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you may leave `DotnetProjectPath`
 empty. Otherwise use this field specify the path to your solution or project file or directory.
 
 ### Application Versioning ###
@@ -235,13 +237,11 @@ The application version (plus release number) is specified in the `pupnet.conf` 
 
     AppVersionRelease = 3.2.1[5]
 
-This is used populate package metadata and required.
-
-Here we are using semantic version `3.2.1` plus a "package release number" in square brackets. The release number
+Here we are using the semantic version `3.2.1` plus a "package release number" in square brackets. The release number
 applies specifically to the deployment package itself and is used by `rpm` and `deb` package kinds (it is stripped off
-for the application use). If you omitted the release number, and just use `3.2.1` for example, it defaults to 1.
+for the application's use). If you omit the release number, and just give `3.2.1` for example, it defaults to 1.
 
-Moreover, if you prefer, you can override the version given in the configuration at the command line using:
+You can override the version given in the configuration file at the command line using:
 
     pupnet --runtime linux-arm64 --kind deb --app-version 4.0.0[1]
 
@@ -249,18 +249,68 @@ Crucially, take a look at the following parameter:
 
     DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
 
-Here we see that we are supply the application version part (i.e. `3.2.1`) to build process. This is optional and
-you may remove this is you like, although you will need to specify the version both in application code and the
-`pupnet.conf` file.
+Here we are specifying parameters to supply to the `dotnet publish` call, and you can see that we also pass the
+version in our configuration to the build process (the variable only supplies the application part, i.e. `3.2.1`).
+This is optional and you may remove this is you wish, although you will need to specify the version both in application
+code and the `pupnet.conf` file.
 
 ### Custom Post-Publish Operation ###
 
+In `HelloWorld.pupnet.conf`, we see the lines:
+
+    DotnetPostPublish = Deploy/PostPublish.sh
+    DotnetPostPublishOnWindows = Deploy/PostPublish.bat
+
+This is an advanced feature which allows you to call a command or script to perform additional operations after
+`dotnet publish` has been called, but prior to building the package. The above commands are called only on their
+respective build systems, and should perform equivalent operation.
+
+Post-publish scripts may employ supported macro variables which are exported to the environment. The Hello World
+scripts above actually create a subdirectory and dummy file within the application build directory, supplied as
+`${BUILD_APP_BIN}`.
+
+Here is the contents of the example bash script:
+
+    #!/bin/bash
+    # This is a dummy bash script used for demonstration and test. It outputs a few variables
+    # and creates a dummy file in the application directory which will be detected by the program.
+
+    echo
+    echo "==========================="
+    echo "POST_PUBLISH BASH SCRIPT"
+    echo "==========================="
+    echo
+
+    # Some useful macros / environment variables
+    echo "BUILD_ARCH: ${BUILD_ARCH}"
+    echo "BUILD_TARGET: ${BUILD_TARGET}"
+    echo "BUILD_SHARE: ${BUILD_SHARE}"
+    echo "BUILD_APP_BIN: ${BUILD_APP_BIN}"
+    echo
+
+    # Directory and file will be detected by HelloWorld Program
+    echo "Do work..."
+    set -x #echo on
+    mkdir -p "${BUILD_APP_BIN}/subdir"
+    touch "${BUILD_APP_BIN}/subdir/file.test"
+    set +x #echo off
+
+    echo
+    echo "==========================="
+    echo "POST_PUBLISH END"
+    echo "==========================="
+    echo
+
+Additionally, you may leverage these so called post-publish operations to perform the actual build operation itself
+and to populate the `${BUILD_APP_BIN}` directory. In principle, you could use this to package the a C++ or Python
+application, provided that it is satisfactory to package the application and all its associated libraries in a
+single directory.
+
+If you do this, you will wish to disable PupNet from calling `dotnet publish`, which can be done by setting
+`DotnetProjectPath = NONE`.
 
 
-
-Additionally, you can disable PupNet from calling `dotnet publish` by setting `DotnetProjectPath = NONE`.
-The reason you may wish to do this is if to use PupNet
-
+## Building Hello World ##
 
 
 
