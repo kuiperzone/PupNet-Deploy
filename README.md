@@ -10,6 +10,7 @@
 ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
+If you like this project, don't forget to like and share.
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
@@ -969,7 +970,7 @@ with PupNet. If not, see <https://www.gnu.org/licenses/>.
 #### Embedded Assets ####
 
 PupNet embeds "appimagetool", from the "AppImageKit".
-AppImageKit is Copyright (C) 2004-20 Simon Peter
+AppImageKit is Copyright (C) 2004-20 Simon Peter:
 https://github.com/AppImage/AppImageKit
 
 ### Non-code Assets ####
