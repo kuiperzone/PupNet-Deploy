@@ -6,19 +6,19 @@
 
 ## Introduction ##
 
-**PupNet** is cross-platform deployment utility that will publish your .NET project and package the output as a
+**PupNet Deploy** is cross-platform deployment utility that will publish your .NET project and package the output as a
 ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
 
 PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this does not prevent
-its use in commercial projects provided the terms are respected.
+its use in commercial projects to generate application installation files.
 
-It has been possible to cross-compile command-line C# applications for sometime now. More recently, the
+It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
-GUI applications to be built for a range of platforms, including: Linux, Windows, MacOS and Android.
+GUI applications to be target a range of platforms, including: Linux, Windows, MacOS and Android.
 
-**PupNet** is a command-line utility which allows you to ship your application as:
+**PupNet Deploy** is a command-line utility which allows you to ship your dotnet application as:
 
 * AppImage for Linux
 * Setup File for Windows
@@ -27,25 +27,28 @@ GUI applications to be built for a range of platforms, including: Linux, Windows
 * RPM Package (binary)
 * Plain old Zip
 
-To use it, you fill out the parameters in a simple `pupnet.conf` file and, from within your project, run a command like so:
+To create an installation file, you fill out the parameters in a simple `pupnet.conf` file and, from within your project,
+run a command like so:
 
     pupnet --runtime linux-x64 --kind appimage
 
-In this case, it will call `dotnet publish` on your project and generate a distributable AppImage output file for
+In this case, PupNet calls `dotnet publish` on your project and generates a distributable AppImage output file for
 use on Linux systems. Additionally, you may optionally provide `.desktop` and AppStream metadata files. There is no need
-to provide a complex build-specific manifest, RPM spec or Debian control file. You provide your deployment
-configuration once in a single `pupnet.conf`, and PupNet takes care of the underlying build-specific tasks.
+to write complex build-specific manifests, RPM spec or Debian control files. You need only supply your deployment
+configuration once as a single `pupnet.conf`, and PupNet takes care of the underlying build-specific tasks.
 
 Likewise, to package the same project for Windows:
 
     pupnet -r win-x64 -k setup
 
 PupNet has good support for internationalization, desktop icons, publisher metadata and custom build operations.
-Although developed for .NET, it is also possible to use it to deploy C++ and other applications.
+Although developed for .NET, it is also possible to use it to deploy C++ and other kinds of applications.
 
 The output of PupNet is a distributable local file, such as an AppImage, flatpak or Setup.exe file -- it does
 not auto-submit your project to a repository. Note also that, in order to build a Linux deployment, the build system
 must be a Linux box and, likewise to build a Windows Setup file, a Windows system (hint: virtual machines are handy).
+
+However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
 
 ## Prerequisites ##
@@ -54,7 +57,7 @@ Install **PupNet** from the Download Page. If you use the AppImage deployment of
 consider renaming the AppImage file to `pupnet` so that the instructions below will match your system.
 
 Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
-you must first install the appropriate third-party builder tool against which PupNet will call.
+however, you must first install the appropriate third-party builder tool against which PupNet will call.
 
 ### Flatpaks on Linux ###
 PupNet requires `flatpak` and `flatpak-builder`. It will also be necessary to install a flatpak platform SDK
@@ -75,7 +78,7 @@ See [Flatpak Available Runtimes](https://docs.flatpak.org/en/latest/available-ru
 
 ### Deb Packages on Linux ###
 
-PupNet requires `dpkg-deb`. As appropriate:
+PupNet requires `dpkg-deb`. So, as appropriate:
 
     sudo apt install dpkg
 
@@ -83,8 +86,8 @@ or:
 
     sudo dnf install dpkg
 
-It is possible to install `dpkg-deb` on an RPM based system in order to build Debian packages, although we
-should not attempt to install such a package on the system itself (use a virtual machines to test).
+It is possible to build Debian packages using `dpkg-deb` on an RPM based system, although you should
+use a virtual machines to test it.
 
 ### RPM Packages on Linux ###
 
@@ -96,15 +99,16 @@ or:
 
     sudo apt install rpm
 
-It is possible to install `rpmbuild` on a Debian based system in order to build RPM packages, although we
-should not attempt to install such a package on the system itself (use a virtual machines to test).
+It is possible to build RPM packages using `rpmbuild` on a Debian system although, again, you should
+use a virtual machines to test it.
+
 
 ### Setup Files on Windows ###
 
 PupNet leverages [InnoSetup](https://jrsoftware.org/isinfo.php) on Windows. Download and install it.
 
-It will also be necessary to manually add the InnoSetup location to the PATH variable so that PupNet can call the
-`iscc` compiler. See below:
+It will also be necessary to manually add the InnoSetup location to the user's PATH variable
+so that PupNet can call the `iscc` compiler. See below:
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-InnoPath.png" style="width:40%;max-width:400px;"/>
@@ -113,7 +117,7 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
 
 ## PupNet Configuration ##
 
-**Hello World for PupNet** is a demonstration project for PupNet Deploy, and it will be instructive to discuss
+**Hello World for PupNet** is a demonstration project for PupNet Deploy. It will be instructive to discuss
 the major configuration elements with reference to this simple project, as it demonstrates all the major
 features of building distributable packages.
 
@@ -133,15 +137,14 @@ Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
     <img src="Media/Screenie-Configuration.png" style="width:60%;max-width:400px;"/>
 </p>
 
-This is a simple ini file in which the deployment project is configured. You will see that each parameter
-is documented. Where local paths are given, they are local to the `.conf` file, and not your current working directory.
-Always use the forward-slash '/' as a path separator.
+This is a simple ini file in which the deployment project is configured. You will see that each parameter is documented.
+Where local paths are given, they are local to the `.conf` file, rather than your current working directory.
+Always use the forward-slash '/' as a path separator for cross-platform compatibility.
 
 ### Desktop File ###
 
-Note the `DesktopFile` parameter which specifies the path (local to the conf file) to a Linux `.desktop` file.
-If you leave it blank, one will be generated automatically. In the Hello World demo, we have specified a file path
-in order to show the contents...
+Note the `DesktopFile` parameter which provides a path to a Linux `.desktop` file. If you leave it blank, one will
+be generated automatically. In the Hello World demo, we have specified a file in order to show the contents...
 
 Open the file `Deploy/app.desktop`, and you will see:
 
@@ -170,13 +173,13 @@ Or, if you prefer:
     Exec=${INSTALL_BIN}/app-name
 
 The reason for this is that the actual path on installation will depend on the package type. You cannot hard code this
-here as Flatpak and Deb packages, for example, will install to different paths. It is important also that you use macros
-as shown with their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search-and-replace operation is
+here as different packages will install to different paths. It is important also that you use macros as shown with
+their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search-and-replace operation is
 used to populate them.
 
 In the event that you explicitly require no desktop file, you may declare: `DesktopFile = NONE`. The `DesktopFile`
 parameter is mostly ignored for Windows `Setup`, except that setting it to `NONE` is used indicate that you wish
-no entry for your main application executable to be written under the Windows Start Menu (i.e. almost synonymous
+no entry for your main application executable to be written under the Windows Start Menu (i.e. synonymous
 behavior with that on Linux).
 
 ### AppStream Metadata ###
@@ -189,7 +192,7 @@ Take a look, for example, at the file provided under: `Deploy/app.metainfo.xml`.
 Again, you will notice that macro variables are used. These are entirely optional here and simply mean, that as far
 as possible, deployment configuration data is specified in one place only (i.e. your `pupnet.conf` file).
 
-Hint: You can use PupNet to generate a metadata template file:
+Hint: You can use PupNet itself to generate a metadata template file:
 
     pupnet name --new meta
 
@@ -198,8 +201,8 @@ This will create a new file for you under: `name.metainfo.xml`
 
 ### Icons ###
 
-Multiple desktop icons may be specified with the `IconPaths` parameter. You can use semi-colon as a separator, such
-as: `IconPaths = icon1.ico;icon2.64x64.png;icon3.svg`, or in multi-line form as shown in the Hello World demo:
+Multiple desktop icons are provided with the `IconPaths` parameter. You can use semi-colon as a separator, such as:
+`IconPaths = icon1.ico;icon2.64x64.png;icon3.svg`, or present them in multi-line form as shown in the Hello World demo:
 
     IconFiles = """
         Deploy/HelloWorld.16x16.png
@@ -225,12 +228,12 @@ your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that t
 however. This is because the `pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
 
 If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you may leave `DotnetProjectPath`
-empty. Otherwise use this field specify the path to your solution or project file or directory relative from the location
+empty. Otherwise use this field specify the path to your solution or project file or directory relative to the location
 of the configuration file.
 
 ### Dotnet Publish Arguments ###
 
-The follow parameter is used to specify values to supply to the `dotnet publish` call:
+The `DotnetPublishArgs` parameter is used to specify values to supply to the `dotnet publish` call:
 
     DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
 
@@ -247,7 +250,7 @@ Here we are using the semantic version `3.2.1` plus a "package release number" i
 applies specifically to the deployment package itself and is used by `rpm` and `deb` package kinds (it is stripped off
 for the application's use). If you omit the release number, and just give `3.2.1` for example, it defaults to 1.
 
-You can override the version given in the configuration file at the command line using:
+If you prefer, you can override the version in the configuration file from the command line using:
 
     pupnet --runtime linux-arm64 --kind deb --app-version 4.0.0[1]
 
@@ -255,14 +258,14 @@ Crucially, if we look again at the `DotnetPublishArgs` value:
 
     DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
 
-We see that the version from our configuration is supplied to the build process as a variable (only supplies the application
-part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will need to specify
-the version both in application code and the `pupnet.conf` file in this case.
+Here, we can see that the version from our configuration is supplied to the build process as a variable (only supplies the
+application part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will need to
+specify the version both in application code and the `pupnet.conf` file in this case.
 
 ### Command-Line Applications ###
 
 With the advent of the Avalonia cross-platform GUI framework, it was envisaged that a typical use case for PupNet
-would be to deploy GUI applications with desktop entries. However, it is possible to support command-line centric
+would be to deploy GUI applications that are integrated with the desktop. However, it is possible to support command-line centric
 applications (except for flatpak), but note that by default, your application will not be in the user's path.
 
 In `deb` and `rpm` deployments, the application is installed to the `/opt` directory, rather than `/usr/bin`.
@@ -272,27 +275,26 @@ If you wish that application be accessible from the command line, assign a suita
 
 This will cause a small bash script to be written under `/usr/bin` which will launch your application.
 
-Under Windows, PupNet offers the option to include a "Command Prompt" entry under the Programs Menu which launches
-a Console Window inside which your application is in the path. See the `SetupCommandPrompt` parameter,
+Under Windows, PupNet offers the option to include a "Command Prompt" entry under the Programs Menu in order to launch
+a dedicated Console Window inside of which your application is accessible. See the `SetupCommandPrompt` parameter,
 and the Windows screenshots below.
 
-
-### Custom Post-Publish Operation ###
+### Custom Post-Publish Operations ###
 
 In `HelloWorld.pupnet.conf`, we see the lines:
 
     DotnetPostPublish = Deploy/PostPublish.sh
     DotnetPostPublishOnWindows = Deploy/PostPublish.bat
 
-This is an advanced feature which allows you to call a command or script to perform additional operations after
-`dotnet publish` has been called, but prior to building the package. The above commands are called only on their
+This is an advanced feature which allows you to call a command or script in order to perform additional operations after
+`dotnet publish` has been called, but prior to building the package output. The above commands are called only on their
 respective build systems, and should perform equivalent operation.
 
-Post-publish scripts may employ supported macro variables which are exported to the environment. The Hello World
-scripts above actually create a subdirectory and dummy file within the application build directory, supplied as
-`${BUILD_APP_BIN}`.
+Such scripts may employ macro variables which are exported to the environment. The Hello World bash and batch scripts above,
+for example, create a subdirectory and dummy file within the application build directory, the path of which is supplied
+as the `${BUILD_APP_BIN}` environment variable (see below for a complete reference).
 
-Here is the contents of the example bash script:
+Here are the contents of our example bash script:
 
     #!/bin/bash
     # This is a dummy bash script used for demonstration and test. It outputs a few variables
@@ -325,9 +327,9 @@ Here is the contents of the example bash script:
     echo
 
 Additionally, you may leverage these so called post-publish operations to perform the actual build operation itself
-and to populate the `${BUILD_APP_BIN}` directory. In principle, you could use this to package the a C++ or Python
-application, provided that it is satisfactory to package the application and all its associated libraries in a
-single directory.
+and populate the `${BUILD_APP_BIN}` directory with the output your build process -- whatever that may be. In principle,
+you could use this to package the a C++ or Python application, provided that it is satisfactory that the application and
+all its associated libraries are contained in a single directory.
 
 If you do this, you will wish to disable PupNet from calling `dotnet publish`, which can be done by setting
 `DotnetProjectPath = NONE`.
@@ -335,7 +337,7 @@ If you do this, you will wish to disable PupNet from calling `dotnet publish`, w
 
 ## Building Hello World ##
 
-**Hello World for PupNet**  can be built for all package kinds, including `appimage`, `flatpak`, `deb`, `rpm`, `zip`
+**Hello World for PupNet** can be built for all package kinds, including `appimage`, `flatpak`, `deb`, `rpm`, `zip`
 and `setup` for Windows.
 
 If you wish to build and try the demo, clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld)
@@ -352,7 +354,7 @@ Assuming you're on Linux, type:
 This will show the following information and ask for confirmation before building the deployment file.
 
     PupNet 0.0.1
-    Configuration: ./HelloWorld.pupnet.conf
+    Configuration: HelloWorld.pupnet.conf
 
     ============================================================
     APPLICATION: HelloWorld 3.2.1 [5]
@@ -417,7 +419,7 @@ This tells us that it will create a file called `HelloWorld.x86_64.AppImage`, un
 Moreover, it shows the expanded contents of the desktop file, and gives the `dotnet publish` call it will make so
 that we may ensure that everything looks correct before hitting "y".
 
-We can see more information, including the AppStream metadata contents by using:
+We can view more information, including the AppStream metadata contents, by using:
 
     pupnet --kind appimage --verbose
 
@@ -435,19 +437,19 @@ This will generate the file: `HelloWorld.x64.exe`, which may be launched to inst
     <img src="Media/Screenie-Setup.png" style="width:50%;max-width:600px;"/>
 </p>
 
-On installation, we find we have the new Program Menu entries, shown below. We can see that it has also
+On installation, we find we have new Program Menu entries, shown below. We can see that it has also
 included a link to our home page, which is optional.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-StartMenu.png" style="width:40%;max-width:800px;"/>
 </p>
 
-Moreover, we see the "Command Prompt" option described above.
+Moreover, there is a "Command Prompt" option to launch a dedicated Console windows, as described above.
 
 
 ## Creating New PupNet Project Files ##
 
-If you're starting a new project, you will wish to generate a new `pupnet.conf` file and, commonly the associated
+If you're starting a new project, you will wish to generate a new `pupnet.conf` file and possibly the associated
 desktop and AppStream metadata files as well.
 
 To generate a new `pupnet.conf` file in the current working directory:
@@ -457,7 +459,7 @@ To generate a new `pupnet.conf` file in the current working directory:
 This will create a new file, `app.pupnet.conf`, which will be a "light weight" configuration file lacking the
 documentation comments.
 
-To generate a "verbose" file with documentation and a custom name:
+To generate a "verbose" file with documentation under a custom name:
 
     pupnet ProjectName --new conf --verbose
 
@@ -914,35 +916,35 @@ PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 </p>
 
 I am a fan of [AppImage](https://github.com/AppImage/AppImageKit), but at the time and as a Fedora user, I was also
-excited by Flatpak, and it was my original intention to add the Flatpak output to Publish-AppImage. However, it was
-difficult to handle the increased complexity in a bash script, so I re-wrote it as a C# application and *PupNet Deploy*
-is the result.
+excited by Flatpak, and it was my original intention to add the Flatpak output to *Publish-AppImage*. However, it was
+difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
+*PupNet Deploy* is the result.
 
-In the process, I had cause to reflect on things, including the realisation that the
+In the process, I had cause to reflect on certain things, including the notion that the
 [sandbox model of Flatpak is arguably broken](https://ludocode.com/blog/flatpak-is-not-the-future).
-Regardless, I still thought it useful for developers to be able ship software in formats convenient for users,
-added RPM and Deb package output also, as well as a traditional Windows Setup file.
+Regardless, I still thought it useful for developers to be able ship software in formats convenient for users, so I
+added RPM and Deb package output also, as well as traditional Windows Setup.
 
 However, I would not be keen on adding more such formats in the Linux space. Rather, I would be interested to see
-how things play out.
-
-Having said that, it may be advantageous at some point to have the ability to deploy MacOS, Android and iOS.
+how things play out in the future. I support the idea of freedom, and that means that developers should maintain
+the freedom to create and share software with users without being subject to centralised repositories.
 
 ### How to Extend PupNet ###
-The following may be helpful:
+I may be advantageous at some point to have the ability to deploy MacOS, Android and iOS. However, these are not
+technologies with which I am familiar.
 
 In PupNet, package builder classes derive from the `PackageBuilder` abstract base class. It is Linux centric, with
-irrelevant directories and properties being ignored or set to null for the Windows Setup Builder.
+irrelevant directories and properties being ignored or set to null for the Windows Setup and Zip builders.
 
 Anyone wishing to extend it, should study how the existing RPM, Flatpak and Windows subclasses override and extend
-the behaviour `PackageBuilder`. Moreover, a new value would need to be added to the `PackageKind` enum. It would be
-wise to do a search on existing `PackageKind`, and add the new type behaviour to switch statements, including that
-in the `BuilderFactory` class.
+the behaviour of `PackageBuilder`. Moreover, a new enum value would need to be added to the `PackageKind` type. It would
+help to do a search on existing `PackageKind` values, and add the new type behaviour to switch statements wherever
+encountered, including the `BuilderFactory` class.
 
 ### Another Applications of Mine ###
 
-[AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework. It was the first Avalonia preview
-solution for Linux.
+[AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework.
+It was the first Avalonia preview solution for Linux.
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/AvantGarde">
