@@ -1,5 +1,5 @@
 <p style="text-align:center;margin-bottom:4em;">
-    <img src="Media/PupNet.1280x378.png" style="width:100%;"/>
+    <img src="Media/PupNet.1280x388.png" style="width:100%;"/>
 </p>
 
 # Publish and Package for .NET #
