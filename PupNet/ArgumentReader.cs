@@ -280,7 +280,7 @@ public class ArgumentReader
         sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} conf|desktop|meta|all [--{VerboseLongArg}]");
         sb.AppendLine($"{indent}Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.");
         sb.AppendLine($"{indent}A base file name may optionally be given. If --{VerboseLongArg} is used, a configuration file");
-        sb.AppendLine($"{indent}with docmentation comments is generated. Use 'all' to generate a full set of");
+        sb.AppendLine($"{indent}with documentation comments is generated. Use 'all' to generate a full set of");
         sb.AppendLine($"{indent}configuration assets. Example: {Program.CommandName} HelloWorld -{NewShortArg} all --{VerboseLongArg}");
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} args|macros|conf");

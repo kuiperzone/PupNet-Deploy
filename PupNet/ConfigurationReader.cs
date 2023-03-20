@@ -139,7 +139,7 @@ public class ConfigurationReader
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs), ValueFlags.None);
         FlatpakFinishArgs = GetCollection(nameof(FlatpakFinishArgs), ValueFlags.None, "=", "--");
 
-        SetupPrompt = GetOptional(nameof(SetupPrompt), ValueFlags.Safe);
+        SetupCommandPrompt = GetOptional(nameof(SetupCommandPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
     }
@@ -203,7 +203,7 @@ public class ConfigurationReader
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
 
-    public string? SetupPrompt { get; }
+    public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
     public string? SetupSignTool { get; }
 
@@ -292,7 +292,7 @@ public class ConfigurationReader
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory application license name. This should be one of the recognised SPDX license");
-        c?.AppendLine($"# identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a properietary or");
+        c?.AppendLine($"# identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a proprietary or");
         c?.AppendLine($"# custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'.");
         sb.AppendLine(GetHelpNameValue(nameof(AppLicenseId), AppLicenseId));
 
@@ -339,7 +339,7 @@ public class ConfigurationReader
         c?.AppendLine($"# {nameof(AppBaseName)} is 'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or");
         c?.AppendLine($"# lower-case variant (i.e. 'helloworld'). It must not contain spaces or invalid filename characters.");
         c?.AppendLine($"# Do not add any extension such as '.exe'. If empty, the application will not be in the path and cannot");
-        c?.AppendLine($"# be started from the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupPrompt)}.");
+        c?.AppendLine($"# be started from the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupCommandPrompt)}.");
         c?.AppendLine($"# The {nameof(StartCommand)} is not supported for all packages.");
         c?.AppendLine($"# kinds. Default is empty (none).");
         sb.AppendLine(GetHelpNameValue(nameof(StartCommand), StartCommand));
@@ -506,8 +506,8 @@ public class ConfigurationReader
         c?.AppendLine($"# path. However, if your package contains a command-line utility, setting this value will");
         c?.AppendLine($"# ensure that a 'Command Prompt' menu entry is added which, when launched, will open a command");
         c?.AppendLine($"# window with your application directory in its path. See also {nameof(StartCommand)}.");
-        c?.AppendLine($"# Examples: Command Prompt, or: Command Prompt for Hello World");
-        sb.AppendLine(GetHelpNameValue(nameof(SetupPrompt), SetupPrompt));
+        c?.AppendLine($"# Examples values: Command Prompt, or: Command Prompt for Hello World");
+        sb.AppendLine(GetHelpNameValue(nameof(SetupCommandPrompt), SetupCommandPrompt));
 
         c?.AppendLine();
         c?.AppendLine($"# Mandatory value which specifies minimum version of Windows that your software runs on.");

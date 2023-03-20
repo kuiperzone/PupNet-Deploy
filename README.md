@@ -225,7 +225,17 @@ your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that t
 however. This is because the `pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
 
 If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you may leave `DotnetProjectPath`
-empty. Otherwise use this field specify the path to your solution or project file or directory.
+empty. Otherwise use this field specify the path to your solution or project file or directory relative from the location
+of the configuration file.
+
+### Dotnet Publish Arguments ###
+
+The follow parameter is used to specify values to supply to the `dotnet publish` call:
+
+    DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
+
+As an absolute minimum, we always want to include `--self-contained true`, as this will cause dotnet not only to
+compile the application, but to publish all dependencies into a single directory.
 
 ### Application Versioning ###
 
@@ -241,14 +251,31 @@ You can override the version given in the configuration file at the command line
 
     pupnet --runtime linux-arm64 --kind deb --app-version 4.0.0[1]
 
-Crucially, take a look at the following parameter:
+Crucially, if we look again at the `DotnetPublishArgs` value:
 
     DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
 
-Here we are specifying parameters to supply to the `dotnet publish` call, and you can see that we also pass the
-version in our configuration to the build process (the variable only supplies the application part, i.e. `3.2.1`).
-This is optional and you may remove this is you wish, although you will need to specify the version both in application
-code and the `pupnet.conf` file.
+We see that the version from our configuration is supplied to the build process as a variable (only supplies the application
+part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will need to specify
+the version both in application code and the `pupnet.conf` file in this case.
+
+### Command-Line Applications ###
+
+With the advent of the Avalonia cross-platform GUI framework, it was envisaged that a typical use case for PupNet
+would be to deploy GUI applications with desktop entries. However, it is possible to support command-line centric
+applications (except for flatpak), but note that by default, your application will not be in the user's path.
+
+In `deb` and `rpm` deployments, the application is installed to the `/opt` directory, rather than `/usr/bin`.
+If you wish that application be accessible from the command line, assign a suitable command name to the following:
+
+    StartCommand = helloworld
+
+This will cause a small bash script to be written under `/usr/bin` which will launch your application.
+
+Under Windows, PupNet offers the option to include a "Command Prompt" entry under the Programs Menu which launches
+a Console Window inside which your application is in the path. See the `SetupCommandPrompt` parameter,
+and the Windows screenshots below.
+
 
 ### Custom Post-Publish Operation ###
 
@@ -402,31 +429,483 @@ On a Windows machine with InnoSetup installed, type:
 
     pupnet --kind setup
 
-This will generate the file: `HelloWorld.x64.exe`, which may be launched to install the program,
-as shown below.
+This will generate the file: `HelloWorld.x64.exe`, which may be launched to install the program.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-Setup.png" style="width:50%;max-width:600px;"/>
 </p>
 
-On installation, we Program Menu entries as follows:
+On installation, we find we have the new Program Menu entries, shown below. We can see that it has also
+included a link to our home page, which is optional.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-StartMenu.png" style="width:40%;max-width:800px;"/>
 </p>
 
+Moreover, we see the "Command Prompt" option described above.
 
 
+## Creating New PupNet Project Files ##
+
+If you're starting a new project, you will wish to generate a new `pupnet.conf` file and, commonly the associated
+desktop and AppStream metadata files as well.
+
+To generate a new `pupnet.conf` file in the current working directory:
+
+    pupnet --new conf
+
+This will create a new file, `app.pupnet.conf`, which will be a "light weight" configuration file lacking the
+documentation comments.
+
+To generate a "verbose" file with documentation and a custom name:
+
+    pupnet ProjectName --new conf --verbose
+
+In fact, we can generate a complete set of files, as follows:
+
+    pupnet ProjectName --new all --verbose
+
+This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainfo.xml` template as well.
+
+## Help System Reference ##
+
+### Command Arguments ###
+
+Type `pupnet --help` displays command arguments as expected.
+
+    USAGE:
+        pupnet [file.conf] [--option-n value-n]
+
+    Example:
+        pupnet app.pupnet.conf -y -r linux-arm64
+
+    If conf file is omitted, one in the working directory will be selected.
+
+    Build Options:
+        -k, --kind Zip|AppImage|Deb|Rpm|Flatpak|Setup
+        Package output kind. If omitted, one is chosen according to the runtime.
+        Example: pupnet HelloWorld -k Flatpak
+
+        -r, --runtime value
+        Dotnet publish runtime identifier. Default: linux-x64.
+        Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
+        See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+
+        -c, --build value
+        Optional build target (or 'Configuration' is dotnet terminology).
+        Value should be 'Release' or 'Debug'. Default: Release.
+
+        -e, --clean [flag only]
+        Specifies whether to call 'dotnet clean' prior to 'dotnet publish'. Default: false.
+
+        -v, --app-version value
+        Specifies application version-release in form 'VERSION[RELEASE]', where value in square
+        brackets is package release. Overrides AppVersionRelease in conf file.
+        Example: 1.2.3[1].
+
+        -p, --property value
+        Specifies a property to be supplied to dotnet publish command. Do not use for
+        app versioning. Example: -p DefineConstants=TRACE;DEBUG
+
+        --arch value
+        Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
+        not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id
+        and will be successfully detected automatically. However, in the event of a problem, the value
+        explicitly supplied here will be used to override. It should be provided in the form
+        expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
+
+        -o, --output value
+        Force package output filename. Normally this is derived from parameters in the configuration.
+        This value will be used to override. Example: -o AppName.AppImage
+
+        --verbose [flag only]
+        Indicates verbose output when building. It can also used with --new.
+
+        -u, --run [flag only]
+        Performs a test run of the application after successful build (where supported).
+
+        -y, --skip-yes [flag only]
+        Skips confirmation prompts (assumes yes).
+
+    Other Options:
+
+        -n, --new None|Conf|Desktop|Meta|All
+        Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
+        A base file name may optionally be given. If --verbose is used, a configuration file
+        with full documentation comments is generated. Use All to generate a full set of
+        configuration assets. Example: pupnet HelloWorld -n All --verbose
+
+        -h, --help args|macros|conf
+        Show help information. Optional value specifies what kind of information to display.
+        Default is 'args'. Example: pupnet -h macros
+
+        --version [flag only]
+        Show version and associated information.
 
 
+### Macro Reference ###
+
+Type `pupnet --help macros` to see supported macro reference information:
+
+    MACROS:
+    Macro variables may be used with the following configuration items:
+    DesktopFile, MetaFile, DotnetPublishArgs, DotnetPostPublish and DotnetPostPublishOnWindows.
+
+    IMPORTANT: Always use the ${MACRO_NAME} form, and not $MACRO_NAME.
+
+    APP_BASE_NAME
+    AppBaseName value from conf file
+    Example: ${APP_BASE_NAME} = HelloWorld
+
+    APP_FRIENDLY_NAME
+    AppFriendlyName value from conf file
+    Example: ${APP_FRIENDLY_NAME} = Hello World
+
+    APP_ID
+    AppId value from conf file
+    Example: ${APP_ID} = net.example.helloworld
+
+    APP_LICENSE_ID
+    AppLicenseId value from conf file
+    Example: ${APP_LICENSE_ID} = LicenseRef-Proprietary
+
+    APP_SHORT_SUMMARY
+    AppShortSummary value from conf file
+    Example: ${APP_SHORT_SUMMARY} = A HelloWorld application
+
+    APP_VERSION
+    Application version, exluding package-release extension
+    Example: ${APP_VERSION} = 1.0.0
+
+    BUILD_APP_BIN
+    Application build directory (i.e. the output of dotnet publish or C++ make)
+    Example: ${BUILD_APP_BIN} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir/opt/net.example.helloworld
+
+    BUILD_ARCH
+    Build architecture: x64, arm64, arm or x86 (may differ from package output notation)
+    Example: ${BUILD_ARCH} = x64
+
+    BUILD_DATE
+    Build date in 'yyyy-MM-dd' format
+    Example: ${BUILD_DATE} = 2023-03-20
+
+    BUILD_ROOT
+    Root of the temporary application build directory
+    Example: ${BUILD_ROOT} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir
+
+    BUILD_SHARE
+    Linux 'usr/share' build directory under BuildRoot (empty for some deployments)
+    Example: ${BUILD_SHARE} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir/usr/share
+
+    BUILD_TARGET
+    Release or Debug (Release unless explicitly specified)
+    Example: ${BUILD_TARGET} = Release
+
+    BUILD_YEAR
+    Build year as 'yyyy'
+    Example: ${BUILD_YEAR} = 2023
+
+    DEPLOY_KIND
+    Deployment output kind: appimage, flatpak, rpm, deb, setup, zip
+    Example: ${DEPLOY_KIND} = rpm
+
+    DOTNET_RUNTIME
+    Dotnet publish runtime identifier used (RID)
+    Example: ${DOTNET_RUNTIME} = linux-x64
+
+    INSTALL_BIN
+    Path to application directory on target system (not the build system)
+    Example: ${INSTALL_BIN} = /opt/net.example.helloworld
+
+    INSTALL_EXEC
+    Path to application executable on target system (not the build system)
+    Example: ${INSTALL_EXEC} = /opt/net.example.helloworld/HelloWorld
+
+    IS_TERMINAL_APP
+    IsTerminalApp value from conf file
+    Example: ${IS_TERMINAL_APP} = true
+
+    PACKAGE_RELEASE
+    Package release version
+    Example: ${PACKAGE_RELEASE} = 1
+
+    PRIME_CATEGORY
+    PrimeCategory value from conf file
+    Example: ${PRIME_CATEGORY} =
+
+    PUBLISHER_COPYRIGHT
+    PublisherCopyright value from conf file
+    Example: ${PUBLISHER_COPYRIGHT} = Copyright (C) Your Name 1970
+
+    PUBLISHER_EMAIL
+    PublisherEmail value from conf file
+    Example: ${PUBLISHER_EMAIL} = contact@example.net
+
+    PUBLISHER_LINK_NAME
+    PublisherLinkName value from conf file
+    Example: ${PUBLISHER_LINK_NAME} = Home Page
+
+    PUBLISHER_LINK_URL
+    PublisherLinkUrl value from conf file
+    Example: ${PUBLISHER_LINK_URL} = https://example.net
+
+    PUBLISHER_NAME
+    PublisherName value from conf file
+    Example: ${PUBLISHER_NAME} = Your Name
+
+### Configuration Reference ###
+
+Type `pupnet --help conf` to see supported macro reference information:
+
+    ########################################
+    # APP PREAMBLE
+    ########################################
+
+    # Mandatory application base name. This MUST BE the base name of the main executable
+    # file. It should NOT include any directory part or extension, i.e. do not append
+    # '.exe' or '.dll'. It should not contain spaces or invalid filename characters.
+    # Example: HelloWorld
+    AppBaseName = HelloWorld
+
+    # Mandatory application friendly name. Example: Hello World
+    AppFriendlyName = Hello World
+
+    # Mandatory application ID in reverse DNS form. Example: net.example.helloworld
+    AppId = net.example.helloworld
+
+    # Mandatory application version and package release of form: 'VERSION[RELEASE]'. Use
+    # optional square brackets to denote package release, i.e. '1.2.3[1]'. Release refers to
+    # a change to the deployment package, rather the application. If release part is absent
+    # (i.e. '1.2.3'), the release value defaults to '1'. Note that the version-release value
+    # given here may be overridden from the command line.
+    AppVersionRelease = 1.0.0[1]
+
+    # Mandatory single line application description. Example: Yet another Hello World application.
+    AppShortSummary = A HelloWorld application
+
+    # Mandatory application license name. This should be one of the recognised SPDX license
+    # identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a proprietary or
+    # custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'.
+    AppLicenseId = LicenseRef-Proprietary
+
+    # Optional path to a copyright/license text file. If provided, it will be packaged with the
+    # application and identified to package builder where supported. Example: Copyright.txt
+    AppLicenseFile =
+
+    ########################################
+    # PUBLISHER
+    ########################################
+
+    # Mandatory publisher, group or creator. Example: Acme Ltd, or HelloWorld Team
+    PublisherName = Your Name
+
+    # Optional copyright statement. Example: Copyright (C) HelloWorld Team 1970
+    PublisherCopyright = Copyright (C) Your Name 1970
+
+    # Optional publisher or application web-link name. Note that Windows Setup packages
+    # require both PublisherLinkName and PublisherLinkUrl in order to include the link as an item
+    # in program menu entries. Default is: Home Page. Examples: Example.net, or: Hello World Online
+    PublisherLinkName = Home Page
+
+    # Optional publisher or application web-link URL. Example: https://example.net
+    PublisherLinkUrl = https://example.net
+
+    # publisher or maintainer email contact. Although optional, some packages (such as Debian)
+    # require it and will fail unless provided. Example: <hello> helloworld@example.net
+    PublisherEmail = contact@example.net
+
+    ########################################
+    # DESKTOP INTEGRATION
+    ########################################
+
+    # Optional command name to start the application from the terminal. If, for example,
+    # AppBaseName is 'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or
+    # lower-case variant (i.e. 'helloworld'). It must not contain spaces or invalid filename characters.
+    # Do not add any extension such as '.exe'. If empty, the application will not be in the path and cannot
+    # be started from the command line. For Windows Setup packages, see also SetupCommandPrompt.
+    # The StartCommand is not supported for all packages.
+    # kinds. Default is empty (none).
+    StartCommand =
+
+    # Boolean (true or false) which indicates whether the application runs in the terminal, rather
+    # than provides a GUI. It is used only to populate the 'Terminal' field of the .desktop file.
+    IsTerminalApp = true
+
+    # Optional path to a Linux desktop file. If empty (default), one will be generated automatically
+    # from the information in this file. Supplying a custom file, however, allows for mime-types and
+    # internationalisation. If supplied, the file MUST contain the line: 'Exec=${INSTALL_EXEC}'
+    # in order to use the correct install location. Other macros may be used to help automate the content.
+    # If no desktop entry is required, set the value to: 'NONE'. It has little effect for
+    # Windows Setup, except that setting it to 'NONE' will cause the
+    # application start menu entry to be omitted. Note. The contents of the files may use macro variables.
+    # Use 'pupnet --help macro' for reference.
+    # See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
+    DesktopFile =
+
+    # Optional category for the application. The value should be one of the recognised Freedesktop
+    # top-level categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value
+    # should be provided here which will be used, where supported, to populate metadata. The default
+    # is empty. See: https://specifications.freedesktop.org/menu-spec/latest/apa.html
+    # Example: Utility
+    PrimeCategory =
+
+    # Optional icon file paths. The value may include multiple filenames separated with semicolon or
+    # given in multi-line form. Valid types are SVG, PNG and ICO (ICO ignored on Linux). Note that the
+    # inclusion of a scalable SVG is preferable on Linux, whereas PNGs must be one of the standard
+    # sizes and MUST include the size in the filename in the form: name.32x32.png' or 'name.32.png'.
+    # Example: Assets/app.svg;Assets/app.24x24.png;Assets/app.32x32.png;Assets/app.ico
+    IconFiles =
+
+    # Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.
+    # Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
+    # See: https://docs.appimage.org/packaging-guide/optional/appstream.html
+    # Example: Deploy/app.metainfo.xml.
+    MetaFile =
+
+    ########################################
+    # DOTNET PUBLISH
+    ########################################
+
+    # Optional path relative to this file in which to find the dotnet project (.csproj)
+    # or solution (.sln) file, or the directory containing it. If empty (default), a single
+    # project or solution file is expected under the same directory as this file.
+    # IMPORTANT. If set to 'NONE', dotnet publish is disabled (not called).
+    # Instead, only DotnetPostPublish is called. Example: Source/MyProject
+    DotnetProjectPath =
+
+    # Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version,
+    # or '-c' (configuration) here as they will be added (i.e. via AppVersionRelease).
+    # Typically you want as a minimum: '-p:Version=${APP_VERSION} --self-contained true'. Additional
+    # useful arguments include: '-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true
+    # -p:PublishReadyToRun=true -p:PublishTrimmed=true -p:TrimMode=link'.
+    # Note. This value may use macro variables. Use 'pupnet --help macro' for reference.
+    # See: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+    DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
+
+    # Post-publish (or standalone build) commands on Linux (ignored on Windows). Multiple commands
+    # may be specified, separated by semicolon or given in multi-line form. They are called after
+    # dotnet publish, but before the final output is built. These could, for example, copy additional
+    # files into the build directory given by ${BUILD_APP_BIN}. The working directory will be the
+    # location of this file. This value is optional, but becomes mandatory if DotnetProjectPath equals 'NONE'.
+    # Note. This value may use macro variables. Additionally, scripts may use these as environment variables.
+    # Use 'pupnet --help macro' for reference.
+    DotnetPostPublish =
+
+    # Post-publish (or standalone build) commands on Windows (ignored on Linux). This should perform
+    # the equivalent operations, as required, as DotnetPostPublish, but using DOS commands and batch scripts.
+    # Multiple commands may be specified, separated by semicolon or given in multi-line form. Note. This value
+    # may use macro variables. Additionally, scripts may use these as environment variables.
+    # Use 'pupnet --help macro' for reference.
+    DotnetPostPublishOnWindows =
+
+    ########################################
+    # PACKAGE OUTPUT
+    ########################################
+
+    # Optional package name (excludes version etc.). If empty, defaults to AppBaseName.
+    # However, it is used not only to specify the base output filename, but to identify the application
+    # in .deb and .rpm packages. You may wish, therefore, to ensure that the value represents a
+    # unique name, such as the AppId. Naming requirements for this are strict and must
+    # contain only alpha-numeric and '-', '+' and '.' characters. Example: HelloWorld
+    PackageName = HelloWorld
+
+    # Output directory, or subdirectory relative to this file. It will be created if it does not
+    # exist and will contain the final deploy output files. If empty, it defaults to the location
+    # of this file. Default: Deploy/bin
+    OutputDirectory = Deploy/bin
+
+    # Boolean (true or false) which sets whether to include the application version in the filename
+    # of the package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if the output
+    # filename is specified at command line.
+    OutputVersion = false
+
+    ########################################
+    # APPIMAGE OPTIONS
+    ########################################
+
+    # Additional arguments for use with appimagetool. Useful for signing. Default is empty.
+    # See appimagetool --help. Example: --sign
+    AppImageArgs =
+
+    ########################################
+    # FLATPAK OPTIONS
+    ########################################
+
+    # The runtime platform. Invariably for .NET (inc. Avalonia), this should be
+    # 'org.freedesktop.Platform'.
+    # Refer: https://docs.flatpak.org/en/latest/available-runtimes.html
+    FlatpakPlatformRuntime = org.freedesktop.Platform
+
+    # The platform SDK. Invariably for .NET (inc. Avalonia applications) this should
+    # be 'org.freedesktop.Sdk'. The SDK must be installed on the build system.
+    FlatpakPlatformSdk = org.freedesktop.Sdk
+
+    # The platform runtime version. The latest available version may change periodically.
+    # Refer to Flatpak documentation. Example: 22.08
+    FlatpakPlatformVersion = 22.08
+
+    # Flatpak manifest 'finish-args' sandbox permissions. Optional, but if empty, the
+    # application will have extremely limited access to the host environment. This
+    # option may be used to grant required application permissions. Values here should
+    # be prefixed with '--' and separated by semicolon or given in multi-line form.
+    # Example: --socket=wayland;--socket=x11;--filesystem=host;--share=network
+    # Refer: https://docs.flatpak.org/en/latest/sandbox-permissions.html
+    FlatpakFinishArgs = """
+        --socket=wayland
+        --socket=x11
+        --filesystem=host
+        --share=network
+    """
+
+    # Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
+    # See flatpak-builder --help. Example: --gpg-keys=FILE
+    FlatpakBuilderArgs =
+
+    ########################################
+    # WINDOWS SETUP OPTIONS
+    ########################################
+
+    # Optional command prompt title. The Windows installer will not add your application to the
+    # path. However, if your package contains a command-line utility, setting this value will
+    # ensure that a 'Command Prompt' menu entry is added which, when launched, will open a command
+    # window with your application directory in its path. See also StartCommand.
+    # Examples: Command Prompt, or: Command Prompt for Hello World
+    SetupCommandPrompt =
+
+    # Mandatory value which specifies minimum version of Windows that your software runs on.
+    # Windows 8 = 6.2, Windows 10/11 = 10. Default: 10.
+    # See 'MinVersion' parameter in: https://jrsoftware.org/ishelp/
+    SetupMinWindowsVersion = 10
+
+    # Optional name and parameters of the Sign Tool to be used to digitally sign: the installer,
+    # uninstaller, and contained exe and dll files. If empty, files will not be signed.
+    # See 'SignTool' parameter in: https://jrsoftware.org/ishelp/
+    SetupSignTool =
 
 
+## Gotchas ##
+
+### Virtual Box and Symlinks ###
+If you are using VirtualBox with your project, note that symbolic links are disabled within shared folders by VirtualBox
+itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
+directory in the virtual machine. Alternatively, it is possible to enable shared-folder symlinks in VirtualBox.
+
+### RPM and Debian Packages Cannot be Removed from Gnome Software Center GUI ###
+If you install your RPM and DEB packages as a local file they will, courtesy of your AppStream metadata,
+show up Gnome Software Center GUI, as would be expected. However, you may find that they cannot be launched
+or removed using the GUI. Instead, they must be removed from the command line, like so:
+
+    sudo dnf remove helloworld
+
+This is not an issue with PupNet or AppStream metadata. Rather, having been installed from file, the Gnome Software
+Center lacks certain other metadata it would get if the package had originated from a repository.
+See [here](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7).
 
 
+## Additional Information ##
 
-### Legacy Publish-AppImage ###
-
-Pup.NET began life as "*Publish-AppImage for .NET*". It was renamed when support for Flatpaks was added.
+### A Brief Discussion on the Past and Future ###
+PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/Publish-AppImage">
@@ -434,18 +913,36 @@ Pup.NET began life as "*Publish-AppImage for .NET*". It was renamed when support
     </a>
 </p>
 
-See: [https://github.com/kuiperzone/Publish-AppImage](https://github.com/kuiperzone/Publish-AppImage)
+I am a fan of [AppImage](https://github.com/AppImage/AppImageKit), but at the time and as a Fedora user, I was also
+excited by Flatpak, and it was my original intention to add the Flatpak output to Publish-AppImage. However, it was
+difficult to handle the increased complexity in a bash script, so I re-wrote it as a C# application and *PupNet Deploy*
+is the result.
 
-### Cross-Platform GUI Development ###
+In the process, I had cause to reflect on things, including the realisation that the
+[sandbox model of Flatpak is arguably broken](https://ludocode.com/blog/flatpak-is-not-the-future).
+Regardless, I still thought it useful for developers to be able ship software in formats convenient for users,
+added RPM and Deb package output also, as well as a traditional Windows Setup file.
 
-You may also be interested in the [Avalonia](https://github.com/AvaloniaUI/Avalonia) framework -- the replacement for WPF.
+However, I would not be keen on adding more such formats in the Linux space. Rather, I would be interested to see
+how things play out.
 
-You can now create cross-platform GUI apps using C# which run virtually any where, including
-Windows, Linux, MacOS and Android. Using **PUBPAK for .NET**, you can easily deploy them on Linux
-without runtime concerns.
+Having said that, it may be advantageous at some point to have the ability to deploy MacOS, Android and iOS.
 
-Shown below is another cross-platform project of mine -- a cross-platform Avalonia XAML Previewer
-called [AvantGarde](https://github.com/kuiperzone/AvantGarde).
+### How to Extend PupNet ###
+The following may be helpful:
+
+In PupNet, package builder classes derive from the `PackageBuilder` abstract base class. It is Linux centric, with
+irrelevant directories and properties being ignored or set to null for the Windows Setup Builder.
+
+Anyone wishing to extend it, should study how the existing RPM, Flatpak and Windows subclasses override and extend
+the behaviour `PackageBuilder`. Moreover, a new value would need to be added to the `PackageKind` enum. It would be
+wise to do a search on existing `PackageKind`, and add the new type behaviour to switch statements, including that
+in the `BuilderFactory` class.
+
+### Another Applications of Mine ###
+
+[AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework. It was the first Avalonia preview
+solution for Linux.
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/AvantGarde">
@@ -453,6 +950,33 @@ called [AvantGarde](https://github.com/kuiperzone/AvantGarde).
     </a>
 </p>
 
-**PUBPAK for .NET** was created by Andy Thomas at [https://kuiper.zone](https://kuiper.zone).
+
+### Copyright & License ###
+
+Copyright (C) Andy Thomas, 2023. Website: https://kuiper.zone
+
+PupNet is free software: you can redistribute it and/or modify it under
+the terms of the GNU Affero General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later version.
+
+PupNet is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along
+with PupNet. If not, see <https://www.gnu.org/licenses/>.
+
+#### Embedded Assets ####
+
+PupNet embeds "appimagetool", from the "AppImageKit".
+AppImageKit is Copyright (C) 2004-20 Simon Peter
+https://github.com/AppImage/AppImageKit
+
+### Non-code Assets ####
+Images and non-code assets are not subject to AGPL.
+
+Project Logo: Copyright (C) Andy Thomas, 2023.
+
+All other copyright and trademarks are property of respective owners.
 
 If you like this project, don't forget to like and share.

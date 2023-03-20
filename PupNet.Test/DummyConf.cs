@@ -84,7 +84,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
         lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
 
-        lines.Add($"{nameof(ConfigurationReader.SetupPrompt)} = Command Prompt");
+        lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
         lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
         lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
 
