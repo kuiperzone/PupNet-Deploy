@@ -913,8 +913,8 @@ PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 </p>
 
 I am a fan of [AppImage](https://github.com/AppImage/AppImageKit), but at the time and as a Fedora user, I was also
-excited by Flatpak, and it was my original intention to add the Flatpak output to *Publish-AppImage*. However, it was
-difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
+excited by Flatpak, and it was my original intention to add Flatpak as an output option to *Publish-AppImage*. However,
+it wa difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
 *PupNet Deploy* is the result.
 
 In the process, I had cause to reflect on certain things, including the notion that the
@@ -923,20 +923,21 @@ Regardless, I still thought it useful for developers to be able ship software in
 added RPM and Deb package output also, as well as traditional Windows Setup.
 
 However, I would not be keen on adding more such formats in the Linux space. Rather, I would be interested to see
-how things play out in the future. I support the idea of freedom, and that means that developers should maintain
-the freedom to create and share software with users without being subject to centralised repositories.
+how things play out in the future. I note the trend toward centralised repository-only distribution. I support the
+idea of freedom and that means that developers and users maintaining the freedom to create and share software
+without being subject to centralisation.
 
 ### How to Extend PupNet ###
-I may be advantageous at some point to have the ability to deploy MacOS, Android and iOS. However, these are not
+It may be advantageous at some point to have the ability to deploy to MacOS, Android and iOS. However, these are not
 technologies with which I am familiar.
 
-In PupNet, package builder classes derive from the `PackageBuilder` abstract base class. It is Linux centric, with
-irrelevant directories and properties being ignored or set to null for the Windows Setup and Zip builders.
+Anyone wishing to extend PuP, should study how the existing RPM, Flatpak and Windows `Builder` classes override and extend
+the behaviour of the `PackageBuilder` base class. The base class is Linux centric, with irrelevant directories and
+properties being ignored or set to null for the Windows Setup and Zip builders.
 
-Anyone wishing to extend it, should study how the existing RPM, Flatpak and Windows subclasses override and extend
-the behaviour of `PackageBuilder`. Moreover, a new enum value would need to be added to the `PackageKind` type. It would
-help to do a search on existing `PackageKind` values, and add the new type behaviour to switch statements wherever
-encountered, including the `BuilderFactory` class.
+Moreover, a new enum value would need to be added to the `PackageKind` type. It would help to do a search on
+existing `PackageKind` values, and add the new type behaviour to switch statements wherever encountered, including
+the `BuilderFactory` class.
 
 ### Another Applications of Mine ###
 
@@ -945,7 +946,7 @@ It was the first Avalonia preview solution for Linux.
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/AvantGarde">
-        <img title="AvantGarde Screenshot" alt="AvantGarde Screenshot" src="Images/AvantGarde.png" style="width:50%;max-width:500px;"/>
+        <img title="AvantGarde Screenshot" alt="AvantGarde Screenshot" src="Media/Screenie-AvantGarde.png" style="width:50%;max-width:500px;"/>
     </a>
 </p>
 
