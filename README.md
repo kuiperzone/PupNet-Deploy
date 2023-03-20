@@ -401,7 +401,7 @@ Let's switch to a Windows machine with InnoSetup installed, and type:
 In our case, this will gives the file: `HelloWorld.x64.exe`
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
-    <img src="Media/Screenie-Configuration.png" style="width:50%;max-width:600px;"/>
+    <img src="Media/Screenie-Setup.png" style="width:50%;max-width:600px;"/>
 </p>
 
 
