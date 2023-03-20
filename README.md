@@ -1,9 +1,8 @@
-<p style="text-align:left;margin-bottom:4em;">
-    <img src="Media/PupNet.1280x378.png" style="width:50%;max-width:800px;"/>
+<p style="text-align:center;margin-bottom:4em;">
+    <img src="Media/PupNet.1280x378.png" style="width:100%;"/>
 </p>
 
 # Publish and Package for .NET #
-
 
 ## Introduction ##
 
@@ -13,13 +12,13 @@ ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
 
-PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this is not intend to
-prevent its use in deploying commercial applications.
+PupNet is licensed under GNU Affero General Public License (AGPL-3.0-or-later), although this does not prevent
+its use with commercial applications.
 
 ### More Detail ... ###
 It has been possible to cross-compile command-line C# applications for sometime now. More recently, the
-[Avalonia](https://github.com/AvaloniaUI/Avalonia) WPF replacement allows fully-featured GUI applications to be
-built for a range of platforms, including: Linux, Windows, MacOS and Android.
+cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
+GUI applications to be built for a range of platforms, including: Linux, Windows, MacOS and Android.
 
 **PupNet** is a command-line utility which allows you to ship your application as:
 
