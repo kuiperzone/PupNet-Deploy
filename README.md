@@ -10,7 +10,8 @@
 ready-to-ship installation file in a single step.
 
 **[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
-If you like this project, don't forget to like and share.
+
+*If you like this project, don't forget to like and share.*
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
