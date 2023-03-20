@@ -13,7 +13,7 @@ ready-to-ship installation file in a single step.
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
-GUI applications to be target a range of platforms, including: Linux, Windows, MacOS and Android.
+GUI applications to target a range of platforms, including: Linux, Windows, MacOS and Android.
 
 Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
@@ -29,10 +29,10 @@ run a command like so:
 
     pupnet --runtime linux-x64 --kind appimage
 
-In this case, PupNet calls `dotnet publish` on your project and generates a distributable AppImage output file for
-use on Linux systems. Additionally, you may optionally provide `.desktop` and AppStream metadata files. There is no need
-to write complex build-specific manifests, RPM spec or Debian control files. You need only supply your deployment
-configuration once as a single `pupnet.conf`, and PupNet takes care of the underlying build-specific tasks.
+In this case, PupNet calls `dotnet publish` on your project and generates a distributable [AppImage](https://github.com/AppImage/AppImageKit)
+file fo use on Linux systems. Additionally, you may optionally provide `.desktop` and AppStream metadata files.
+There is no need to write complex build-specific manifests, RPM spec or Debian control files. You need only supply your
+deployment configuration once as a single `pupnet.conf`, and PupNet takes care of the underlying build-specific tasks.
 
 Likewise, to package the same project for Windows:
 
