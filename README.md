@@ -916,7 +916,7 @@ PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 
 I am a fan of [AppImage](https://github.com/AppImage/AppImageKit), but at the time and as a Fedora user, I was also
 excited by Flatpak, and it was my original intention to add Flatpak as an output option to *Publish-AppImage*. However,
-it wa difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
+it was difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
 *PupNet Deploy* is the result.
 
 In the process, I had cause to reflect on certain things, including the notion that the
