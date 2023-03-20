@@ -113,8 +113,11 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
 
 ## PupNet Configuration ##
 
-**Hello World for PupNet** is a demonstration project for PupNet Deploy. It lives in [a separate
-git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own:
+**Hello World for PupNet** is a demonstration project for PupNet Deploy, and it will be instructive to discuss
+the major configuration elements with reference to this simple project, as it demonstrates all the major
+features of building distributable packages.
+
+The Hello World project lives in [a separate git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own:
 
 <p style="text-align:left;margin-bottom:4em;">
     <a href="https://github.com/kuiperzone/PupNet-HelloWorld" style="outline-style:none;">
@@ -122,13 +125,9 @@ git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own:
     </a>
 </p>
 
-It will be instructive to discuss the major configuration elements with reference to this simple project,
-as it demonstrates all the major features of building distributable packages with PupNet.
-It can be built for all package kinds, including AppImage, Flatpak, DEB and RPM formats on Linux,
-and as a Setup file on Windows. It provides an example of using desktop and AppStream metadata files,
-as well as icons and a post-publish script.
+Head over to this project in a different browser tab, or download it to your local drive.
 
-Take a look at the `HelloWorld.pupnet.conf` in the root of the project.
+Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-Configuration.png" style="width:60%;max-width:400px;"/>
@@ -309,16 +308,21 @@ If you do this, you will wish to disable PupNet from calling `dotnet publish`, w
 
 ## Building Hello World ##
 
+**Hello World for PupNet**  can be built for all package kinds, including `appimage`, `flatpak`, `deb`, `rpm`, `zip`
+and `setup` for Windows.
+
 If you wish to build and try the demo, clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld)
 to your local drive. Ensure that you have installed the prerequisites above, or at least those you wish to use.
 
 In the terminal, CD into the root of the project directory.
 
+### On Linux ###
+
 Assuming you're on Linux, type:
 
     pupnet --kind appimage
 
-This will show the following information and ask for confirmation before building the deployment file:
+This will show the following information and ask for confirmation before building the deployment file.
 
     PupNet 0.0.1
     Configuration: ./HelloWorld.pupnet.conf
@@ -384,7 +388,7 @@ This will show the following information and ask for confirmation before buildin
 
 This tells us that it will create a file called `HelloWorld.x86_64.AppImage`, under the `Deploy/bin` directory.
 Moreover, it shows the expanded contents of the desktop file, and gives the `dotnet publish` call it will make so
-that we may ensure that everything looks correct by hitting "y".
+that we may ensure that everything looks correct before hitting "y".
 
 We can see more information, including the AppStream metadata contents by using:
 
@@ -392,17 +396,25 @@ We can see more information, including the AppStream metadata contents by using:
 
 The `--verbose` option is useful in other areas too, as we will see below.
 
-Other valid package "kinds" include: `flatpak`, `deb`, `rpm`, `zip` and `setup`.
+### On Windows ###
 
-Let's switch to a Windows machine with InnoSetup installed, and type:
+On a Windows machine with InnoSetup installed, type:
 
     pupnet --kind setup
 
-In our case, this will gives the file: `HelloWorld.x64.exe`
+This will generate the file: `HelloWorld.x64.exe`, which may be launched to install the program,
+as shown below.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-Setup.png" style="width:50%;max-width:600px;"/>
 </p>
+
+On installation, we Program Menu entries as follows:
+
+<p style="text-align:left;margin-top:2em;margin-bottom:2em;">
+    <img src="Media/Screenie-Setup.png" style="width:40%;max-width:800px;"/>
+</p>
+
 
 
 
