@@ -143,7 +143,7 @@ internal class Program
 
             // BUILD AND RUN
             Console.WriteLine($"{ProductName} {Version}");
-            Console.WriteLine($"Conf File: {decoder.Value ?? "[None]"}");
+            Console.WriteLine($"Configuration: {decoder.Value ?? "[None]"}");
             Console.WriteLine();
 
             new BuildHost(decoder).Run();

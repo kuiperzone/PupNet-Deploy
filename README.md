@@ -113,8 +113,8 @@ It will also be necessary to manually add the InnoSetup location to the PATH var
 
 ## PupNet Configuration ##
 
-**Hello World for PupNet** is a demonstration project for use with PupNet Deploy. It lives in [a separate
-git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own.
+**Hello World for PupNet** is a demonstration project for PupNet Deploy. It lives in [a separate
+git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own:
 
 <p style="text-align:left;margin-bottom:4em;">
     <a href="https://github.com/kuiperzone/PupNet-HelloWorld" style="outline-style:none;">
@@ -122,17 +122,13 @@ git repo](https://github.com/kuiperzone/PupNet-HelloWorld) of its own.
     </a>
 </p>
 
-Hello World demonstrates all the major features of building distributable packages with PupNet.
+It will be instructive to discuss the major configuration elements with reference to this simple project,
+as it demonstrates all the major features of building distributable packages with PupNet.
 It can be built for all package kinds, including AppImage, Flatpak, DEB and RPM formats on Linux,
 and as a Setup file on Windows. It provides an example of using desktop and AppStream metadata files,
 as well as icons and a post-publish script.
 
-It will be instructive to discuss the major configuration elements with reference to this simple project. **But first...**
-
-If you wish to build and try the demo, clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld)
-to your local drive. Ensure that you have installed the prerequisites above, or at least those you wish to use.
-
-Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
+Take a look at the `HelloWorld.pupnet.conf` in the root of the project.
 
 <p style="text-align:left;margin-top:2em;margin-bottom:2em;">
     <img src="Media/Screenie-Configuration.png" style="width:60%;max-width:400px;"/>
@@ -140,6 +136,7 @@ Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
 
 This is a simple ini file in which the deployment project is configured. You will see that each parameter
 is documented. Where local paths are given, they are local to the `.conf` file, and not your current working directory.
+Always use the forward-slash '/' as a path separator.
 
 ### Desktop File ###
 
@@ -312,6 +309,100 @@ If you do this, you will wish to disable PupNet from calling `dotnet publish`, w
 
 ## Building Hello World ##
 
+If you wish to build and try the demo, clone or download the [PupNet Hello World Project](https://github.com/kuiperzone/PupNet-HelloWorld)
+to your local drive. Ensure that you have installed the prerequisites above, or at least those you wish to use.
+
+In the terminal, CD into the root of the project directory.
+
+Assuming you're on Linux, type:
+
+    pupnet --kind appimage
+
+This will show the following information and ask for confirmation before building the deployment file:
+
+    PupNet 0.0.1
+    Configuration: ./HelloWorld.pupnet.conf
+
+    ============================================================
+    APPLICATION: HelloWorld 3.2.1 [5]
+    ============================================================
+
+    AppBaseName: HelloWorld
+    AppId: zone.kuiper.helloworld
+    AppVersion: 3.2.1
+    PackageRelease: 5
+    StartCommand: helloworld [Not Supported]
+
+    ============================================================
+    OUTPUT: APPIMAGE
+    ============================================================
+
+    PackageKind: appimage
+    Runtime: linux-x64
+    Arch: Auto (x86_64)
+    Build: Release
+    OutputName: HelloWorld.x86_64.AppImage
+    OutputDirectory: /mnt/DEVEL-1T/DOTNET/GITHUB/PupNet-HelloWorld/Deploy/bin
+
+    ============================================================
+    DESKTOP: app.desktop
+    ============================================================
+
+    [Desktop Entry]
+    Type=Application
+    Name=Hello World
+    Icon=zone.kuiper.helloworld
+    Comment=A Hello World application
+    Exec=usr/bin/HelloWorld
+    TryExec=usr/bin/HelloWorld
+    Terminal=true
+    Categories=Utility
+    MimeType=
+    Keywords=
+
+    ============================================================
+    BUILD PROJECT
+    ============================================================
+
+    dotnet publish -r linux-x64 -c Release -p:Version=3.2.1 --self-contained true -p:DebugType=None -p:DebugSymbols=false -o "/tmp/KuiperZone.PupNet/zone.kuiper.helloworld-linux-x64-Release-AppImage/AppDir/usr/bin"
+
+    /mnt/DEVEL-1T/DOTNET/GITHUB/PupNet-HelloWorld/Deploy/PostPublish.sh
+
+    ============================================================
+    BUILD PACKAGE: HelloWorld.x86_64.AppImage
+    ============================================================
+
+    /tmp/.mount_PupNetK4O50z/usr/bin/appimagetool-x86_64.AppImage  "/tmp/KuiperZone.PupNet/zone.kuiper.helloworld-linux-x64-Release-AppImage/AppDir" "/mnt/DEVEL-1T/DOTNET/GITHUB/PupNet-HelloWorld/Deploy/bin/HelloWorld.x86_64.AppImage"
+
+    ============================================================
+    ISSUES
+    ============================================================
+
+    [None Detected]
+
+    Continue? [N/y] or ESC aborts?
+
+This tells us that it will create a file called `HelloWorld.x86_64.AppImage`, under the `Deploy/bin` directory.
+Moreover, it shows the expanded contents of the desktop file, and gives the `dotnet publish` call it will make so
+that we may ensure that everything looks correct by hitting "y".
+
+We can see more information, including the AppStream metadata contents by using:
+
+    pupnet --kind appimage --verbose
+
+The `--verbose` option is useful in other areas too, as we will see below.
+
+Other valid package "kinds" include: `flatpak`, `deb`, `rpm`, `zip` and `setup`.
+
+Let's switch to a Windows machine with InnoSetup installed, and type:
+
+    pupnet --kind setup
+
+In our case, this will gives the file: `HelloWorld.x64.exe`
+
+<p style="text-align:left;margin-top:2em;margin-bottom:2em;">
+    <img src="Media/Screenie-Configuration.png" style="width:50%;max-width:600px;"/>
+</p>
 
 
 

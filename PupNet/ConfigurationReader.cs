@@ -122,7 +122,7 @@ public class ConfigurationReader
         IconFiles = GetCollection(nameof(IconFiles), ValueFlags.AssertPath);
         MetaFile = GetOptional(nameof(MetaFile), ValueFlags.AssertPathWithDisable);
 
-        DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable);
+        DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable) ?? LocalDirectory;
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs), ValueFlags.None);
         DotnetPostPublish = GetOptional(nameof(DotnetPostPublish), ValueFlags.AssertPath);
         DotnetPostPublishOnWindows = GetOptional(nameof(DotnetPostPublishOnWindows), ValueFlags.AssertPath);
@@ -185,7 +185,7 @@ public class ConfigurationReader
     public string? MetaFile { get; }
     public IReadOnlyCollection<string> IconFiles { get; } = Array.Empty<string>();
 
-    public string? DotnetProjectPath { get; }
+    public string DotnetProjectPath { get; }
     public string? DotnetPublishArgs { get; } = $"-p:Version={MacroId.AppVersion.ToVar()} --self-contained true -p:DebugType=None -p:DebugSymbols=false";
     public string? DotnetPostPublish { get; }
     public string? DotnetPostPublishOnWindows { get; }
