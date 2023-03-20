@@ -2,7 +2,7 @@
     <img src="Media/PupNet.1280x388.png" style="width:100%;"/>
 </p>
 
-# Publish and Package for .NET #
+# PupNet Deploy - Publish & Package for .NET #
 
 ## Introduction ##
 
