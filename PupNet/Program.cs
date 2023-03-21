@@ -35,6 +35,16 @@ internal class Program
     public const string ConfExt = ".pupnet.conf";
 
     /// <summary>
+    /// Gets the desktop file extension.
+    /// </summary>
+    public const string DesktopExt = ".desktop";
+
+    /// <summary>
+    /// Gets the AppStream metadata extension.
+    /// </summary>
+    public const string MetaExt = ".metainfo.xml";
+
+    /// <summary>
     /// Gets the program product name.
     /// </summary>
     public const string ProductName = "PupNet Deploy";
@@ -66,7 +76,7 @@ internal class Program
         {
             var decoder = new ArgumentReader(args);
 
-            if (decoder.New != NewKind.None)
+            if (decoder.NewFile != null)
             {
                 CreateNewFiles(decoder);
                 return 0;
@@ -105,7 +115,7 @@ internal class Program
                 Console.WriteLine($"See also: {ProjectUrl}");
                 Console.WriteLine();
 
-                if (decoder.ShowHelp == "macros")
+                if (decoder.ShowHelp == "macro" || decoder.ShowHelp == "macros")
                 {
                     Console.WriteLine("MACROS:");
 
@@ -124,7 +134,7 @@ internal class Program
 
                 if (decoder.ShowHelp == "conf")
                 {
-                    Console.WriteLine(new ConfigurationReader().ToString(true));
+                    Console.WriteLine(new ConfigurationReader(true).ToString(DocStyles.Reference));
                     Console.WriteLine();
                     return 0;
                 }
@@ -142,7 +152,9 @@ internal class Program
 
                 var ops = new FileOps();
                 ops.CopyFile(path, path + ".old");
-                ops.WriteFile(path, conf.ToString(decoder.IsVerbose), true);
+
+                var style = decoder.IsVerbose ? DocStyles.Comments : DocStyles.NoComments;
+                ops.WriteFile(path, conf.ToString(style), true);
                 return 0;
             }
 
@@ -173,27 +185,36 @@ internal class Program
 
     private static void CreateNewFiles(ArgumentReader args)
     {
-        bool all = args.New == NewKind.All;
+        bool ok = false;
+        bool all = args.NewFile == ArgumentReader.NewAllValue;
 
-        if (all || args.New == NewKind.Conf)
+        if (all || args.NewFile == ArgumentReader.NewConfValue || args.NewFile == "true")
         {
-            CreateNewSingleFile(NewKind.Conf, args);
+            ok = true;
+            CreateNewSingleFile(ArgumentReader.NewConfValue, args);
         }
 
-        if (all || args.New == NewKind.Desktop)
+        if (all || args.NewFile == ArgumentReader.NewDesktopValue)
         {
-            CreateNewSingleFile(NewKind.Desktop, args);
+            ok = true;
+            CreateNewSingleFile(ArgumentReader.NewDesktopValue, args);
         }
 
-        if (all || args.New == NewKind.Meta)
+        if (all || args.NewFile == ArgumentReader.NewMetaValue)
         {
-            CreateNewSingleFile(NewKind.Meta, args);
+            ok = true;
+            CreateNewSingleFile(ArgumentReader.NewMetaValue, args);
+        }
+
+        if (!ok)
+        {
+            throw new InvalidOperationException($"Invalid -{ArgumentReader.NewShortArg} or --{ArgumentReader.NewLongArg} value {args.NewFile}");
         }
     }
 
-    private static void CreateNewSingleFile(NewKind kind, ArgumentReader args)
+    private static void CreateNewSingleFile(string newKind, ArgumentReader args)
     {
-        var path = GetNewPath(kind, args.Value);
+        var path = GetNewPath(newKind, args.Value);
         var name = Path.GetFileName(path);
 
         if (!File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?").Wait())
@@ -201,33 +222,44 @@ internal class Program
             var fop = new FileOps();
             string? baseName = null;
 
-            if (args.New == NewKind.All)
+            if (newKind == ArgumentReader.NewAllValue)
             {
                 // Link conf to expected other meta files
-                baseName = Path.GetFileNameWithoutExtension(GetNewPath(NewKind.Desktop, args.Value));
+                baseName = Path.GetFileNameWithoutExtension(GetNewPath(newKind, args.Value));
             }
 
-            switch (kind)
+            switch (newKind)
             {
-                case NewKind.Conf:
-                    fop.WriteFile(path, new ConfigurationReader(baseName).ToString(args.IsVerbose), true);
+                case ArgumentReader.NewConfValue:
+                    var style = args.IsVerbose ? DocStyles.Comments : DocStyles.NoComments;
+                    fop.WriteFile(path, new ConfigurationReader(false, baseName).ToString(style), true);
                     break;
-                case NewKind.Desktop:
+                case ArgumentReader.NewDesktopValue:
                     fop.WriteFile(path, MetaTemplates.Desktop, true);
                     break;
-                case NewKind.Meta:
+                case ArgumentReader.NewMetaValue:
                     fop.WriteFile(path, MetaTemplates.MetaInfo, true);
                     break;
                 default:
-                    throw new InvalidOperationException($"Invalid {kind} value");
+                    throw new InvalidOperationException($"Invalid {newKind} value");
             }
         }
     }
 
-    private static string GetNewPath(NewKind kind, string? baseName)
+    private static string GetNewPath(string newKind, string? baseName)
     {
         const string Default = "app";
-        var ext = kind.GetFileExt();
+        string ext = ConfExt;
+
+        switch (newKind)
+        {
+            case ArgumentReader.NewDesktopValue:
+                ext = DesktopExt;
+                break;
+            case ArgumentReader.NewMetaValue:
+                ext = MetaExt;
+                break;
+        }
 
         if (!string.IsNullOrEmpty(baseName))
         {

@@ -42,11 +42,4 @@ public class BuilderFactory
         }
     }
 
-    /// <summary>
-    /// Creates with dummy configuration.
-    /// </summary>
-    public PackageBuilder Create(PackageKind kind)
-    {
-        return Create(new ConfigurationReader(kind));
-    }
 }

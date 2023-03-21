@@ -63,7 +63,9 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.PublisherEmail)} = email@example.net");
 
         lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
-        lines.Add($"{nameof(ConfigurationReader.IsTerminalApp)} = True");
+        lines.Add($"{nameof(ConfigurationReader.DesktopNoDisplay)} = TRUE");
+        lines.Add($"{nameof(ConfigurationReader.DesktopTerminal)} = False");
+        lines.Add($"{nameof(ConfigurationReader.PrimeCategory)} = Development");
         lines.Add($"{nameof(ConfigurationReader.DesktopFile)} = app.desktop");
         lines.Add($"{nameof(ConfigurationReader.IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
         lines.Add($"{nameof(ConfigurationReader.MetaFile)} = metainfo.xml");

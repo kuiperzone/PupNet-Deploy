@@ -167,13 +167,16 @@ public class ArgumentReaderTest
     public void New_DecodeOK()
     {
         var args = new ArgumentReader();
-        Assert.Equal(NewKind.None, args.New);
+        Assert.Null(args.NewFile);
 
-        args = new ArgumentReader("FileName --new conf");
-        Assert.Equal(NewKind.Conf, args.New);
+        args = new ArgumentReader("FileName --new Conf");
+        Assert.Equal("conf", args.NewFile);
         Assert.Equal("FileName", args.Value);
 
-        args = new ArgumentReader("-n meta");
-        Assert.Equal(NewKind.Meta, args.New);
+        args = new ArgumentReader("FileName --new");
+        Assert.Equal("true", args.NewFile);
+
+        args = new ArgumentReader("-n Meta");
+        Assert.Equal("meta", args.NewFile);
     }
 }

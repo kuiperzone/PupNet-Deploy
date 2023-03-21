@@ -35,7 +35,9 @@ public class MacroIdTest
         Assert.Equal("PUBLISHER_LINK_NAME", MacroId.PublisherLinkName.ToName());
         Assert.Equal("PUBLISHER_LINK_URL", MacroId.PublisherLinkUrl.ToName());
         Assert.Equal("PUBLISHER_EMAIL", MacroId.PublisherEmail.ToName());
-        Assert.Equal("IS_TERMINAL_APP", MacroId.IsTerminalApp.ToName());
+        Assert.Equal("DESKTOP_NODISPLAY", MacroId.DesktopNoDisplay.ToName());
+        Assert.Equal("DESKTOP_INTEGRATE", MacroId.DesktopIntegrate.ToName());
+        Assert.Equal("DESKTOP_TERMINAL", MacroId.DesktopTerminal.ToName());
         Assert.Equal("PRIME_CATEGORY", MacroId.PrimeCategory.ToName());
 
         // Others

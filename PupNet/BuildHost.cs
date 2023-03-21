@@ -59,26 +59,16 @@ public class BuildHost
 
         if (Builder.BuildShareApplications != null)
         {
-            var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile);
+            // Magic desktop file - always have one
+            var desktop = Configuration.ReadAssociatedFile(Configuration.DesktopFile) ?? MetaTemplates.Desktop;
 
-            // Careful - check filename, not content as filename may equal "NONE"
-            if (desktop == null && (Configuration.DesktopFile != ConfigurationReader.PathDisable || Arguments.Kind == PackageKind.AppImage))
+            // Not fool-proof but a fair check
+            bool hasExec = desktop.Contains("Exec=") || desktop.Contains("Exec ");
+            bool hasInstall = desktop.Contains(MacroId.InstallBin.ToVar()) || desktop.Contains(MacroId.InstallExec.ToVar());
+
+            if (!hasExec || !hasInstall)
             {
-                // Magic desktop file
-                // NOTE. AppImage MUST have desktop - we make one if not provided
-                desktop = MetaTemplates.Desktop;
-            }
-
-            if (desktop != null)
-            {
-                // Not fool-proof but a fair check
-                bool hasExec = desktop.Contains("Exec=") || desktop.Contains("Exec ");
-                bool hasInstall = desktop.Contains(MacroId.InstallBin.ToVar()) || desktop.Contains(MacroId.InstallExec.ToVar());
-
-                if (!hasExec || !hasInstall)
-                {
-                    Builder.WarningSink.Add($"WARNING. Desktop file does not contain line needed to accommodate multi-variant deployments: 'Exec={MacroId.InstallExec.ToVar()}' or 'Exec={MacroId.InstallBin.ToVar()}/app-name'");
-                }
+                Builder.WarningSink.Add($"WARNING. Desktop file does not contain line needed to accommodate multi-variant deployments: 'Exec={MacroId.InstallExec.ToVar()}' or 'Exec={MacroId.InstallBin.ToVar()}/app-name'");
             }
 
             ExpandedDesktop = Macros.Expand(desktop, Path.GetFileName(Configuration.DesktopFile));
@@ -270,7 +260,7 @@ public class BuildHost
 
         if (verbose)
         {
-            AppendSection(sb, $"CONFIGURATION: {Path.GetFileName(Configuration.Reader.Filepath)}", Configuration.ToString(false));
+            AppendSection(sb, $"CONFIGURATION: {Path.GetFileName(Configuration.Reader.Filepath)}", Configuration.ToString(DocStyles.NoComments));
         }
 
         AppendSection(sb, $"DESKTOP: {Path.GetFileName(Configuration.DesktopFile)}", ExpandedDesktop);

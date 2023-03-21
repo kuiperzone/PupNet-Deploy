@@ -19,52 +19,23 @@
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Defines new file kind.
+/// Determines documentation string output.
 /// </summary>
-public enum NewKind
+public enum DocStyles
 {
     /// <summary>
-    /// None. Invalid. Empty.
+    /// No documentation.
     /// </summary>
-    None = 0,
+    NoComments = 0,
 
     /// <summary>
-    /// Conf file.
+    /// Verbose output.
     /// </summary>
-    Conf,
+    Comments,
 
     /// <summary>
-    /// Desktop file.
+    /// Reference output.
     /// </summary>
-    Desktop,
-
-    /// <summary>
-    /// AppStream metadata.
-    /// </summary>
-    Meta,
-
-    /// <summary>
-    /// All kinds.
-    /// </summary>
-    All,
+    Reference,
 }
 
-/// <summary>
-/// Extension methods.
-/// </summary>
-public static class NewKindExtension
-{
-    /// <summary>
-    /// Gets file extension.
-    /// </summary>
-    public static string GetFileExt(this NewKind kind)
-    {
-        switch (kind)
-        {
-            case NewKind.Conf: return Program.ConfExt;
-            case NewKind.Desktop: return ".desktop";
-            case NewKind.Meta: return ".metainfo.xml";
-            default: return "";
-        }
-    }
-}

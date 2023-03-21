@@ -65,7 +65,14 @@ public class ArgumentReader
     public const string HelpShortArg = "h";
     public const string HelpLongArg = "help";
 
-    private string _string;
+    // New files
+    public const string NewConfValue = "conf";
+    public const string NewDesktopValue = "desktop";
+    public const string NewMetaValue = "meta";
+    public const string NewAllValue = "all";
+    public const string NewAllowedSequence = $"conf|desktop|meta|all";
+
+private string _string;
 
     /// <summary>
     /// Default constructor. Values are defaults only.
@@ -101,8 +108,7 @@ public class ArgumentReader
 
         Value = args.Value;
 
-        New = AssertEnum<NewKind>(NewShortArg, NewLongArg,
-            args.GetOrDefault(NewShortArg, NewLongArg, NewKind.None.ToString()));
+        NewFile = args.GetOrDefault(NewShortArg, NewLongArg, null)?.ToLowerInvariant();
 
         Arch = args.GetOrDefault(ArchLongArg, null);
         Runtime = args.GetOrDefault(RidShortArg, RidLongArg, RuntimeConverter.DefaultRuntime);
@@ -112,7 +118,7 @@ public class ArgumentReader
         IsVerbose = args.GetOrDefault(VerboseLongArg, false);
         IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
-        if (New == NewKind.None)
+        if (NewFile == null)
         {
             Value = GetDefaultValuePath(Value);
 
@@ -141,7 +147,7 @@ public class ArgumentReader
     /// <summary>
     /// Gets new conf filename.
     /// </summary>
-    public NewKind New { get; }
+    public string? NewFile { get; }
 
     /// <summary>
     /// Gets the dotnet runtime-id.
@@ -277,15 +283,15 @@ public class ArgumentReader
         sb.AppendLine("Other Options:");
 
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} conf|desktop|meta|all [--{VerboseLongArg}]");
+        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} {NewAllowedSequence} [--{VerboseLongArg}]");
         sb.AppendLine($"{indent}Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.");
-        sb.AppendLine($"{indent}A base file name may optionally be given. If --{VerboseLongArg} is used, a configuration file");
-        sb.AppendLine($"{indent}with documentation comments is generated. Use 'all' to generate a full set of");
-        sb.AppendLine($"{indent}configuration assets. Example: {Program.CommandName} HelloWorld -{NewShortArg} all --{VerboseLongArg}");
+        sb.AppendLine($"{indent}A base file name may optionally be given. If --{VerboseLongArg} is used, a configuration file with");
+        sb.AppendLine($"{indent}documentation comments is generated. Use 'all' to generate a full set of configuration assets.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewAllValue} --{VerboseLongArg}");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} args|macros|conf");
+        sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} args|macro|conf");
         sb.AppendLine($"{indent}Show help information. Optional value specifies what kind of information to display.");
-        sb.AppendLine($"{indent}Default is 'args'. Example: {Program.CommandName} -{HelpShortArg} macros");
+        sb.AppendLine($"{indent}Default is 'args'. Example: {Program.CommandName} -{HelpShortArg} macro");
         sb.AppendLine();
         sb.AppendLine($"{indent}--{VersionLongArg} [flag only]");
         sb.AppendLine($"{indent}Show version and associated information.");

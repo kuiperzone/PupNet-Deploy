@@ -33,7 +33,9 @@ public enum MacroId
     PublisherLinkName,
     PublisherLinkUrl,
     PublisherEmail,
-    IsTerminalApp,
+    DesktopNoDisplay,
+    DesktopIntegrate,
+    DesktopTerminal,
     PrimeCategory,
 
     AppVersion,
@@ -76,7 +78,9 @@ public static class MacroIdExtension
             case MacroId.PublisherLinkName: return "PUBLISHER_LINK_NAME";
             case MacroId.PublisherLinkUrl: return "PUBLISHER_LINK_URL";
             case MacroId.PublisherEmail: return "PUBLISHER_EMAIL";
-            case MacroId.IsTerminalApp: return "IS_TERMINAL_APP";
+            case MacroId.DesktopNoDisplay: return "DESKTOP_NODISPLAY";
+            case MacroId.DesktopIntegrate: return "DESKTOP_INTEGRATE";
+            case MacroId.DesktopTerminal: return "DESKTOP_TERMINAL";
             case MacroId.PrimeCategory: return "PRIME_CATEGORY";
 
             // Others
@@ -124,10 +128,13 @@ public static class MacroIdExtension
             case MacroId.PublisherLinkUrl: return $"{nameof(ConfigurationReader.PublisherLinkUrl)} value from conf file";
             case MacroId.PublisherEmail: return $"{nameof(ConfigurationReader.PublisherEmail)} value from conf file";
 
-            case MacroId.IsTerminalApp: return $"{nameof(ConfigurationReader.IsTerminalApp)} value from conf file";
+            case MacroId.DesktopNoDisplay: return $"{nameof(ConfigurationReader.DesktopNoDisplay)} value from conf file";
+            case MacroId.DesktopTerminal: return $"{nameof(ConfigurationReader.DesktopTerminal)} value from conf file";
             case MacroId.PrimeCategory: return $"{nameof(ConfigurationReader.PrimeCategory)} value from conf file";
 
-            case MacroId.AppVersion: return "Application version, exluding package-release extension";
+            case MacroId.DesktopIntegrate: return $"Gives the logical not of {nameof(ConfigurationReader.DesktopNoDisplay)}";
+
+            case MacroId.AppVersion: return "Application version, excluding package-release extension";
             case MacroId.PackageRelease: return "Package release version";
             case MacroId.DeployKind: return "Deployment output kind: appimage, flatpak, rpm, deb, setup, zip";
             case MacroId.DotnetRuntime: return "Dotnet publish runtime identifier used (RID)";

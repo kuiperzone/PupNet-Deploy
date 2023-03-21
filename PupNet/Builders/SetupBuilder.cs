@@ -49,6 +49,11 @@ public class SetupBuilder : PackageBuilder
     }
 
     /// <summary>
+    /// Gets terminal windows icon.
+    /// </summary>
+    public static string TerminalIcon { get; } = Path.Combine(AssemblyDirectory, "terminal.ico");
+
+    /// <summary>
     /// Implements.
     /// </summary>
     public override string BuildAppBin { get; }
@@ -163,6 +168,12 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"Source: \"{BuildAppBin}\\*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs signonce;");
         sb.AppendLine($"Source: \"{BuildAppBin}\\*\"; Excludes: \"*.exe,*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
 
+        if (Configuration.SetupCommandPrompt != null)
+        {
+            // Need this below
+            sb.AppendLine($"Source: \"{TerminalIcon}\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
+        }
+
         sb.AppendLine();
         sb.AppendLine("[Tasks]");
         sb.AppendLine($"Name: \"desktopicon\"; Description: \"Create a &Desktop Icon\"; GroupDescription: \"Additional icons:\"; Flags: unchecked");
@@ -171,15 +182,18 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine();
         sb.AppendLine($"[Icons]");
 
-        if (Configuration.DesktopFile != ConfigurationReader.PathDisable)
+        if (!Configuration.DesktopNoDisplay)
         {
             sb.AppendLine($"Name: \"{{group}}\\{Configuration.AppFriendlyName}\"; Filename: \"{{app}}\\{AppExecName}\"");
             sb.AppendLine($"Name: \"{{userdesktop}}\\{Configuration.AppFriendlyName}\"; Filename: \"{{app}}\\{AppExecName}\"; Tasks: desktopicon");
         }
 
+        // Still put CommandPrompt and Home Page link DesktopNoDisplay is true
         if (Configuration.SetupCommandPrompt != null)
         {
-            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupCommandPrompt}\"; Filename: \"{{app}}\\{PromptBat}\"");
+            // Give special terminal icon rather meaningless default .bat icon
+            var name = Path.GetFileName(TerminalIcon);
+            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupCommandPrompt}\"; Filename: \"{{app}}\\{PromptBat}\" IconFilename: \"{{app}}\\{name}\"");
         }
 
         if (Configuration.PublisherLinkName != null && Configuration.PublisherLinkUrl != null)
@@ -190,7 +204,7 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine();
         sb.AppendLine($"[Run]");
 
-        if (Configuration.DesktopFile != ConfigurationReader.PathDisable)
+        if (!Configuration.DesktopNoDisplay)
         {
             sb.AppendLine($"Filename: \"{{app}}\\{AppExecName}\"; Description: Start Application Now; Flags: postinstall nowait skipifsilent");
         }

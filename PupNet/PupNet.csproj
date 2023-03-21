@@ -11,6 +11,7 @@
 	<PublishReadyToRun>true</PublishReadyToRun>
 	<ApplicationIcon>Assets/app.ico</ApplicationIcon>
 
+	<PackageId>KuiperZone.PupNet</PackageId>
     <PackageId>KuiperZone.PupNet</PackageId>
     <Product>PupNet Deploy</Product>
     <Authors>Andy Thomas</Authors>
@@ -37,9 +38,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
-		<None Include="$(ProjectDir)\Assets\generic.svg" Link="generic.svg">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 		<None Include="$(ProjectDir)\Assets\generic.ico" Link="generic.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -56,6 +54,43 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="$(ProjectDir)\Assets\generic.64x64.png" Link="generic.64x64.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\generic.96x96.png" Link="generic.96x96.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\generic.128x128.png" Link="generic.128x128.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\generic.256x256.png" Link="generic.256x256.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
+		<None Include="$(ProjectDir)\Assets\terminal.ico" Link="terminal.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.16x16.png" Link="terminal.16x16.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.24x24.png" Link="terminal.24x24.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.32x32.png" Link="terminal.32x32.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.48x48.png" Link="terminal.48x48.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.64x64.png" Link="terminal.64x64.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.96x96.png" Link="terminal.96x96.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.128x128.png" Link="terminal.128x128.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\terminal.256x256.png" Link="terminal.256x256.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 

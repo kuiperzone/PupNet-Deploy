@@ -61,7 +61,9 @@ public class MacrosExpander
         dict.Add(MacroId.PublisherLinkName, conf.PublisherLinkName ?? "");
         dict.Add(MacroId.PublisherLinkUrl, conf.PublisherLinkUrl ?? "");
         dict.Add(MacroId.PublisherEmail, conf.PublisherEmail ?? "");
-        dict.Add(MacroId.IsTerminalApp, conf.IsTerminalApp.ToString().ToLowerInvariant());
+        dict.Add(MacroId.DesktopNoDisplay, conf.DesktopNoDisplay.ToString().ToLowerInvariant());
+        dict.Add(MacroId.DesktopIntegrate, (!conf.DesktopNoDisplay).ToString().ToLowerInvariant());
+        dict.Add(MacroId.DesktopTerminal, conf.DesktopTerminal.ToString().ToLowerInvariant());
         dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);

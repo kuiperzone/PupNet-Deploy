@@ -63,7 +63,7 @@ public abstract class PackageBuilder
         if (IconPaths.Count == 0)
         {
             // Always has some linux icons
-            IconPaths = GetShareIconPaths(DefaultIcons);
+            IconPaths = GetShareIconPaths(Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
         }
 
         IconSource = GetSourceIcon(kind, Configuration.IconFiles);
@@ -83,12 +83,17 @@ public abstract class PackageBuilder
     /// <summary>
     /// Known and accepted PNG icon sizes.
     /// </summary>
-    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256 });
+    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256, 512 });
 
     /// <summary>
-    /// Gets default source icons.
+    /// Gets default GUI icons.
     /// </summary>
-    public static IReadOnlyCollection<string> DefaultIcons { get; } = GetDefaultIcons();
+    public static IReadOnlyCollection<string> DefaultGuiIcons { get; } = GetDefaultIcons(false);
+
+    /// <summary>
+    /// Gets default GUI icons.
+    /// </summary>
+    public static IReadOnlyCollection<string> DefaultTerminalIcons { get; } = GetDefaultIcons(true);
 
     /// <summary>
     /// Gets the package kind.
@@ -525,20 +530,24 @@ public abstract class PackageBuilder
         return output + "." + kind.ToString().ToLowerInvariant();
     }
 
-    private static IReadOnlyCollection<string> GetDefaultIcons()
+    private static IReadOnlyCollection<string> GetDefaultIcons(bool terminal)
     {
         // Default icon in assembly directory
         var list = new List<string>();
 
-        // Leave windows icon out - leave InnoSetup to assign own
-        // list.Add(Path.Combine(AssemblyDirectory, "generic.icon"));
+        string name = terminal ? "terminal" : "generic";
 
-        list.Add(Path.Combine(AssemblyDirectory, "generic.svg"));
-        list.Add(Path.Combine(AssemblyDirectory, "generic.16x16.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "generic.24x24.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "generic.32x32.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "generic.48x48.png"));
-        list.Add(Path.Combine(AssemblyDirectory, "generic.64x64.png"));
+        // Leave windows icon out - leave InnoSetup to assign own
+        // list.Add(Path.Combine(AssemblyDirectory, $"{name}.icon"));
+
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.16x16.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.24x24.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.32x32.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.48x48.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.64x64.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.96x96.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.128x128.png"));
+        list.Add(Path.Combine(AssemblyDirectory, $"{name}.256x256.png"));
 
         return list;
     }

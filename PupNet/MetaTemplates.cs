@@ -45,7 +45,9 @@ public static class MetaTemplates
         list.Add($"Comment={MacroId.AppShortSummary.ToVar()}");
         list.Add($"Exec={MacroId.InstallExec.ToVar()}");
         list.Add($"TryExec={MacroId.InstallExec.ToVar()}");
-        list.Add($"Terminal={MacroId.IsTerminalApp.ToVar()}");
+        list.Add($"NoDisplay={MacroId.DesktopNoDisplay.ToVar()}");
+        list.Add($"X-AppImage-Integrate={MacroId.DesktopIntegrate.ToVar()}");
+        list.Add($"Terminal={MacroId.DesktopTerminal.ToVar()}");
         list.Add($"Categories={MacroId.PrimeCategory.ToVar()}");
         list.Add($"MimeType=");
         list.Add($"Keywords=");

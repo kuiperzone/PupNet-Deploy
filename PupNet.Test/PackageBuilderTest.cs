@@ -25,9 +25,9 @@ public class PackageBuilderTest
     [Fact]
     public void DefaultIcons_Available()
     {
-        Assert.NotEmpty(PackageBuilder.DefaultIcons);
+        Assert.NotEmpty(PackageBuilder.DefaultGuiIcons);
 
-        foreach (var item in PackageBuilder.DefaultIcons)
+        foreach (var item in PackageBuilder.DefaultGuiIcons)
         {
             Assert.True(File.Exists(item));
         }
