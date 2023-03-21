@@ -909,7 +909,7 @@ If you are using VirtualBox with your project, note that symbolic links are disa
 itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
 directory in the virtual machine. Alternatively, it is possible to enable shared-folder symlinks in VirtualBox.
 
-### RPM Output to a Subdirectory ###
+### RPM Outputs to a Subdirectory ###
 The RPM package builder creates subdirectories under the directory that you specify. This is normal
 behaviour and cannot be overridden.
 
@@ -928,7 +928,9 @@ Software Center GUI, as expected. However, you may find that they cannot be laun
 Instead, they must be removed from the command line, like so:
 
     sudo apt remove helloworld
+
 or:
+
     sudo dnf remove helloworld
 
 This is not an issue with PupNet or necessarily with your AppStream metadata. Rather, having been installed from file,
