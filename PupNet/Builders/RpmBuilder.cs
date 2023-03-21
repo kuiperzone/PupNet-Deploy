@@ -42,6 +42,7 @@ public sealed class RpmBuilder : PackageBuilder
         var list = new List<string>();
         var temp = Path.Combine(Root, "rpmbuild");
 
+        // https://cmake.cmake.narkive.com/uDOFCNJ3/rpmbuild-architecture
         // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
         var cmd = $"rpmbuild -bb \"{ManifestBuildPath}\"";
         cmd += $" --define \"_topdir {temp}\" --buildroot=\"{BuildRoot}\"";

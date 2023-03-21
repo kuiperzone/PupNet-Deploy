@@ -185,6 +185,11 @@ public class RuntimeConverter
             {
                 return "aarch64";
             }
+            else
+            if (RuntimeArch == Architecture.X86)
+            {
+                return "i686";
+            }
         }
         else
         if (kind == PackageKind.Deb)

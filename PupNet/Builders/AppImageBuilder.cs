@@ -163,6 +163,7 @@ public class AppImageBuilder : PackageBuilder
         {
             // Used by AppImageTool
             // Otherwise leave to auto-detect
+            // https://discourse.appimage.org/t/how-to-package-for-aarch64/2088
             Environment.SetEnvironmentVariable("ARCH", Arguments.Arch);
         }
 
