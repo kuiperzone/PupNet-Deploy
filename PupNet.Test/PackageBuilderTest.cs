@@ -63,8 +63,7 @@ public class PackageBuilderTest
         AssertOK(builder, PackageKind.Rpm);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
-        Assert.StartsWith("HelloWorld-5.4.3-2.", builder.OutputName);
-        Assert.EndsWith(".rpm", builder.OutputName);
+        Assert.Equal("RPMS", builder.OutputName);
     }
 
     [Fact]
@@ -74,7 +73,7 @@ public class PackageBuilderTest
         AssertOK(builder, PackageKind.Deb);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
-        Assert.StartsWith("HelloWorld-5.4.3-2.", builder.OutputName);
+        Assert.StartsWith("helloworld_5.4.3-2", builder.OutputName);
         Assert.EndsWith(".deb", builder.OutputName);
     }
 
@@ -112,8 +111,6 @@ public class PackageBuilderTest
 
         // Not fully qualified as no assert files
         Assert.Equal("Deploy", builder.OutputDirectory);
-        Assert.StartsWith("HelloWorld", builder.OutputName);
-        Assert.Contains("5.4.3", builder.OutputName);
 
         if (builder.IsLinuxExclusive)
         {

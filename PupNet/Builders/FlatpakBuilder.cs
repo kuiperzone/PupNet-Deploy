@@ -69,6 +69,14 @@ public class FlatpakBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string OutputName
+    {
+        get { return GetOutputName(true, Architecture, ".flatpak"); }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string BuildAppBin { get; }
 
     /// <summary>

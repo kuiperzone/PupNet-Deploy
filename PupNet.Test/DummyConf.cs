@@ -76,9 +76,9 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.DotnetPostPublishOnWindows)} = PostPublishCommandOnWindows.bat");
 
         lines.Add($"{nameof(ConfigurationReader.OutputDirectory)} = Deploy");
-        lines.Add($"{nameof(ConfigurationReader.OutputVersion)} = true");
 
         lines.Add($"{nameof(ConfigurationReader.AppImageArgs)} = -appargs");
+        lines.Add($"{nameof(ConfigurationReader.AppImageVersionOutput)} = true");
 
         lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformRuntime)} = org.freedesktop.Platform");
         lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformSdk)} = org.freedesktop.Sdk");
@@ -86,6 +86,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
         lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
 
+        lines.Add($"{nameof(ConfigurationReader.SetupVersionOutput)} = true");
         lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
         lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
         lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");

@@ -75,7 +75,7 @@ public class ConfigurationReader
         {
             AppLicenseFile = "LICENSE.txt";
             PublisherCopyright = "Copyright (C) Acme Ltd 2023";
-            PublisherLinkName = "Home Page";
+            PublisherLinkName = "Project Page";
             PublisherLinkUrl = "https://example.net";
             PublisherEmail = "contact@example.net";
             StartCommand = "helloworld";
@@ -153,9 +153,9 @@ public class ConfigurationReader
 
         PackageName = GetOptional(nameof(PackageName), ValueFlags.StrictSafe) ?? AppBaseName;
         OutputDirectory = GetOptional(nameof(OutputDirectory), ValueFlags.Path) ?? LocalDirectory;
-        OutputVersion = GetBool(nameof(OutputVersion), OutputVersion);
 
         AppImageArgs = GetOptional(nameof(AppImageArgs), ValueFlags.None);
+        AppImageVersionOutput = GetBool(nameof(AppImageVersionOutput), AppImageVersionOutput);
 
         FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime), ValueFlags.StrictSafe);
         FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk), ValueFlags.StrictSafe);
@@ -166,6 +166,7 @@ public class ConfigurationReader
         SetupCommandPrompt = GetOptional(nameof(SetupCommandPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
+        SetupVersionOutput = GetBool(nameof(SetupVersionOutput), SetupVersionOutput);
     }
 
     /// <summary>
@@ -217,9 +218,9 @@ public class ConfigurationReader
 
     public string PackageName { get; }
     public string OutputDirectory { get; } = "Deploy/bin";
-    public bool OutputVersion { get; } = false;
 
     public string? AppImageArgs { get; }
+    public bool AppImageVersionOutput { get; }
 
     public string FlatpakPlatformRuntime { get; } = "org.freedesktop.Platform";
     public string FlatpakPlatformSdk { get; } = "org.freedesktop.Sdk";
@@ -231,6 +232,7 @@ public class ConfigurationReader
     public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
     public string? SetupSignTool { get; }
+    public bool SetupVersionOutput { get; }
 
     /// <summary>
     /// Reads file associated with this configuration and returns the text. Returns null if path is null or
@@ -295,7 +297,7 @@ public class ConfigurationReader
                 $"Mandatory application version and package release of form: 'VERSION[RELEASE]'. Use optional square",
                 $"brackets to denote package release, i.e. '1.2.3[1]'. Release refers to a change to the deployment",
                 $"package, rather the application. If release part is absent (i.e. '1.2.3'), the release value defaults",
-                $"to '1'. Note that the version-release value given here may be overidden from the command line."));
+                $"to '1'. Note that the version-release value given here may be overridden from the command line."));
 
         sb.Append(CreateHelpField(nameof(AppShortSummary), AppShortSummary, style,
                 $"Mandatory single line application description."));
@@ -417,18 +419,12 @@ public class ConfigurationReader
         sb.Append(CreateHelpField(nameof(PackageName), PackageName, style,
                 $"Optional package name (excludes version etc.). If empty, defaults to {nameof(AppBaseName)}. However, it is",
                 $"used not only to specify the base output filename, but to identify the application in .deb and .rpm",
-                $"packages. You may wish, therefore, to ensure that the value represents a unique name, such as the",
-                $"{nameof(AppId)}. Naming requirements for this are strict and must contain only alpha-numeric and '-',",
-                $"'+' and '.' characters."));
+                $"packages. You may wish, therefore, to ensure that the value represents a unique name. Naming",
+                $"requirements are strict and must contain only alpha-numeric and '-', '+' and '.' characters."));
 
         sb.Append(CreateHelpField(nameof(OutputDirectory), OutputDirectory, style,
                 $"Output directory, or subdirectory relative to this file. It will be created if it does not exist and",
                 $"will contain the final deploy output files. If empty, it defaults to the location of this file."));
-
-        sb.Append(CreateHelpField(nameof(OutputVersion), OutputVersion, style,
-                $"Boolean (true or false) which sets whether to include the application version in the filename of the",
-                $"package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if the output filename is specified",
-                $"at command line."));
 
 
 
@@ -436,6 +432,11 @@ public class ConfigurationReader
 
         sb.Append(CreateHelpField(nameof(AppImageArgs), AppImageArgs, style,
                 $"Additional arguments for use with appimagetool. Useful for signing. Default is empty."));
+
+        sb.Append(CreateHelpField(nameof(AppImageVersionOutput), AppImageVersionOutput, style,
+                $"Boolean (true or false) which sets whether to include the application version in the AppImage filename,",
+                $"i.e. 'HelloWorld-1.2.3-x86_64.AppImage'. Default is false. It is ignored if the output filename is",
+                $"specified at command line."));
 
 
 
@@ -481,6 +482,11 @@ public class ConfigurationReader
                 $"Optional name and parameters of the Sign Tool to be used to digitally sign: the installer,",
                 $"uninstaller, and contained exe and dll files. If empty, files will not be signed.",
                 $"See 'SignTool' parameter in: https://jrsoftware.org/ishelp/"));
+
+        sb.Append(CreateHelpField(nameof(SetupVersionOutput), SetupVersionOutput, style,
+                $"Boolean (true or false) which sets whether to include the application version in the setup filename,",
+                $"i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. It is ignored if the output filename is",
+                $"specified at command line."));
 
         return sb.ToString().Trim().ReplaceLineEndings("\n");
     }

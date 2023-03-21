@@ -65,6 +65,14 @@ public class AppImageBuilder : PackageBuilder
     public static string? AppImageTool { get; } = GetAppImageTool();
 
     /// <summary>
+    /// Implements.
+    /// </summary>
+    public override string OutputName
+    {
+        get { return GetOutputName(Configuration.AppImageVersionOutput, Architecture, ".AppImage"); }
+    }
+
+    /// <summary>
     /// Overrides.
     /// </summary>
     public override string? MetaBuildPath

@@ -43,6 +43,14 @@ public class ZipBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string OutputName
+    {
+        get { return GetOutputName(true, Runtime.RuntimeId, ".zip"); }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string BuildAppBin { get; }
 
     /// <summary>

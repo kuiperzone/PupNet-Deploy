@@ -47,13 +47,10 @@ public abstract class PackageBuilder
 
         // Important - Architecture is tailored for third-party builder
         Architecture = Arguments.Arch ?? Runtime.GetPackageArch(Kind);
-
         AppVersion = SplitVersion(conf.Arguments.VersionRelease ?? conf.AppVersionRelease, out string temp);
         PackageRelease = temp;
 
         OutputDirectory = GetOutputDirectory(Configuration);
-        OutputName = GetOutputName(Kind, Configuration, Architecture, AppVersion, PackageRelease);
-
         Root = Path.Combine(GlobalRoot, $"{conf.AppId}-{Runtime}-{conf.Arguments.Build}-{kind}");
         BuildRoot = Path.Combine(Root, AppRootName);
         Operations = new(Root);
@@ -83,7 +80,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// Known and accepted PNG icon sizes.
     /// </summary>
-    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256, 512 });
+    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256, 512, 1024 });
 
     /// <summary>
     /// Gets default GUI icons.
@@ -167,7 +164,7 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets output filename.
     /// </summary>
-    public string OutputName { get; }
+    public abstract string OutputName { get; }
 
     /// <summary>
     /// Gets output file path.
@@ -175,6 +172,14 @@ public abstract class PackageBuilder
     public string OutputPath
     {
         get { return Path.Combine(OutputDirectory, OutputName); }
+    }
+
+    /// <summary>
+    /// Gets the application executable filename (no directory part). I.e. "Configuration.AppBase[.exe]".
+    /// </summary>
+    public string AppExecName
+    {
+        get { return Runtime.IsWindowsRuntime ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
     }
 
     /// <summary>
@@ -189,11 +194,21 @@ public abstract class PackageBuilder
     public string BuildRoot { get; }
 
     /// <summary>
-    /// Gets the application executable filename (no directory part). I.e. "Configuration.AppBase[.exe]".
+    /// Gets the build 'usr' directory, i.e. "{BuildRoot}/usr",  We do not necessarily 'dotnet publish' here, and
+    /// it may be distinct from <see cref="BuildAppBin"/>. Returns null for Windows packages.
     /// </summary>
-    public string AppExecName
+    public string? BuildUsr
     {
-        get { return Runtime.IsWindowsRuntime ? Configuration.AppBaseName + ".exe" : Configuration.AppBaseName; }
+        get
+        {
+            if (IsLinuxExclusive || IsOsxExclusive)
+            {
+                // Note. We have the option in the future of using "{BuildRoot}/usr/local"
+                return $"{BuildRoot}/usr";
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -202,7 +217,11 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildUsrBin
     {
-        get { return (IsLinuxExclusive || IsOsxExclusive) ? $"{BuildRoot}/usr/bin" : null; }
+        get
+        {
+            var usr = BuildUsr;
+            return usr != null ? $"{BuildUsr}/bin" : null;
+        }
     }
 
     /// <summary>
@@ -210,7 +229,11 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildUsrShare
     {
-        get { return (IsLinuxExclusive || IsOsxExclusive) ? $"{BuildRoot}/usr/share" : null; }
+        get
+        {
+            var usr = BuildUsr;
+            return usr != null ? $"{BuildUsr}/share" : null;
+        }
     }
 
     /// <summary>
@@ -218,7 +241,16 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareMeta
     {
-        get { return IsLinuxExclusive ? $"{BuildRoot}/usr/share/metainfo" : null; }
+        get
+        {
+            if (IsLinuxExclusive)
+            {
+                var usr = BuildUsr;
+                return usr != null ? $"{BuildUsr}/share/metainfo" : null;
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -226,7 +258,16 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareApplications
     {
-        get { return IsLinuxExclusive ? $"{BuildRoot}/usr/share/applications" : null; }
+        get
+        {
+            if (IsLinuxExclusive)
+            {
+                var usr = BuildUsr;
+                return usr != null ? $"{BuildUsr}/share/applications" : null;
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -234,7 +275,16 @@ public abstract class PackageBuilder
     /// </summary>
     public string? BuildShareIcons
     {
-        get { return IsLinuxExclusive ? $"{BuildRoot}/usr/share/icons" : null; }
+        get
+        {
+            if (IsLinuxExclusive)
+            {
+                var usr = BuildUsr;
+                return usr != null ? $"{BuildUsr}/share/icons" : null;
+            }
+
+            return null;
+        }
     }
 
     /// <summary>
@@ -458,6 +508,29 @@ public abstract class PackageBuilder
         return Root;
     }
 
+    /// <summary>
+    /// Accessible by subclass. Derives "standard" output name. Ext to include leading ".".
+    /// Returns Configuration.Arguments.Output if not null.
+    /// </summary>
+    protected string GetOutputName(bool version, string arch, string ext)
+    {
+        var output = Path.GetFileName(Configuration.Arguments.Output);
+
+        if (!string.IsNullOrEmpty(output))
+        {
+            return output;
+        }
+
+        output = Configuration.PackageName;
+
+        if (version)
+        {
+            output += $"-{AppVersion}-{PackageRelease}";
+        }
+
+        return $"{output}.{arch}{ext}";
+    }
+
     private static string SplitVersion(string version, out string release)
     {
         release = "1";
@@ -497,37 +570,6 @@ public abstract class PackageBuilder
         }
 
         return conf.OutputDirectory;
-    }
-
-    private static string GetOutputName(PackageKind kind, ConfigurationReader conf, string arch, string version, string release)
-    {
-        var output = Path.GetFileName(conf.Arguments.Output);
-
-        if (output != null)
-        {
-            return output;
-        }
-
-        output = conf.PackageName;
-
-        if (conf.OutputVersion && !string.IsNullOrEmpty(version))
-        {
-            output += $"-{version}-{release}";
-        }
-
-        output += $".{arch}";
-
-        if (kind == PackageKind.AppImage)
-        {
-            return output + ".AppImage";
-        }
-
-        if (kind == PackageKind.Setup)
-        {
-            return output + ".exe";
-        }
-
-        return output + "." + kind.ToString().ToLowerInvariant();
     }
 
     private static IReadOnlyCollection<string> GetDefaultIcons(bool terminal)

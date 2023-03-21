@@ -25,7 +25,7 @@ namespace KuiperZone.PupNet.Builders;
 /// https://docs.fedoraproject.org/en-US/package-maintainers/Packaging_Tutorial_GNU_Hello/
 /// https://www.techrepublic.com/article/making-rpms-part-1-the-spec-file-header/
 /// </summary>
-public class RpmBuilder : PackageBuilder
+public sealed class RpmBuilder : PackageBuilder
 {
     /// <summary>
     /// Constructor.
@@ -49,6 +49,25 @@ public class RpmBuilder : PackageBuilder
 
         list.Add(cmd);
         PackageCommands = list;
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override string OutputName
+    {
+        get
+        {
+            var output = Path.GetFileName(Configuration.Arguments.Output);
+
+            if (string.IsNullOrEmpty(output))
+            {
+                // rpmbuild always treats name as directory - use standard notion
+                return "RPMS";
+            }
+
+            return output;
+        }
     }
 
     /// <summary>

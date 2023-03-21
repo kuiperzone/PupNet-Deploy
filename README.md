@@ -34,7 +34,7 @@ run a command like so:
 In this case, PupNet calls `dotnet publish` on your project and generates a distributable [AppImage](https://github.com/AppImage/AppImageKit)
 file fo use on Linux systems. Additionally, you may optionally provide `.desktop` and AppStream metadata files.
 There is no need to write complex build-specific manifests, RPM spec or Debian control files. You need only supply your
-deployment configuration once as a single `pupnet.conf`, and PupNet takes care of the underlying build-specific tasks.
+deployment configuration once as a single `pupnet.conf` file, and PupNet takes care of the underlying build-specific tasks.
 
 Likewise, to package the same project for Windows:
 
@@ -178,9 +178,9 @@ here as different packages will install to different paths. It is important also
 their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search-and-replace operation is
 used to populate them.
 
-In the event that you explicitly require no desktop file, you may declare: `DesktopFile = NONE`. The `DesktopFile`
-parameter is mostly ignored for Windows `Setup`, except that setting it to `NONE` is used indicate that you wish
-no entry for your main application executable to be written under the Windows Start Menu (i.e. synonymous
+In the event that you wish there be no desktop entry (i.e. a command-line application), you should declare:
+`DesktopNoDisplay = true`. The is ignored for Windows `Setup`, although if you set `DesktopNoDisplay`, then
+no entry for your application's main executable will be added under the Windows Start Menu (i.e. synonymous
 behavior with that on Linux).
 
 ### AppStream Metadata ###
@@ -689,7 +689,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Mandatory application version and package release of form: 'VERSION[RELEASE]'. Use optional square
     brackets to denote package release, i.e. '1.2.3[1]'. Release refers to a change to the deployment
     package, rather the application. If release part is absent (i.e. '1.2.3'), the release value defaults
-    to '1'. Note that the version-release value given here may be overidden from the command line.
+    to '1'. Note that the version-release value given here may be overridden from the command line.
     Example: AppVersionRelease = 1.0.0[1]
 
     ** AppShortSummary **
@@ -904,6 +904,19 @@ Type `pupnet --help conf` to see supported configuration reference information:
 If you are using VirtualBox with your project, note that symbolic links are disabled within shared folders by VirtualBox
 itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
 directory in the virtual machine. Alternatively, it is possible to enable shared-folder symlinks in VirtualBox.
+
+### RPM Output to a Subdirectory ###
+The RPM package builder creates subdirectories under the directory that you specify. This is normal
+behaviour and cannot be overridden.
+
+### Package Naming Convention is not Consistent ###
+You may notice that PupNet outputs differences in package naming styles:
+
+    PupNet-Deploy.x86_64.AppImage
+    pupnet-deploy_0.0.1-1_amd64.deb
+
+PupNet follows the naming conventions used with the respective packages. This includes different CPU architecture
+naming conventions.
 
 ### RPM and Debian Packages Cannot be Removed from Gnome Software Center GUI ###
 If you install your RPM and DEB packages as a local file they will, courtesy of your AppStream metadata, show up Gnome

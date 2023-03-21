@@ -56,6 +56,14 @@ public class SetupBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string OutputName
+    {
+        get { return GetOutputName(Configuration.SetupVersionOutput, Architecture, ".exe"); }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string BuildAppBin { get; }
 
     /// <summary>

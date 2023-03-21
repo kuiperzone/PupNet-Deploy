@@ -24,7 +24,7 @@ namespace KuiperZone.PupNet.Builders;
 /// Extends <see cref="PackageBuilder"/> for Debian package.
 /// https://www.baeldung.com/linux/create-debian-package
 /// </summary>
-public class DebianBuilder : PackageBuilder
+public sealed class DebianBuilder : PackageBuilder
 {
     private readonly string _debianPackageName;
 
@@ -54,6 +54,26 @@ public class DebianBuilder : PackageBuilder
         cmd += $"--build \"{BuildRoot}\" \"{archiveDirectory}\"";
         list.Add(cmd);
         PackageCommands = list;
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override string OutputName
+    {
+        get
+        {
+            var output = Path.GetFileName(Configuration.Arguments.Output);
+
+            if (string.IsNullOrEmpty(output))
+            {
+                // packagename_version-release_architecture.deb
+                // https://kerneltalks.com/tools/understanding-package-naming-convention-rpm-deb/
+                return $"{_debianPackageName}_{AppVersion}-{PackageRelease}_{Architecture}.deb";
+            }
+
+            return output;
+        }
     }
 
     /// <summary>

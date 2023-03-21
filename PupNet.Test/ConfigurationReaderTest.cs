@@ -114,17 +114,24 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
-    public void DesktopNoDisplay_Bool_ExpectTrue()
+    public void DesktopNoDisplay_Bool_IsTrue()
     {
         Assert.True(Create().DesktopNoDisplay);
         Assert.False(Create(nameof(ConfigurationReader.DesktopNoDisplay)).DesktopNoDisplay);
     }
 
     [Fact]
-    public void DesktopTerminal_Bool_ExpectFalse()
+    public void DesktopTerminal_Bool_IsFalse()
     {
         Assert.False(Create().DesktopTerminal);
         Assert.True(Create(nameof(ConfigurationReader.DesktopTerminal)).DesktopTerminal);
+    }
+
+    [Fact]
+    public void DesktopFile_Optional_DecodeOK()
+    {
+        Assert.Equal("app.desktop", Create().DesktopFile);
+        Assert.Null(Create(nameof(ConfigurationReader.DesktopFile)).DesktopFile);
     }
 
     [Fact]
@@ -135,10 +142,14 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
-    public void DesktopFile_Optional_DecodeOK()
+    public void IconFiles_Optional_DecodeOK()
     {
-        Assert.Equal("app.desktop", Create().DesktopFile);
-        Assert.Null(Create(nameof(ConfigurationReader.DesktopFile)).DesktopFile);
+        var paths = Create().IconFiles;
+        Assert.NotEmpty(paths);
+        Assert.Contains("Assets/Icon.svg", paths);
+        Assert.Contains("Assets/Icon.32x32.png", paths);
+
+        Assert.Empty(Create(nameof(ConfigurationReader.IconFiles)).IconFiles);
     }
 
     [Fact]
@@ -177,10 +188,56 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
-    public void OutputVersionName_Mandatory_DecodeOK()
+    public void AppImageArgs_Optional_DecodeOK()
     {
-        Assert.True(Create().OutputVersion);
-        Assert.False(Create(nameof(ConfigurationReader.OutputVersion)).OutputVersion);
+        Assert.Equal("-appargs", Create().AppImageArgs);
+        Assert.Null(Create(nameof(ConfigurationReader.AppImageArgs)).AppImageArgs);
+    }
+
+    [Fact]
+    public void AppImageVersionOutput_Bool_IsTrue()
+    {
+        Assert.True(Create().AppImageVersionOutput);
+        Assert.False(Create(nameof(ConfigurationReader.AppImageVersionOutput)).AppImageVersionOutput);
+    }
+
+
+    [Fact]
+    public void FlatpakPlatformRuntime_Mandatory_DecodeOK()
+    {
+        Assert.Equal("org.freedesktop.Platform", Create().FlatpakPlatformRuntime);
+        Assert.Throws<ArgumentException>(() => Create(nameof(ConfigurationReader.FlatpakPlatformRuntime)));
+    }
+
+    [Fact]
+    public void FlatpakPlatformSdk_Mandatory_DecodeOK()
+    {
+        Assert.Equal("org.freedesktop.Sdk", Create().FlatpakPlatformSdk);
+        Assert.Throws<ArgumentException>(() => Create(nameof(ConfigurationReader.FlatpakPlatformSdk)));
+    }
+
+    [Fact]
+    public void FlatpakPlatformVersion_Mandatory_DecodeOK()
+    {
+        Assert.Equal("18.00", Create().FlatpakPlatformVersion);
+        Assert.Throws<ArgumentException>(() => Create(nameof(ConfigurationReader.FlatpakPlatformVersion)));
+    }
+
+    [Fact]
+    public void FlatpakFinishArgs_Optional_DecodeOK()
+    {
+        var args = Create().FlatpakFinishArgs;
+        Assert.NotEmpty(args);
+        Assert.Contains("--socket=wayland", args);
+        Assert.Contains("--share=network", args);
+        Assert.Empty(Create(nameof(ConfigurationReader.FlatpakFinishArgs)).FlatpakFinishArgs);
+    }
+
+    [Fact]
+    public void FlatpakBuilderArgs_Optional_DecodeOK()
+    {
+        Assert.Equal("-flatargs", Create().FlatpakBuilderArgs);
+        Assert.Null(Create(nameof(ConfigurationReader.FlatpakBuilderArgs)).FlatpakBuilderArgs);
     }
 
     [Fact]
@@ -202,6 +259,13 @@ public class ConfigurationReaderTest
     {
         Assert.Equal("6.9", Create().SetupMinWindowsVersion);
         Assert.Throws<ArgumentException>(() => Create(nameof(ConfigurationReader.SetupMinWindowsVersion)));
+    }
+
+    [Fact]
+    public void SetupVersionOutput_Bool_IsTrue()
+    {
+        Assert.True(Create().SetupVersionOutput);
+        Assert.False(Create(nameof(ConfigurationReader.SetupVersionOutput)).SetupVersionOutput);
     }
 
     [Fact]
