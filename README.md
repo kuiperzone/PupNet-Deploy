@@ -476,10 +476,10 @@ This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainf
 Type `pupnet --help` to display command arguments as expected.
 
     USAGE:
-        pupnet [file.conf] [--option-n value-n]
+        pupnet [file.pupnet.conf] [--option-n value-n]
 
     Example:
-        pupnet app.pupnet.conf -y -r linux-arm64
+        pupnet app..pupnet.conf -y -r linux-arm64
 
     If conf file is omitted, one in the working directory will be selected.
 
@@ -531,10 +531,10 @@ Type `pupnet --help` to display command arguments as expected.
 
     Other Options:
 
-        -n, --new [conf|desktop|meta|all]
+        -n, --new conf|desktop|meta|all [--verbose]
         Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
         A base file name may optionally be given. If --verbose is used, a configuration file with
-        documentation comments is generated. Use All to generate a full set of configuration assets.
+        documentation comments is generated. Use 'all' to generate a full set of configuration assets.
         Example: pupnet HelloWorld -n all --verbose
 
         -h, --help args|macro|conf
@@ -819,9 +819,8 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ** PackageName **
     Optional package name (excludes version etc.). If empty, defaults to AppBaseName. However, it is
     used not only to specify the base output filename, but to identify the application in .deb and .rpm
-    packages. You may wish, therefore, to ensure that the value represents a unique name, such as the
-    AppId. Naming requirements for this are strict and must contain only alpha-numeric and '-',
-    '+' and '.' characters.
+    packages. You may wish, therefore, to ensure that the value represents a unique name. Naming
+    requirements are strict and must contain only alpha-numeric and '-', '+' and '.' characters.
     Example: PackageName = HelloWorld
 
     ** OutputDirectory **
@@ -829,18 +828,18 @@ Type `pupnet --help conf` to see supported configuration reference information:
     will contain the final deploy output files. If empty, it defaults to the location of this file.
     Example: OutputDirectory = Deploy/bin
 
-    ** OutputVersion **
-    Boolean (true or false) which sets whether to include the application version in the filename of the
-    package (i.e. 'HelloWorld-1.2.3-x86_64.AppImage'). It is ignored if the output filename is specified
-    at command line.
-    Example: OutputVersion = false
-
     ########################################
     # APPIMAGE OPTIONS
     ########################################
 
     ** AppImageArgs **
     Additional arguments for use with appimagetool. Useful for signing. Default is empty.
+
+    ** AppImageVersionOutput **
+    Boolean (true or false) which sets whether to include the application version in the AppImage filename,
+    i.e. 'HelloWorld-1.2.3-x86_64.AppImage'. Default is false. It is ignored if the output filename is
+    specified at command line.
+    Example: AppImageVersionOutput = false
 
     ########################################
     # FLATPAK OPTIONS
@@ -897,6 +896,11 @@ Type `pupnet --help conf` to see supported configuration reference information:
     uninstaller, and contained exe and dll files. If empty, files will not be signed.
     See 'SignTool' parameter in: https://jrsoftware.org/ishelp/
 
+    ** SetupVersionOutput **
+    Boolean (true or false) which sets whether to include the application version in the setup filename,
+    i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. It is ignored if the output filename is
+    specified at command line.
+    Example: SetupVersionOutput = false
 
 ## Gotchas ##
 
