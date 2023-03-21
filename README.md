@@ -734,14 +734,6 @@ Type `pupnet --help conf` to see supported configuration reference information:
     # DESKTOP INTEGRATION
     ########################################
 
-    ** StartCommand **
-    Optional command name to start the application from the terminal. If, for example, AppBaseName is
-    'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant
-    (i.e. 'helloworld'). It must not contain spaces or invalid filename characters. Do not add any
-    extension such as '.exe'. If empty, the application will not be in the path and cannot be started from
-    the command line. For Windows Setup packages, see also SetupCommandPrompt. The
-    StartCommand is not supported for all packages kinds. Default is empty (none).
-
     ** DesktopNoDisplay **
     Boolean (true or false) which indicates whether the application is hidden on the desktop. It is used to
     populate the 'NoDisplay' field of the .desktop file. The default is false. Setting to true will also
@@ -761,22 +753,30 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
     See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
 
+    ** StartCommand **
+    Optional command name to start the application from the terminal. If, for example, AppBaseName is
+    'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant
+    (i.e. 'helloworld'). It must not contain spaces or invalid filename characters. Do not add any
+    extension such as '.exe'. If empty, the application will not be in the path and cannot be started from
+    the command line. For Windows Setup packages, see also SetupCommandPrompt. The
+    StartCommand is not supported for all packages kinds. Default is empty (none).
+
     ** PrimeCategory **
     Optional category for the application. The value should be one of the recognised Freedesktop top-level
     categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value should be
     provided here which will be used, where supported, to populate metadata. The default is empty.
     See: https://specifications.freedesktop.org/menu-spec/latest/apa.html
 
+    ** MetaFile **
+    Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.
+    Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
+    See: https://docs.appimage.org/packaging-guide/optional/appstream.html
+
     ** IconFiles **
     Optional icon file paths. The value may include multiple filenames separated with semicolon or given
     in multi-line form. Valid types are SVG, PNG and ICO (ICO ignored on Linux). Note that the inclusion
     of a scalable SVG is preferable on Linux, whereas PNGs must be one of the standard sizes and MUST
     include the size in the filename in the form: name.32x32.png' or 'name.32.png'.
-
-    ** MetaFile **
-    Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.
-    Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
-    See: https://docs.appimage.org/packaging-guide/optional/appstream.html
 
     ########################################
     # DOTNET PUBLISH

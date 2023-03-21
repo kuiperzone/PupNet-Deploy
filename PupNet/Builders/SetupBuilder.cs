@@ -165,6 +165,11 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"ArchitecturesInstallIn64BitMode={Architecture}");
         sb.AppendLine($"MinVersion={Configuration.SetupMinWindowsVersion}");
 
+        if (IconSource != null)
+        {
+            sb.AppendLine($"UninstallDisplayIcon={{app}}\\{Path.GetFileName(IconSource)}");
+        }
+
         if (!string.IsNullOrEmpty(Configuration.SetupSignTool))
         {
             sb.AppendLine($"SignTool={Configuration.SetupSignTool}");
@@ -176,6 +181,11 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"Source: \"{BuildAppBin}\\*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs signonce;");
         sb.AppendLine($"Source: \"{BuildAppBin}\\*\"; Excludes: \"*.exe,*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
 
+        if (IconSource != null)
+        {
+            sb.AppendLine($"Source: \"{IconSource}\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
+        }
+
         if (Configuration.SetupCommandPrompt != null)
         {
             // Need this below
@@ -184,7 +194,12 @@ public class SetupBuilder : PackageBuilder
 
         sb.AppendLine();
         sb.AppendLine("[Tasks]");
-        sb.AppendLine($"Name: \"desktopicon\"; Description: \"Create a &Desktop Icon\"; GroupDescription: \"Additional icons:\"; Flags: unchecked");
+
+        if (!Configuration.DesktopNoDisplay)
+        {
+            sb.AppendLine($"Name: \"desktopicon\"; Description: \"Create a &Desktop Icon\"; GroupDescription: \"Additional icons:\"; Flags: unchecked");
+        }
+
         sb.AppendLine();
         sb.AppendLine($"[REGISTRY]");
         sb.AppendLine();
@@ -201,7 +216,7 @@ public class SetupBuilder : PackageBuilder
         {
             // Give special terminal icon rather meaningless default .bat icon
             var name = Path.GetFileName(TerminalIcon);
-            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupCommandPrompt}\"; Filename: \"{{app}}\\{PromptBat}\" IconFilename: \"{{app}}\\{name}\"");
+            sb.AppendLine($"Name: \"{{group}}\\{Configuration.SetupCommandPrompt}\"; Filename: \"{{app}}\\{PromptBat}\"; IconFilename: \"{{app}}\\{name}\"");
         }
 
         if (Configuration.PublisherLinkName != null && Configuration.PublisherLinkUrl != null)

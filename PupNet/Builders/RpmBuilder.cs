@@ -47,6 +47,11 @@ public sealed class RpmBuilder : PackageBuilder
         cmd += $" --define \"_topdir {temp}\" --buildroot=\"{BuildRoot}\"";
         cmd += $" --define \"_rpmdir {OutputPath}\" --define \"_build_id_links none\"";
 
+        if (Arguments.IsVerbose)
+        {
+            cmd += " --verbose";
+        }
+
         list.Add(cmd);
         PackageCommands = list;
     }

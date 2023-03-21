@@ -41,17 +41,24 @@ public class AppImageBuilder : PackageBuilder
         ManifestBuildPath = null;
         ManifestContent = null;
 
-        var cmds = new List<string>();
+        var list = new List<string>();
 
         // Do the build
-        cmds.Add($"{AppImageTool} {Configuration.AppImageArgs} \"{BuildRoot}\" \"{OutputPath}\"");
+        var cmd = $"{AppImageTool} {Configuration.AppImageArgs} \"{BuildRoot}\" \"{OutputPath}\"";
+
+        if (Arguments.IsVerbose)
+        {
+            cmd += " --verbose";
+        }
+
+        list.Add(cmd);
 
         if (Arguments.IsRun)
         {
-            cmds.Add(OutputPath);
+            list.Add(OutputPath);
         }
 
-        PackageCommands = cmds;
+        PackageCommands = list;
     }
 
     /// <summary>

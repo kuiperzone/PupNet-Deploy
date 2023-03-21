@@ -78,9 +78,9 @@ public class ConfigurationReader
             PublisherLinkName = "Project Page";
             PublisherLinkUrl = "https://example.net";
             PublisherEmail = "contact@example.net";
-            StartCommand = "helloworld";
             DesktopFile = "Deploy/app.desktop";
             PrimeCategory = "Utility";
+            StartCommand = "helloworld";
             MetaFile = "Deploy/app.metainfo.xml";
             IconFiles = new string[] { "app.ico", "app.svg", "app.16x16.png", "app.32x32.png", "app.64x64.png" };
             DotnetProjectPath = "Source";
@@ -138,13 +138,13 @@ public class ConfigurationReader
         PublisherLinkUrl = GetOptional(nameof(PublisherLinkUrl), ValueFlags.Safe);
         PublisherEmail = GetOptional(nameof(PublisherEmail), ValueFlags.None);
 
-        StartCommand = GetOptional(nameof(StartCommand), ValueFlags.StrictSafe);
         DesktopNoDisplay = GetBool(nameof(DesktopNoDisplay), DesktopNoDisplay);
         DesktopTerminal = GetBool(nameof(DesktopTerminal), DesktopTerminal);
         DesktopFile = GetOptional(nameof(DesktopFile), ValueFlags.AssertPathWithDisable);
+        StartCommand = GetOptional(nameof(StartCommand), ValueFlags.StrictSafe);
         PrimeCategory = GetOptional(nameof(PrimeCategory), ValueFlags.StrictSafe);
-        IconFiles = GetCollection(nameof(IconFiles), ValueFlags.AssertPath);
         MetaFile = GetOptional(nameof(MetaFile), ValueFlags.AssertPathWithDisable);
+        IconFiles = GetCollection(nameof(IconFiles), ValueFlags.AssertPath);
 
         DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable) ?? LocalDirectory;
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs), ValueFlags.None);
@@ -203,10 +203,10 @@ public class ConfigurationReader
     public string? PublisherLinkUrl { get; }
     public string? PublisherEmail { get; }
 
-    public string? StartCommand { get; }
     public bool DesktopNoDisplay { get; }
     public bool DesktopTerminal { get; } = true;
     public string? DesktopFile { get; }
+    public string? StartCommand { get; }
     public string? PrimeCategory { get; }
     public string? MetaFile { get; }
     public IReadOnlyCollection<string> IconFiles { get; } = Array.Empty<string>();
@@ -217,7 +217,7 @@ public class ConfigurationReader
     public string? DotnetPostPublishOnWindows { get; }
 
     public string PackageName { get; }
-    public string OutputDirectory { get; } = "Deploy/bin";
+    public string OutputDirectory { get; } = "Deploy/OUT";
 
     public string? AppImageArgs { get; }
     public bool AppImageVersionOutput { get; }
@@ -337,14 +337,6 @@ public class ConfigurationReader
 
         sb.Append(CreateBreaker("DESKTOP INTEGRATION", style));
 
-        sb.Append(CreateHelpField(nameof(StartCommand), StartCommand, style,
-                $"Optional command name to start the application from the terminal. If, for example, {nameof(AppBaseName)} is",
-                $"'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant",
-                $"(i.e. 'helloworld'). It must not contain spaces or invalid filename characters. Do not add any",
-                $"extension such as '.exe'. If empty, the application will not be in the path and cannot be started from",
-                $"the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupCommandPrompt)}. The",
-                $"{nameof(StartCommand)} is not supported for all packages kinds. Default is empty (none)."));
-
         sb.Append(CreateHelpField(nameof(DesktopNoDisplay), DesktopNoDisplay, style,
                 $"Boolean (true or false) which indicates whether the application is hidden on the desktop. It is used to",
                 $"populate the 'NoDisplay' field of the .desktop file. The default is false. Setting to true will also",
@@ -362,22 +354,30 @@ public class ConfigurationReader
                 $"Note. The contents of the files may use macro variables. Use {macroHelp} for reference.",
                 $"See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html"));
 
+        sb.Append(CreateHelpField(nameof(StartCommand), StartCommand, style,
+                $"Optional command name to start the application from the terminal. If, for example, {nameof(AppBaseName)} is",
+                $"'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant",
+                $"(i.e. 'helloworld'). It must not contain spaces or invalid filename characters. Do not add any",
+                $"extension such as '.exe'. If empty, the application will not be in the path and cannot be started from",
+                $"the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupCommandPrompt)}. The",
+                $"{nameof(StartCommand)} is not supported for all packages kinds. Default is empty (none)."));
+
         sb.Append(CreateHelpField(nameof(PrimeCategory), PrimeCategory, style,
                 $"Optional category for the application. The value should be one of the recognised Freedesktop top-level",
                 $"categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value should be",
                 $"provided here which will be used, where supported, to populate metadata. The default is empty.",
                 $"See: https://specifications.freedesktop.org/menu-spec/latest/apa.html"));
 
+        sb.Append(CreateHelpField(nameof(MetaFile), MetaFile, style,
+                $"Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.",
+                $"Note. The contents of the files may use macro variables. Use {macroHelp} for reference.",
+                $"See: https://docs.appimage.org/packaging-guide/optional/appstream.html"));
+
         sb.Append(CreateHelpField(nameof(IconFiles), IconFiles, true, style,
                 $"Optional icon file paths. The value may include multiple filenames separated with semicolon or given",
                 $"in multi-line form. Valid types are SVG, PNG and ICO (ICO ignored on Linux). Note that the inclusion",
                 $"of a scalable SVG is preferable on Linux, whereas PNGs must be one of the standard sizes and MUST",
                 $"include the size in the filename in the form: name.32x32.png' or 'name.32.png'."));
-
-        sb.Append(CreateHelpField(nameof(MetaFile), MetaFile, style,
-                $"Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.",
-                $"Note. The contents of the files may use macro variables. Use {macroHelp} for reference.",
-                $"See: https://docs.appimage.org/packaging-guide/optional/appstream.html"));
 
 
 
