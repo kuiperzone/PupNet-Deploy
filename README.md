@@ -179,7 +179,7 @@ their braces, i.e. `${INSTALL_EXEC}` and not `$INSTALL_EXEC`, as a simple search
 used to populate them.
 
 In the event that you wish there be no desktop entry (i.e. a command-line application), you should declare:
-`DesktopNoDisplay = true`. The is ignored for Windows `Setup`, although if you set `DesktopNoDisplay`, then
+`DesktopNoDisplay = true`. The file itself is ignored for Windows `Setup`, although if you set `DesktopNoDisplay`, then
 no entry for your application's main executable will be added under the Windows Start Menu (i.e. synonymous
 behavior with that on Linux).
 
