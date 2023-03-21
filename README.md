@@ -953,16 +953,22 @@ At the time, I was excited by Flatpak and it was my original intention to add Fl
 it was difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
 *PupNet Deploy* is the result.
 
-In the process, however, I had cause to reflect on certain things, including the notion that the
-[sandbox model of Flatpak is arguably broken](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
+In the process, however, I had cause to reflect on certain things, including the sad fact that the
+[sandbox model of Flatpak is broken](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
 because I intended to use Flatpak to deploy my other [application project](https://github.com/kuiperzone/AvantGarde),
 but found that Flatpak could not support this. Regardless, I still thought it useful for developers to be able ship
 software in formats convenient for users, so I added Flatpak, along with RPM and Deb to PupNet Deploy.
 
 However, I would not be keen on adding more formats in the Linux space. Rather, I would be interested to see
 how things play out in the future. I note the trend toward centralised repository-only distribution, which is not
-a paradigm I share. Rather, I support the idea of freedom and that means developers and users having the freedom to
-create and share software without being subject to centralised control.
+a paradigm I support. For example, here is a quote from the [Gnome Team](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7):
+
+*Stand-alone RPM files are really not a use case we want to encourage people to use.*
+
+Rather, I support the idea of freedom and that means developers and users having the freedom to create and share
+software without having to go through third-parties, or being subject to centralisation and the gate-keeping that engenders.
+
+This is why I support [AppImage](https://github.com/AppImage/AppImageKit) as a means of software distribution on Linux.
 
 ### How to Extend PupNet ###
 All that being said, it may be advantageous at some point to have the ability to deploy to MacOS, Android and iOS.
@@ -978,8 +984,8 @@ the `BuilderFactory` class.
 
 ### Another Applications of Mine ###
 
-[AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework.
-It was the first Avalonia preview solution for Linux.
+[AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework,
+and the first and primary previewer for Linux.
 
 <p style="text-align:left;">
     <a href="https://github.com/kuiperzone/AvantGarde">
