@@ -108,7 +108,7 @@ public class BuildHost
 
         if (Builder.Runtime.IsArchUncertain)
         {
-            Builder.WarningSink.Add($"WARNING. Package architecture {Builder.Runtime.GetPackageArch(Builder.Kind)} is uncertain for the runtime {Builder.Runtime}\n" +
+            Builder.WarningSink.Add($"WARNING. Package architecture is uncertain for the runtime {Builder.Runtime}\n" +
                 $"Use the argument --{ArgumentReader.ArchLongArg} to specify.");
         }
 

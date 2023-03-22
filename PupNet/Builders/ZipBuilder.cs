@@ -43,6 +43,23 @@ public class ZipBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string Architecture
+    {
+        get
+        {
+            if (Arguments.Arch != null)
+            {
+                return Arguments.Arch;
+            }
+
+            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
+            return Runtime.RuntimeArch.ToString().ToLowerInvariant();
+        }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string OutputName
     {
         get { return GetOutputName(true, Runtime.RuntimeId, ".zip"); }

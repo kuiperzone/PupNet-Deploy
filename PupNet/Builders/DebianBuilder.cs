@@ -79,6 +79,39 @@ public sealed class DebianBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string Architecture
+    {
+        get
+        {
+            if (Arguments.Arch != null)
+            {
+                return Arguments.Arch;
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X64)
+            {
+                return "amd64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                return "arm64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X86)
+            {
+                // Not sure about this?
+                // https://en.wikipedia.org/wiki/X32_ABI
+                return "x32";
+            }
+
+            return Runtime.RuntimeArch.ToString().ToLowerInvariant();
+        }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string BuildAppBin { get; }
 
     /// <summary>

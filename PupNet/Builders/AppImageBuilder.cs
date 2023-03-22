@@ -74,6 +74,37 @@ public class AppImageBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string Architecture
+    {
+        get
+        {
+            if (Arguments.Arch != null)
+            {
+                return Arguments.Arch;
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X64)
+            {
+                return "x86_64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                return "aarch64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X86)
+            {
+                return "i686";
+            }
+
+            return Runtime.RuntimeArch.ToString().ToLowerInvariant();
+        }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string OutputName
     {
         get { return GetOutputName(Configuration.AppImageVersionOutput, Architecture, ".AppImage"); }
@@ -159,14 +190,16 @@ public class AppImageBuilder : PackageBuilder
     /// </summary>
     public override void BuildPackage()
     {
-        if (Arguments.Arch != null)
+        var arch = Architecture;
+
+        if ((arch == "aarch64" || arch == "arm64") && Arguments.Arch == null)
         {
-            // Used by AppImageTool
-            // Otherwise leave to auto-detect
+            // Strange convention? More confusion?
             // https://discourse.appimage.org/t/how-to-package-for-aarch64/2088
-            Environment.SetEnvironmentVariable("ARCH", Arguments.Arch);
+            arch = "arm_aarch64";
         }
 
+        Environment.SetEnvironmentVariable("ARCH", arch);
         base.BuildPackage();
     }
 
@@ -185,6 +218,7 @@ public class AppImageBuilder : PackageBuilder
             }
         }
 
+        // No supported
         return null;
     }
 

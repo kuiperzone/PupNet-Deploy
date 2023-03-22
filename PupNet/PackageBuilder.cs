@@ -46,7 +46,6 @@ public abstract class PackageBuilder
         IsOsxExclusive = Kind.TargetsOsx(true);
 
         // Important - Architecture is tailored for third-party builder
-        Architecture = Arguments.Arch ?? Runtime.GetPackageArch(Kind);
         AppVersion = SplitVersion(conf.Arguments.VersionRelease ?? conf.AppVersionRelease, out string temp);
         PackageRelease = temp;
 
@@ -119,10 +118,10 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the architecture string tailed to suit the package builder.
-    /// This may be "x86_64" or "amd64" etc. depending on <see cref="Kind"/>.
-    /// It can also be overridden with <see cref="Arguments.Arch"/>.
+    /// Subclass to override to set appropriate value based on <see cref="RuntimeConverter.RuntimeArch"/>.
+    /// If user supplies <see cref="Arguments.Arch"/>, this value should be used verbatim.
     /// </summary>
-    public string Architecture { get; }
+    public abstract string Architecture { get; }
 
     /// <summary>
     /// Collects warning messages.

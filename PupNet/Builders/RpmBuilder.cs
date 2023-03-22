@@ -42,6 +42,8 @@ public sealed class RpmBuilder : PackageBuilder
         var list = new List<string>();
         var temp = Path.Combine(Root, "rpmbuild");
 
+        // Can't this to build for arm64 on an x64 development system?
+        // https://stackoverflow.com/questions/64563386/how-do-i-package-up-go-code-as-an-arm-rpm
         // https://cmake.cmake.narkive.com/uDOFCNJ3/rpmbuild-architecture
         // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
         var cmd = $"rpmbuild -bb \"{ManifestBuildPath}\"";
@@ -73,6 +75,41 @@ public sealed class RpmBuilder : PackageBuilder
             }
 
             return output;
+        }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
+    public override string Architecture
+    {
+        get
+        {
+            if (Arguments.Arch != null)
+            {
+                return Arguments.Arch;
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X64)
+            {
+                return "x86_64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                // Not clear? arm64 or aarch64?
+                // https://koji.fedoraproject.org/koji/buildinfo?buildID=2108850
+                // https://stackoverflow.com/questions/64563386/how-do-i-package-up-go-code-as-an-arm-rpm
+                return "arm64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X86)
+            {
+                // Confirm?
+                return "i686";
+            }
+
+            return Runtime.RuntimeArch.ToString().ToLowerInvariant();
         }
     }
 

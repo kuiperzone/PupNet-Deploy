@@ -69,6 +69,37 @@ public class FlatpakBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
+    public override string Architecture
+    {
+        get
+        {
+            if (Arguments.Arch != null)
+            {
+                return Arguments.Arch;
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X64)
+            {
+                return "x86_64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.Arm64)
+            {
+                return "aarch64";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X86)
+            {
+                return "i686";
+            }
+
+            return Runtime.RuntimeArch.ToString().ToLowerInvariant();
+        }
+    }
+
+    /// <summary>
+    /// Implements.
+    /// </summary>
     public override string OutputName
     {
         get { return GetOutputName(true, Architecture, ".flatpak"); }

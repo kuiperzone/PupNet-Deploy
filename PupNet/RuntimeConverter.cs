@@ -22,7 +22,6 @@ namespace KuiperZone.PupNet;
 
 /// <summary>
 /// Converts dotnet publish "runtime" ("-r") value into <see cref="Architecture"/> value.
-/// Also converts into string suitable for use with <see cref="PackageBuilder"/> subclass.
 /// </summary>
 public class RuntimeConverter
 {
@@ -163,81 +162,6 @@ public class RuntimeConverter
     /// Gets default package kind given runtime-id.
     /// </summary>
     public PackageKind DefaultPackage { get; }
-
-    /// <summary>
-    /// Gets the architecture tailored to suite the package <see cref="PackageKind"/> value.
-    /// </summary>
-    public string GetPackageArch(PackageKind kind)
-    {
-        // Hard to get any definitive ARCH list for other package kinds.
-        // We commonly see "x86_64" and "aarch64" in examples, rather than "x64" and "arm64".
-        // We can add further exceptions here according to kind.
-
-        if (kind == PackageKind.AppImage || kind == PackageKind.Flatpak)
-        {
-            // AppImage, flatpak
-            if (RuntimeArch == Architecture.X64)
-            {
-                return "x86_64";
-            }
-            else
-            if (RuntimeArch == Architecture.Arm64)
-            {
-                return "aarch64";
-            }
-            else
-            if (RuntimeArch == Architecture.X86)
-            {
-                return "i686";
-            }
-        }
-        else
-        if (kind == PackageKind.Deb)
-        {
-            // DEB Example: amd64 (not x64 or x86_64)
-            // https://wiki.debian.org/ArchitectureSpecificsMemo
-            if (RuntimeArch == Architecture.X64)
-            {
-                return "amd64";
-            }
-
-            if (RuntimeArch == Architecture.Arm64)
-            {
-                return "arm64";
-            }
-
-            if (RuntimeArch == Architecture.X86)
-            {
-                // Not sure about this?
-                // https://en.wikipedia.org/wiki/X32_ABI
-                return "x32";
-            }
-        }
-        else
-        if (kind == PackageKind.Rpm)
-        {
-            // RPM Example: (aarch64 not arm64)
-            // https://koji.fedoraproject.org/koji/buildinfo?buildID=2108850
-            if (RuntimeArch == Architecture.X64)
-            {
-                return "x86_64";
-            }
-
-            if (RuntimeArch == Architecture.Arm64)
-            {
-                return "aarch64";
-            }
-
-            if (RuntimeArch == Architecture.X86)
-            {
-                return "i686";
-            }
-        }
-
-        // Windows and any remaining
-        // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
-        return RuntimeArch.ToString().ToLower();
-    }
 
     /// <summary>
     /// Returns RuntimeId.
