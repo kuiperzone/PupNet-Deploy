@@ -2,3 +2,5 @@ Add screenshot to metainfo.xml
 Update windows screenshot in readme
 Output tool version in --version screen
 Don't show AppImage version if not package
+
+Add multiple --kind values to arguments
