@@ -99,13 +99,17 @@ internal class Program
                 Console.WriteLine($"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS");
                 Console.WriteLine($"FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.");
 
-                Console.WriteLine();
-                Console.WriteLine("Third-party Tools:");
+                if (AppImageBuilder.AppImageTool != null)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Third-party Tools:");
+                    Console.WriteLine();
+                    Console.WriteLine($"AppImageKit: {AppImageBuilder.AppImageVersion}");
+                    Console.WriteLine("Copyright (C) 2004-20 Simon Peter");
+                }
 
                 Console.WriteLine();
-                Console.WriteLine($"AppImageKit: {AppImageBuilder.AppImageVersion}");
-                Console.WriteLine("Copyright (C) 2004-20 Simon Peter");
-                Console.WriteLine();
+
                 return 0;
             }
 

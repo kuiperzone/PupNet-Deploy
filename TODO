@@ -1,7 +1,4 @@
-Add screenshot to metainfo.xml
-Update windows screenshot in readme
-Output tool version in --version screen with --verbose??
-Don't show AppImage version if not packaged
-
-
-Add multiple --kind values to arguments
+Show name/version on Windows Command Prompt
+Add Setup option to install to admin
+Add Setup option to uninstall on upgrade
+Add multiple --kind values to arguments?

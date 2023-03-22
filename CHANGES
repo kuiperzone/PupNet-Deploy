@@ -1,3 +1,9 @@
++ VERSION 1.0.1; 2023-03-22
+- Now shows AppImageTool version only on Linux.
+- Minor updates to built-in help information.
+- Added screenshot to metainfo.xml
+- Tested against: appimagetool: 13 (2020-12-31); rpmbuild: RPM version 4.18.0; dpkg: 1.21.20;flatpak-builder: 1.2.3;InnoSetup: 6.2.0
+
 + VERSION 1.0.0; 2023-03-22
 - Initial Release
 - Tested against: appimagetool: 13 (2020-12-31); rpmbuild: RPM version 4.18.0; dpkg: 1.21.20;flatpak-builder: 1.2.3;InnoSetup: 6.2.0

@@ -58,15 +58,16 @@
         <keyword translate="no">rpm</keyword>
     </keywords>
 
-    <!-- Uncomment to provide screenshots
     <screenshots>
         <screenshot type="default">
-            <image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>
+            <image>https://raw.githubusercontent.com/kuiperzone/PupNet-Deploy/main/Media/Screenie-PupNet.png</image>
         </screenshot>
     </screenshots>
-    -->
 
     <releases>
+        <release version="1.0.1" date="2023-03-22">
+            <description><p>Patch only</p></description>
+        </release>
         <release version="1.0.0" date="2023-03-22">
             <description><p>Initial release</p></description>
         </release>

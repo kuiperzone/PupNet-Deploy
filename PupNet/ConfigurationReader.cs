@@ -291,7 +291,7 @@ public class ConfigurationReader
                 $"Mandatory application friendly name."));
 
         sb.Append(CreateHelpField(nameof(AppId), AppId, style,
-                $"Mandatory application ID in reverse DNS form."));
+                $"Mandatory application ID in reverse DNS form. This should stay constant for lifetime of the software."));
 
         sb.Append(CreateHelpField(nameof(AppVersionRelease), AppVersionRelease, style,
                 $"Mandatory application version and package release of form: 'VERSION[RELEASE]'. Use optional square",
@@ -324,7 +324,7 @@ public class ConfigurationReader
         sb.Append(CreateHelpField(nameof(PublisherLinkName), PublisherLinkName, style,
                 $"Optional publisher or application web-link name. Note that Windows {nameof(PackageKind.Setup)} packages",
                 $"require both {nameof(PublisherLinkName)} and {nameof(PublisherLinkUrl)} in order to include the link as",
-                $"an item in program menu entries."));
+                $"an item in program menu entries. Do not modify name, as may leave old entries in updated installations."));
 
         sb.Append(CreateHelpField(nameof(PublisherLinkUrl), PublisherLinkUrl, style,
                 $"Optional publisher or application web-link URL."));
