@@ -328,7 +328,7 @@ Here are the contents of our example bash script:
     echo
 
 Additionally, you may leverage these so called post-publish operations to perform the actual build operation itself
-and populate the `${BUILD_APP_BIN}` directory with the output your build process -- whatever that may be. In principle,
+and populate the `${BUILD_APP_BIN}` directory with the output of your build process -- whatever that may be. In principle,
 you could use this to package the a C++ or Python application, provided that it is satisfactory that the application and
 all its associated libraries are contained in a single directory.
 
