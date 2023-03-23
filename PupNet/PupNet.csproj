@@ -12,7 +12,6 @@
 	<ApplicationIcon>Assets/app.ico</ApplicationIcon>
 
 	<PackageId>KuiperZone.PupNet</PackageId>
-    <PackageId>KuiperZone.PupNet</PackageId>
     <Product>PupNet Deploy</Product>
     <Authors>Andy Thomas</Authors>
     <Copyright>© Andy Thomas 2022-23</Copyright>

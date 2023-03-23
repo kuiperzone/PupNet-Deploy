@@ -13,7 +13,7 @@
     <launchable type="desktop-id">${APP_ID}.desktop</launchable>
 
     <description>
-        <p>PupNet Deploy is a cross-platform deployment utility publishes your .NET project and
+        <p>PupNet Deploy is a cross-platform deployment which utility publishes your .NET project and
         packages it as a ready-to-ship installation file in a single step.</p>
 
         <p>It has been possible to cross-compile console C# applications for sometime now. More recently, the
