@@ -922,9 +922,9 @@ You may notice that PupNet outputs differences in package naming styles:
 PupNet follows the naming conventions used with the respective packages. This includes different CPU architecture
 naming conventions.
 
-### RPM and Debian Packages Cannot be Removed from Gnome Software Center GUI ###
-If you install your RPM and DEB packages as a local file they will, courtesy of your AppStream metadata, show up Gnome
-Software Center GUI, as expected. However, you may find that they cannot be launched or removed using the GUI.
+### RPM and Debian Packages Cannot be Removed using Gnome Software Center ###
+If you install your RPM and DEB packages as a local file they will, courtesy of your AppStream metadata, show up in the
+Gnome Software Center GUI, as expected. However, you may find that they cannot be launched or removed using the GUI.
 Instead, they must be removed from the command line, like so:
 
     sudo apt remove helloworld
