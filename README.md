@@ -974,9 +974,9 @@ This is why I support [AppImage](https://github.com/AppImage/AppImageKit) as a m
 All that being said, it may be advantageous at some point to have the ability to deploy to MacOS, Android and iOS.
 However, these are not technologies with which I am familiar.
 
-Anyone wishing to extend PuP, should study how the existing RPM, Flatpak and Windows `Builder` classes override and extend
-the behaviour of the `PackageBuilder` base class. The base class is Linux centric, with irrelevant directories and
-properties being ignored or set to null for the Windows Setup and Zip builders.
+Anyone wishing to extend PupNet, should study how the existing `RpmBuilder`, `FlatpakBuilder` and Windows `SetupBuilder`
+classes override and extend the behaviour of the `PackageBuilder` base class. The base class is Linux centric, with unused
+directories and properties being set to null and ignored for the Windows Setup and Zip builders.
 
 Moreover, a new enum value would need to be added to the `PackageKind` type. It would help to do a search on
 existing `PackageKind` values, and add the new type behaviour to switch statements wherever encountered, including
