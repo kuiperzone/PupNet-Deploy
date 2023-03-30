@@ -145,4 +145,23 @@ public class RuntimeConverterTest
         Assert.True(r.IsArchUncertain);
     }
 
+    [Fact]
+    public void ToArchitecture_MapsOK()
+    {
+        Assert.Equal(Architecture.X64, RuntimeConverter.ToArchitecture("x64"));
+        Assert.Equal(Architecture.X64, RuntimeConverter.ToArchitecture("x86_64"));
+
+        Assert.Equal(Architecture.Arm64, RuntimeConverter.ToArchitecture("arm64"));
+        Assert.Equal(Architecture.Arm64, RuntimeConverter.ToArchitecture("aarch64"));
+        Assert.Equal(Architecture.Arm64, RuntimeConverter.ToArchitecture("arm_aarch64"));
+
+        Assert.Equal(Architecture.Arm, RuntimeConverter.ToArchitecture("arm"));
+        Assert.Equal(Architecture.Arm, RuntimeConverter.ToArchitecture("armhf"));
+
+        Assert.Equal(Architecture.X86, RuntimeConverter.ToArchitecture("x86"));
+        Assert.Equal(Architecture.X86, RuntimeConverter.ToArchitecture("i686"));
+
+        Assert.Throws<ArgumentException>(() => RuntimeConverter.ToArchitecture("jdue"));
+    }
+
 }

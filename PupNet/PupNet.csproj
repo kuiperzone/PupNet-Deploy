@@ -1,41 +1,56 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <IsPackable>false</IsPackable>
-	<IsPublishable>true</IsPublishable>
-	<PublishReadyToRun>true</PublishReadyToRun>
-	<ApplicationIcon>Assets/app.ico</ApplicationIcon>
+		<IsPackable>false</IsPackable>
+		<IsPublishable>true</IsPublishable>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<ApplicationIcon>Assets/app.ico</ApplicationIcon>
 
-	<PackageId>KuiperZone.PupNet</PackageId>
-    <Product>PupNet Deploy</Product>
-    <Authors>Andy Thomas</Authors>
-    <Copyright>© Andy Thomas 2022-23</Copyright>
-    <Company>KuiperZone</Company>
-    <Description>Publish, Package and Deploy to AppImage, Windows Setup Flatpak, Deb, RPM</Description>
-    <PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux;</PackageTags>
-    <Language>en-US</Language>
-    <PackageProjectUrl>https://github.com/kuiperzone/PupNet-Deploy</PackageProjectUrl>
-    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+		<PackageId>KuiperZone.PupNet</PackageId>
+		<Product>PupNet Deploy</Product>
+		<Authors>Andy Thomas</Authors>
+		<Copyright>© Andy Thomas 2022-23</Copyright>
+		<Company>KuiperZone</Company>
+		<Description>Publish, Package and Deploy to AppImage, Windows Setup Flatpak, Deb, RPM</Description>
+		<PackageTags>publish;AppImage;deb;rpm;flatpak;setup;installer;linux;</PackageTags>
+		<Language>en-US</Language>
+		<PackageProjectUrl>https://github.com/kuiperzone/PupNet-Deploy</PackageProjectUrl>
+		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="KuiperZone.Utility.Yaap" Version="2.0.0" />
-  </ItemGroup>
+  	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage"
-			Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
+	<ItemGroup Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">
+
+		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage"
-			Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' ">
+		<None Include="$(ProjectDir)\Assets\appimagetool-aarch64.AppImage" Link="appimagetool-aarch64.AppImage">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Include="$(ProjectDir)\Assets\appimagetool-armhf.AppImage" Link="appimagetool-armhf.AppImage">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
+
+		<None Include="$(ProjectDir)\Assets\runtime-fuse2-x86_64" Link="runtime-fuse2-x86_64">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\runtime-fuse2-aarch64" Link="runtime-fuse2-aarch64">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="$(ProjectDir)\Assets\runtime-fuse2-armhf" Link="runtime-fuse2-armhf">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+
+	</ItemGroup>
+
+  	<ItemGroup>
+    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="2.0.0" />
 
 		<None Include="$(ProjectDir)\Assets\generic.ico" Link="generic.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -93,6 +108,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 
-  </ItemGroup>
+	</ItemGroup>
 
 </Project>

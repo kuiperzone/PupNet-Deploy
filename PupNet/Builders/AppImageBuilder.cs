@@ -44,7 +44,9 @@ public class AppImageBuilder : PackageBuilder
         var list = new List<string>();
 
         // Do the build
-        var cmd = $"{AppImageTool} {Configuration.AppImageArgs} \"{BuildRoot}\" \"{OutputPath}\"";
+        var arch = Arguments.Arch;
+        string fuse = arch != null ? GetRuntimePath(RuntimeConverter.ToArchitecture(arch)) : GetRuntimePath(Runtime.RuntimeArch);
+        var cmd = $"{AppImageTool} {Configuration.AppImageArgs} --runtime-file=\"{fuse}\" \"{BuildRoot}\" \"{OutputPath}\"";
 
         if (Arguments.IsVerbose)
         {
@@ -96,6 +98,11 @@ public class AppImageBuilder : PackageBuilder
             if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.X86)
             {
                 return "i686";
+            }
+
+            if (Runtime.RuntimeArch == System.Runtime.InteropServices.Architecture.Arm)
+            {
+                return "armhf";
             }
 
             return Runtime.RuntimeArch.ToString().ToLowerInvariant();
@@ -163,6 +170,32 @@ public class AppImageBuilder : PackageBuilder
     public override bool SupportsPostRun { get; } = true;
 
     /// <summary>
+    /// Gets path to embedded fuse2 runtime, or throws.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    public static string GetRuntimePath(Architecture arch)
+    {
+        // https://github.com/AppImage/type2-runtime/releases/tag/continuous
+        if (arch == System.Runtime.InteropServices.Architecture.X64)
+        {
+            return Path.Combine(AssemblyDirectory, "runtime-fuse2-x86_64");
+        }
+
+        if (arch == System.Runtime.InteropServices.Architecture.Arm64)
+        {
+            return Path.Combine(AssemblyDirectory, "runtime-fuse2-aarch64");
+        }
+
+        if (arch == System.Runtime.InteropServices.Architecture.Arm)
+        {
+            return Path.Combine(AssemblyDirectory, "runtime-fuse2-armhf");
+        }
+
+        throw new ArgumentException($"Unsupported runtime architecture {arch} - must be one of: x64, arm64, x86, arm");
+    }
+
+
+    /// <summary>
     /// Overrides and extends.
     /// </summary>
     public override void Create(string? desktop, string? metainfo)
@@ -192,11 +225,20 @@ public class AppImageBuilder : PackageBuilder
     {
         var arch = Architecture;
 
-        if ((arch == "aarch64" || arch == "arm64") && Arguments.Arch == null)
+        if (Arguments.Arch == null)
         {
-            // Strange convention? More confusion?
-            // https://discourse.appimage.org/t/how-to-package-for-aarch64/2088
-            arch = "arm_aarch64";
+            if (arch == "aarch64" || arch == "arm64")
+            {
+                // Strange convention? More confusion?
+                // https://discourse.appimage.org/t/how-to-package-for-aarch64/2088
+                arch = "arm_aarch64";
+            }
+            else
+            if (arch == "armhf")
+            {
+                arch = "arm";
+            }
+
         }
 
         Environment.SetEnvironmentVariable("ARCH", arch);
@@ -215,6 +257,11 @@ public class AppImageBuilder : PackageBuilder
             if (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm64)
             {
                 return Path.Combine(AssemblyDirectory, "appimagetool-aarch64.AppImage");
+            }
+
+            if (RuntimeInformation.OSArchitecture == System.Runtime.InteropServices.Architecture.Arm)
+            {
+                return Path.Combine(AssemblyDirectory, "appimagetool-armhf.AppImage");
             }
         }
 

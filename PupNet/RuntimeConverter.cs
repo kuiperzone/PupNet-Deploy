@@ -149,7 +149,7 @@ public class RuntimeConverter
     public bool IsOsxRuntime { get; }
 
     /// <summary>
-    /// Gets the runtime converted to architecture.
+    /// Gets the runtime converted to <see cref="Architecture"/>.
     /// </summary>
     public Architecture RuntimeArch { get; } = RuntimeInformation.OSArchitecture;
 
@@ -162,6 +162,47 @@ public class RuntimeConverter
     /// Gets default package kind given runtime-id.
     /// </summary>
     public PackageKind DefaultPackage { get; }
+
+    /// <summary>
+    /// Converts all known strings to <see cref="Architecture"/>, i.e. "aarch64" to <see cref="Architecture.Arm64"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException"/>
+    public static Architecture ToArchitecture(string arch)
+    {
+        arch = arch?.Trim().ToLowerInvariant() ?? throw new ArgumentNullException(nameof(arch));
+
+        foreach (var item in Enum.GetValues<Architecture>())
+        {
+            // X86, X64, Arm, Arm64 etc.
+            if (arch.Equals(item.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return item;
+            }
+        }
+
+        // Variations
+        if (arch == "x86_64")
+        {
+            return Architecture.X64;
+        }
+
+        if (arch == "aarch64" || arch == "arm_aarch64")
+        {
+            return Architecture.Arm64;
+        }
+
+        if (arch == "i686")
+        {
+            return Architecture.X86;
+        }
+
+        if (arch == "armhf")
+        {
+            return Architecture.Arm;
+        }
+
+        throw new ArgumentException($"Unknown or unsupported architecture name {arch}");
+    }
 
     /// <summary>
     /// Returns RuntimeId.

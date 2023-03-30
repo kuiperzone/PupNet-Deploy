@@ -65,6 +65,16 @@
     </screenshots>
 
     <releases>
+        <release version="1.1.0" date="2023-03-30">
+            <description>
+                <ul>
+                    <li>Now ships internally with fuse run-times to allow cross-build for: x64, am64 (aarch64) and Arm (32-bit) architectures</li>
+                    <li>Support for building AppImages on 32-bit Arm development platforms</li>
+                    <li>Tested against: appimagetool 13 (2020-12-31), rpmbuild RPM version 4.18.0, dpkg 1.21.20, flatpak-builder 1.2.3, InnoSetup 6.2.0</li>
+                </ul>
+            </description>
+        </release>
+
         <release version="1.0.1" date="2023-03-22">
             <description><p>Patch only</p></description>
         </release>

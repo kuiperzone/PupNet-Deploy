@@ -1,3 +1,9 @@
+/opt/zone.kuiper.pupnet/appimagetool-x86_64.AppImage --runtime-file="/opt/zone.kuiper.pupnet/runtime-fuse2-aarch64" "/tmp/KuiperZone.PupNet/zone.kuiper.pupnet-linux-arm64-Release-AppImage/AppDir" "/mnt/DEVEL-1T/DOTNET/GITHUB/PupNet-Deploy/Deploy/OUT/PupNet-Deploy.aarch64.AppImage"
+appimagetool, continuous build (commit 8bbf694), build <local dev build> built on 2020-12-31 11:48:33 UTC
+More than one architectures were found of the AppDir source directory "/tmp/KuiperZone.PupNet/zone.kuiper.pupnet-linux-arm64-Release-AppImage/AppDir"
+A valid architecture with the ARCH environmental variable should be provided
+e.g. ARCH=x86_64 appimagetool ...
+
 Show name/version on Windows Command Prompt
 Add Setup option to install to admin
 Add Setup option to uninstall on upgrade
