@@ -19,7 +19,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Text;
-using KuiperZone.PupNet.Builders;
 
 namespace KuiperZone.PupNet;
 
@@ -51,6 +50,7 @@ public class MacrosExpander
 
         var dict = new Dictionary<MacroId, string>();
 
+        dict.Add(MacroId.LocalDirectory, conf.LocalDirectory);
         dict.Add(MacroId.AppBaseName, conf.AppBaseName);
         dict.Add(MacroId.AppFriendlyName, conf.AppFriendlyName);
         dict.Add(MacroId.AppId, conf.AppId);
@@ -192,7 +192,10 @@ public class MacrosExpander
                 }
 
                 more = true;
-                sb.AppendLine(item.Value.ToName());
+                sb.Append("** ");
+                sb.Append(item.Value.ToVar());
+                sb.AppendLine(" **");
+
                 sb.AppendLine(item.Value.ToHint());
                 sb.Append("Example: ");
             }

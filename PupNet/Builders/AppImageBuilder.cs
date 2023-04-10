@@ -238,7 +238,6 @@ public class AppImageBuilder : PackageBuilder
             {
                 arch = "arm";
             }
-
         }
 
         Environment.SetEnvironmentVariable("ARCH", arch);

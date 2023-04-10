@@ -23,6 +23,7 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public enum MacroId
 {
+    LocalDirectory,
     AppBaseName,
     AppFriendlyName,
     AppId,
@@ -68,6 +69,7 @@ public static class MacroIdExtension
         switch (id)
         {
             // Direct from config
+            case MacroId.LocalDirectory: return "LOcAL_DIRECTORY";
             case MacroId.AppBaseName: return "APP_BASE_NAME";
             case MacroId.AppFriendlyName: return "APP_FRIENDLY_NAME";
             case MacroId.AppId: return "APP_ID";
@@ -116,23 +118,24 @@ public static class MacroIdExtension
     {
         switch (id)
         {
-            case MacroId.AppBaseName: return $"{nameof(ConfigurationReader.AppBaseName)} value from conf file";
-            case MacroId.AppFriendlyName: return $"{nameof(ConfigurationReader.AppFriendlyName)} value from conf file";
-            case MacroId.AppId: return $"{nameof(ConfigurationReader.AppId)} value from conf file";
-            case MacroId.AppShortSummary: return $"{nameof(ConfigurationReader.AppShortSummary)} value from conf file";
-            case MacroId.AppLicenseId: return $"{nameof(ConfigurationReader.AppLicenseId)} value from conf file";
+            case MacroId.LocalDirectory: return $"The pupnet.conf file directory";
+            case MacroId.AppBaseName: return GetConfHelp(nameof(ConfigurationReader.AppBaseName));
+            case MacroId.AppFriendlyName: return GetConfHelp(nameof(ConfigurationReader.AppFriendlyName));
+            case MacroId.AppId: return GetConfHelp(nameof(ConfigurationReader.AppId));
+            case MacroId.AppShortSummary: return GetConfHelp(nameof(ConfigurationReader.AppShortSummary));
+            case MacroId.AppLicenseId: return GetConfHelp(nameof(ConfigurationReader.AppLicenseId));
 
-            case MacroId.PublisherName: return $"{nameof(ConfigurationReader.PublisherName)} value from conf file";
-            case MacroId.PublisherCopyright: return $"{nameof(ConfigurationReader.PublisherCopyright)} value from conf file";
-            case MacroId.PublisherLinkName: return $"{nameof(ConfigurationReader.PublisherLinkName)} value from conf file";
-            case MacroId.PublisherLinkUrl: return $"{nameof(ConfigurationReader.PublisherLinkUrl)} value from conf file";
-            case MacroId.PublisherEmail: return $"{nameof(ConfigurationReader.PublisherEmail)} value from conf file";
+            case MacroId.PublisherName: return GetConfHelp(nameof(ConfigurationReader.PublisherName));
+            case MacroId.PublisherCopyright: return GetConfHelp(nameof(ConfigurationReader.PublisherCopyright));
+            case MacroId.PublisherLinkName: return GetConfHelp(nameof(ConfigurationReader.PublisherLinkName));
+            case MacroId.PublisherLinkUrl: return GetConfHelp(nameof(ConfigurationReader.PublisherLinkUrl));
+            case MacroId.PublisherEmail: return GetConfHelp(nameof(ConfigurationReader.PublisherEmail));
 
-            case MacroId.DesktopNoDisplay: return $"{nameof(ConfigurationReader.DesktopNoDisplay)} value from conf file";
-            case MacroId.DesktopTerminal: return $"{nameof(ConfigurationReader.DesktopTerminal)} value from conf file";
-            case MacroId.PrimeCategory: return $"{nameof(ConfigurationReader.PrimeCategory)} value from conf file";
+            case MacroId.DesktopNoDisplay: return GetConfHelp(nameof(ConfigurationReader.DesktopNoDisplay));
+            case MacroId.DesktopTerminal: return GetConfHelp(nameof(ConfigurationReader.DesktopTerminal));
+            case MacroId.PrimeCategory: return GetConfHelp(nameof(ConfigurationReader.PrimeCategory));
 
-            case MacroId.DesktopIntegrate: return $"Gives the logical not of {nameof(ConfigurationReader.DesktopNoDisplay)}";
+            case MacroId.DesktopIntegrate: return $"Gives the logical not of {MacroId.DesktopNoDisplay.ToVar()}";
 
             case MacroId.AppVersion: return "Application version, excluding package-release extension";
             case MacroId.PackageRelease: return "Package release version";
@@ -154,4 +157,8 @@ public static class MacroIdExtension
         }
     }
 
+    private static string GetConfHelp(string name)
+    {
+        return $"Gives the {name} value from the pupnet.conf file";
+    }
 }

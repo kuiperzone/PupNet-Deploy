@@ -26,20 +26,6 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class ConfigurationReader
 {
-    [Flags]
-    private enum ValueFlags
-    {
-        None = 0x00,
-        Multi = 0x01,
-        Safe = 0x02,
-        SafeNoSpace = Safe | 0x04,
-        StrictSafe = SafeNoSpace | 0x08,
-        Path = Safe | 0x10,
-        AssertPath = Path | 0x20,
-        PathWithDisable = Path | 0x40,
-        AssertPathWithDisable = AssertPath | PathWithDisable,
-    };
-
     /// <summary>
     /// Explicitly no path.
     /// </summary>
@@ -163,11 +149,26 @@ public class ConfigurationReader
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs), ValueFlags.None);
         FlatpakFinishArgs = GetCollection(nameof(FlatpakFinishArgs), ValueFlags.None, "=", "--");
 
+        SetupAdminInstall = GetBool(nameof(SetupAdminInstall), SetupAdminInstall);
         SetupCommandPrompt = GetOptional(nameof(SetupCommandPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
         SetupVersionOutput = GetBool(nameof(SetupVersionOutput), SetupVersionOutput);
     }
+
+    [Flags]
+    private enum ValueFlags
+    {
+        None = 0x00,
+        Multi = 0x01,
+        Safe = 0x02,
+        SafeNoSpace = Safe | 0x04,
+        StrictSafe = SafeNoSpace | 0x08,
+        Path = Safe | 0x10,
+        AssertPath = Path | 0x20,
+        PathWithDisable = Path | 0x40,
+        AssertPathWithDisable = AssertPath | PathWithDisable,
+    };
 
     /// <summary>
     /// Gets the underlying ini values.
@@ -198,7 +199,7 @@ public class ConfigurationReader
     public string? AppLicenseFile { get; }
 
     public string PublisherName { get; } = "The Hello World Team";
-    public string? PublisherCopyright { get; }
+    public string? PublisherCopyright { get; } = "Copyright (C) Hello World Team 2023";
     public string? PublisherLinkName { get; } = "Home Page";
     public string? PublisherLinkUrl { get; }
     public string? PublisherEmail { get; }
@@ -228,6 +229,8 @@ public class ConfigurationReader
     public IReadOnlyCollection<string> FlatpakFinishArgs { get; } = new string[]
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
+
+    public bool SetupAdminInstall { get; }
 
     public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
@@ -468,6 +471,10 @@ public class ConfigurationReader
 
         sb.Append(CreateBreaker("WINDOWS SETUP OPTIONS", style));
 
+        sb.Append(CreateHelpField(nameof(SetupAdminInstall), SetupAdminInstall, style,
+                $"Boolean (true or false) which specifies whether the application is to be installed in administrive",
+                $"mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm"));
+
         sb.Append(CreateHelpField(nameof(SetupCommandPrompt), SetupCommandPrompt, style,
                 $"Optional command prompt title. The Windows installer will not add your application to the path.",
                 $"However, if your package contains a command-line utility, setting this value will ensure that a",
@@ -476,12 +483,12 @@ public class ConfigurationReader
 
         sb.Append(CreateHelpField(nameof(SetupMinWindowsVersion), SetupMinWindowsVersion, style,
                 $"Mandatory value which specifies minimum version of Windows that your software runs on. Windows 8 = 6.2,",
-                $"Windows 10/11 = 10. Default: 10. See 'MinVersion' parameter in: https://jrsoftware.org/ishelp/"));
+                $"Windows 10/11 = 10. Default: 10. See: https://jrsoftware.org/ishelp/topic_setup_minversion.htm"));
 
         sb.Append(CreateHelpField(nameof(SetupSignTool), SetupSignTool, style,
                 $"Optional name and parameters of the Sign Tool to be used to digitally sign: the installer,",
                 $"uninstaller, and contained exe and dll files. If empty, files will not be signed.",
-                $"See 'SignTool' parameter in: https://jrsoftware.org/ishelp/"));
+                $"See: https://jrsoftware.org/ishelp/topic_setup_signtool.htm"));
 
         sb.Append(CreateHelpField(nameof(SetupVersionOutput), SetupVersionOutput, style,
                 $"Boolean (true or false) which sets whether to include the application version in the setup filename,",

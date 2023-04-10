@@ -241,6 +241,13 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
+    public void SetupAdminInstall_Bool_IsTrue()
+    {
+        Assert.True(Create().SetupAdminInstall);
+        Assert.False(Create(nameof(ConfigurationReader.SetupAdminInstall)).SetupAdminInstall);
+    }
+
+    [Fact]
     public void SetupCommandPrompt_Optional_DecodeOK()
     {
         Assert.Equal("Command Prompt", Create().SetupCommandPrompt);
@@ -248,17 +255,17 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
-    public void SetupSignTool_Optional_DecodeOK()
-    {
-        Assert.Equal("signtool.exe", Create().SetupSignTool);
-        Assert.Null(Create(nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
-    }
-
-    [Fact]
     public void SetupMinWindowsVersion_Mandatory_DecodeOK()
     {
         Assert.Equal("6.9", Create().SetupMinWindowsVersion);
         Assert.Throws<ArgumentException>(() => Create(nameof(ConfigurationReader.SetupMinWindowsVersion)));
+    }
+
+    [Fact]
+    public void SetupSignTool_Optional_DecodeOK()
+    {
+        Assert.Equal("signtool.exe", Create().SetupSignTool);
+        Assert.Null(Create(nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
     }
 
     [Fact]

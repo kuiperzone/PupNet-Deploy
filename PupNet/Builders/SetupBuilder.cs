@@ -131,8 +131,10 @@ public class SetupBuilder : PackageBuilder
         if (Configuration.SetupCommandPrompt != null)
         {
             var title = EscapeBat(Configuration.SetupCommandPrompt);
+            var cmd = Configuration.StartCommand ?? EscapeBat(Configuration.AppBaseName);
+
             var path  = Path.Combine(BuildAppBin, PromptBat);
-            var script = $"start cmd /k \"cd /D %userprofile% & title {title} & set path=%path%;%~dp0\"";
+            var script = $"start cmd /k \"cd /D %userprofile% & title {title} & echo {cmd} {AppVersion} & echo. & set path=%path%;%~dp0\"";
             Operations.WriteFile(path, script);
 
         }
@@ -176,11 +178,12 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"DefaultGroupName={Configuration.AppFriendlyName}");
         sb.AppendLine($"DefaultDirName={{autopf}}\\{Configuration.AppBaseName}");
 
-        sb.AppendLine($"PrivilegesRequired=lowest");
         sb.AppendLine($"AllowNoIcons=yes");
         sb.AppendLine($"ArchitecturesAllowed={Architecture}");
         sb.AppendLine($"ArchitecturesInstallIn64BitMode={Architecture}");
         sb.AppendLine($"MinVersion={Configuration.SetupMinWindowsVersion}");
+
+        sb.AppendLine($"PrivilegesRequired={(Configuration.SetupAdminInstall ? "admin" : "lowest")}");
 
         if (IconSource != null)
         {
@@ -250,13 +253,14 @@ public class SetupBuilder : PackageBuilder
         }
 
         sb.AppendLine();
-        sb.AppendLine($"[InstallDelete]");
-        sb.AppendLine($"Type: filesandordirs; Name: \"{{app}}\\*\";");
+        sb.AppendLine("[InstallDelete]");
+        sb.AppendLine("Type: filesandordirs; Name: \"{app}\\*\";");
+        sb.AppendLine("Type: filesandordirs; Name: \"{group}\\*\";");
         sb.AppendLine();
-        sb.AppendLine($"[UninstallRun]");
+        sb.AppendLine("[UninstallRun]");
         sb.AppendLine();
-        sb.AppendLine($"[UninstallDelete]");
-        sb.AppendLine($"Type: dirifempty; Name: \"{{app}}\"");
+        sb.AppendLine("[UninstallDelete]");
+        sb.AppendLine("Type: dirifempty; Name: \"{app}\"");
 
         return sb.ToString().TrimEnd();
     }
