@@ -60,6 +60,8 @@ public class ArgumentReader
     public const string NewShortArg = "n";
     public const string NewLongArg = "new";
 
+    public const string UpdateConfLongArg = "update-conf";
+
     public const string VersionLongArg = "version";
 
     public const string HelpShortArg = "h";
@@ -116,6 +118,7 @@ private string _string;
         VersionRelease = args.GetOrDefault(VersionReleaseShortArg, VersionReleaseLongArg, null);
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
         IsVerbose = args.GetOrDefault(VerboseLongArg, false);
+        IsUpdateConf = args.GetOrDefault(UpdateConfLongArg, false);
         IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
 
         if (NewFile == null)
@@ -200,6 +203,11 @@ private string _string;
     public bool IsVerbose { get; }
 
     /// <summary>
+    /// Gets whether to update configuration.
+    /// </summary>
+    public bool IsUpdateConf { get; }
+
+    /// <summary>
     /// Gets whether to skip yes.
     /// </summary>
     public bool IsSkipYes { get; }
@@ -229,7 +237,7 @@ private string _string;
         sb.AppendLine("Example:");
         sb.AppendLine($"{indent}{Program.CommandName} app.{Program.ConfExt} -{SkipYesShortArg} -{RidShortArg} linux-arm64");
         sb.AppendLine();
-        sb.AppendLine($"If conf file is omitted, one in the working directory will be selected.");
+        sb.AppendLine($"Always give {Program.ConfExt} file first. If {Program.ConfExt} file is omitted, the one in the working directory will be selected.");
 
         sb.AppendLine();
         sb.AppendLine("Build Options:");
@@ -283,11 +291,19 @@ private string _string;
         sb.AppendLine("Other Options:");
 
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} {NewAllowedSequence} [--{VerboseLongArg}]");
+        sb.AppendLine($"{indent}-{NewShortArg}, --{NewLongArg} {NewAllowedSequence}");
         sb.AppendLine($"{indent}Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.");
         sb.AppendLine($"{indent}A base file name may optionally be given. If --{VerboseLongArg} is used, a configuration file with");
         sb.AppendLine($"{indent}documentation comments is generated. Use 'all' to generate a full set of configuration assets.");
         sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{NewShortArg} {NewAllValue} --{VerboseLongArg}");
+        sb.AppendLine();
+        sb.AppendLine($"{indent}--{UpdateConfLongArg} [flag only]");
+        sb.AppendLine($"{indent}Upgrades supplied {Program.ConfExt} file to latest version parameters. For example, if");
+        sb.AppendLine($"{indent}the conf file was created with program version 1.1 and new parameters where added in version");
+        sb.AppendLine($"{indent}1.2, this command will upgrade the file by adding new paramters with default values.");
+        sb.AppendLine($"{indent}If --{VerboseLongArg} is used, a configuration file with documentation comments is generated.");
+        sb.AppendLine($"{indent}Example: {Program.CommandName} file{Program.ConfExt} --{UpdateConfLongArg} --{VerboseLongArg}");
+
         sb.AppendLine();
         sb.AppendLine($"{indent}-{HelpShortArg}, --{HelpLongArg} args|macro|conf");
         sb.AppendLine($"{indent}Show help information. Optional value specifies what kind of information to display.");

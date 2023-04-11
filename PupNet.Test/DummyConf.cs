@@ -90,6 +90,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
         lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
         lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
+        lines.Add($"{nameof(ConfigurationReader.SetupSuffixOutput)} = Setup");
         lines.Add($"{nameof(ConfigurationReader.SetupVersionOutput)} = true");
 
         Remove(lines, omit);

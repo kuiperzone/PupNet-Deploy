@@ -58,7 +58,7 @@ public class SetupBuilder : PackageBuilder
     /// </summary>
     public override string OutputName
     {
-        get { return GetOutputName(Configuration.SetupVersionOutput, Architecture, ".exe"); }
+        get { return GetOutputName(Configuration.SetupVersionOutput, Configuration.SetupSuffixOutput, Architecture, ".exe"); }
     }
 
     /// <summary>

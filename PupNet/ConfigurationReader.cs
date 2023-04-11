@@ -56,6 +56,7 @@ public class ConfigurationReader
         LocalDirectory = "";
         PackageName = AppBaseName;
         DotnetProjectPath = "";
+        PupnetVersion = Program.Version;
 
         if (examples)
         {
@@ -153,7 +154,11 @@ public class ConfigurationReader
         SetupCommandPrompt = GetOptional(nameof(SetupCommandPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
+        SetupSuffixOutput = GetOptional(nameof(SetupSuffixOutput), ValueFlags.SafeNoSpace);
         SetupVersionOutput = GetBool(nameof(SetupVersionOutput), SetupVersionOutput);
+
+        // Not actually a key-value, but a comment
+        PupnetVersion = ExtractVersion(reader.ToString());
     }
 
     [Flags]
@@ -231,11 +236,13 @@ public class ConfigurationReader
     public string? FlatpakBuilderArgs { get; }
 
     public bool SetupAdminInstall { get; }
-
     public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
     public string? SetupSignTool { get; }
+    public string? SetupSuffixOutput { get; }
     public bool SetupVersionOutput { get; }
+
+    public string? PupnetVersion { get; }
 
     /// <summary>
     /// Reads file associated with this configuration and returns the text. Returns null if path is null or
@@ -280,7 +287,7 @@ public class ConfigurationReader
 
         if (style != DocStyles.Reference)
         {
-            sb.Append(CreateBreaker($"{Program.ProductName.ToUpperInvariant()} {Program.Version}", style, true));
+            sb.Append(CreateBreaker($"{Program.ProductName.ToUpperInvariant()}: {Program.Version}", style, true));
         }
 
         sb.Append(CreateBreaker("APP PREAMBLE", style));
@@ -476,10 +483,10 @@ public class ConfigurationReader
                 $"mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm"));
 
         sb.Append(CreateHelpField(nameof(SetupCommandPrompt), SetupCommandPrompt, style,
-                $"Optional command prompt title. The Windows installer will not add your application to the path.",
-                $"However, if your package contains a command-line utility, setting this value will ensure that a",
-                $"'Command Prompt' menu entry is added which, when launched, will open a command window with your",
-                $"application directory in its path. Default is empty. See also {nameof(StartCommand)}."));
+                $"Optional command prompt title. The Windows installer will NOT add your application to the path. However,",
+                $"if your package contains a command-line utility, setting this value will ensure that a 'Command Prompt'",
+                $"program menu entry is added (with this title) which, when launched, will open a dedicated command",
+                $"window with your application directory in its path. Default is empty. See also {nameof(StartCommand)}."));
 
         sb.Append(CreateHelpField(nameof(SetupMinWindowsVersion), SetupMinWindowsVersion, style,
                 $"Mandatory value which specifies minimum version of Windows that your software runs on. Windows 8 = 6.2,",
@@ -490,12 +497,45 @@ public class ConfigurationReader
                 $"uninstaller, and contained exe and dll files. If empty, files will not be signed.",
                 $"See: https://jrsoftware.org/ishelp/topic_setup_signtool.htm"));
 
+        sb.Append(CreateHelpField(nameof(SetupSuffixOutput), SetupSuffixOutput, style,
+                $"Optional suffix for the installer output filename. The default is empty, but you may wish set it to:",
+                $"'Setup' or similar. This, for example, will output a file of name: HelloWorldSetup-x86_64.exe",
+                $"Ignored if the output filename is specified at command line."));
+
         sb.Append(CreateHelpField(nameof(SetupVersionOutput), SetupVersionOutput, style,
                 $"Boolean (true or false) which sets whether to include the application version in the setup filename,",
-                $"i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. It is ignored if the output filename is",
-                $"specified at command line."));
+                $"i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. Ignored if the output filename is specified",
+                $"at command line."));
 
         return sb.ToString().Trim().ReplaceLineEndings("\n");
+    }
+
+    private static string? ExtractVersion(string content)
+    {
+        // This is written in header of ToString() method above
+        string prefix = "# " + Program.ProductName.ToUpperInvariant();
+
+        int p0 = content.IndexOf(prefix);
+
+        if (p0 > -1)
+        {
+            int p1 = content.IndexOf("\n", p0);
+            p0 += prefix.Length;
+
+            if (p1 > p0)
+            {
+                // 01234567890
+                // # PFX 1.2n
+                var version = content.Substring(p0, p1 - p0 - 1).Trim().TrimStart(' ', '=', ':');
+
+                if (version.Length > 0 && version.Length < 12)
+                {
+                    return version;
+                }
+            }
+        }
+
+        return null;
     }
 
     private static string CreateBreaker(string title, DocStyles style, bool major = false)

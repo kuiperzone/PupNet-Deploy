@@ -1,19 +1,22 @@
-+ VERSION 1.2.0; 2023-04-10
++ VERSION 1.2.0; 2023-04-11
 - Now ships as a dotnet tool
+- Added CLI option to upgrade existing pupnet.conf file
+- Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup
+- Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup
 - Added ${LocalDirectory} macro
-- Added conf option to install with admin privileges in Windows Setup
-- Windows Setup now removes existing program group entries on upgrade
-- Windows Setup console window now echos command name and version
+- Windows Setup now removes (re-writes) existing program group entries on upgrade
+- Windows Setup console window now echos command name and version on launch
 - Improved Windows Setup console icon
 - Tweaks to formatting of --help output
+- Other minor changes
 - Ships with: appimagetool 13 (2020-12-31)
-- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.20, flatpak-builder 1.2.3, InnoSetup 6.2.2
+- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 + VERSION 1.1.0; 2023-03-30
 - Now ships internally with fuse run-times to allow cross-build for: x64, am64 (aarch64) and Arm (32-bit) architectures.
 - Support for building AppImages on 32-bit Arm development platforms
 - Ships with: appimagetool 13 (2020-12-31)
-- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.20, flatpak-builder 1.2.3, InnoSetup 6.2.0
+- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.0
 
 + VERSION 1.0.1; 2023-03-22
 - Now shows AppImageTool version only on Linux.

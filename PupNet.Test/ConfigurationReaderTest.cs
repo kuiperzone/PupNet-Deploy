@@ -269,6 +269,13 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
+    public void SetupSuffixOutput_Optional_DecodeOK()
+    {
+        Assert.Equal("Setup", Create().SetupSuffixOutput);
+        Assert.Null(Create(nameof(ConfigurationReader.SetupSuffixOutput)).SetupSuffixOutput);
+    }
+
+    [Fact]
     public void SetupVersionOutput_Bool_IsTrue()
     {
         Assert.True(Create().SetupVersionOutput);

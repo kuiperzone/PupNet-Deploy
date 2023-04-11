@@ -45,6 +45,13 @@ public class AppImageBuilder : PackageBuilder
 
         // Do the build
         var arch = Arguments.Arch;
+
+        if (AppImageTool == null)
+        {
+            // Cannot run appimagetool on this platform
+            throw new InvalidOperationException($"Building of AppImages not supported on {RuntimeConverter.DefaultRuntime} development system");
+        }
+
         string fuse = arch != null ? GetRuntimePath(RuntimeConverter.ToArchitecture(arch)) : GetRuntimePath(Runtime.RuntimeArch);
         var cmd = $"{AppImageTool} {Configuration.AppImageArgs} --runtime-file=\"{fuse}\" \"{BuildRoot}\" \"{OutputPath}\"";
 

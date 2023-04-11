@@ -148,17 +148,45 @@ internal class Program
                 return 0;
             }
 
-            if (decoder.Parser.GetOrDefault("update-conf", false))
+            if (decoder.IsUpdateConf)
             {
                 // Undocumented feature. Internal use
                 var conf = new ConfigurationReader(decoder, false);
                 var path = conf.Reader.Filepath;
+                var name = Path.GetFileName(path);
+                var style = decoder.IsVerbose ? DocStyles.Comments : DocStyles.NoComments;
+
+                if (!decoder.IsSkipYes)
+                {
+                    if (conf.PupnetVersion != null)
+                    {
+                        Console.WriteLine($"Update {name} from version {conf.PupnetVersion} to {Program.Version}?");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Update {name} to version {Program.Version}?");
+                    }
+
+                    if (decoder.IsVerbose)
+                    {
+                        Console.WriteLine($"Update will have document comments.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Update will NOT have document comments (use with --{ArgumentReader.VerboseLongArg} for this)");
+                    }
+
+                    if (!new ConfirmPrompt().Wait())
+                    {
+                        return 0;
+                    }
+                }
 
                 var ops = new FileOps();
                 ops.CopyFile(path, path + ".old");
-
-                var style = decoder.IsVerbose ? DocStyles.Comments : DocStyles.NoComments;
                 ops.WriteFile(path, conf.ToString(style), true);
+
+                Console.WriteLine($"Updated {name} to version {Program.Version} OK");
                 return 0;
             }
 
@@ -221,7 +249,7 @@ internal class Program
         var path = GetNewPath(newKind, args.Value);
         var name = Path.GetFileName(path);
 
-        if (!File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?").Wait())
+        if (args.IsSkipYes || !File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?").Wait())
         {
             var fop = new FileOps();
             string? baseName = null;

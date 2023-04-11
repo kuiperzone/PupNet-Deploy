@@ -79,18 +79,20 @@ public class IniReader
     {
         Options = opts;
         Filepath = Path.GetFullPath(path);
-        Values = Parse(File.ReadAllLines(Filepath));
-        _string = GetString(Values);
+
+        var lines = File.ReadAllLines(Filepath);
+        Values = Parse(lines);
+        _string = string.Join('\n', lines).Trim();
     }
 
     /// <summary>
     /// Constructor with content lines.
     /// </summary>
-    public IniReader(string[] content, IniOptions opts = IniOptions.Default)
+    public IniReader(string[] lines, IniOptions opts = IniOptions.Default)
     {
         Options = opts;
-        Values = Parse(content);
-        _string = GetString(Values);
+        Values = Parse(lines);
+        _string = string.Join('\n', lines).Trim();
     }
 
     /// <summary>
@@ -114,44 +116,6 @@ public class IniReader
     public override string ToString()
     {
         return _string;
-    }
-
-    private static string GetString(IReadOnlyDictionary<string, string> dict)
-    {
-        var sb = new StringBuilder();
-
-        foreach (var pair in dict)
-        {
-            sb.Append(pair.Key);
-            sb.Append(" = ");
-
-
-            if (!pair.Value.Contains('\n'))
-            {
-                sb.AppendLine(pair.Value);
-            }
-            else
-            {
-                sb.AppendLine(StartMultiQuote);
-
-                foreach (var item in pair.Value.Split('\n', StringSplitOptions.TrimEntries))
-                {
-                    if (string.IsNullOrEmpty(item))
-                    {
-                        sb.AppendLine();
-                    }
-                    else
-                    {
-                        sb.Append("    ");
-                        sb.AppendLine(item);
-                    }
-                }
-
-                sb.AppendLine(EndMultiQuote);
-            }
-        }
-
-        return sb.ToString().Trim().ReplaceLineEndings("\n");
     }
 
     private Dictionary<string, string> Parse(string[] content)

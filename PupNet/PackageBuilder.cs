@@ -511,23 +511,52 @@ public abstract class PackageBuilder
     /// Accessible by subclass. Derives "standard" output name. Ext to include leading ".".
     /// Returns Configuration.Arguments.Output if not null.
     /// </summary>
-    protected string GetOutputName(bool version, string arch, string ext)
+    protected string GetOutputName(bool version, string? suffix, string arch, string ext)
     {
-        var output = Path.GetFileName(Configuration.Arguments.Output);
+        var output = Configuration.Arguments.Output;
+        var name = Path.GetFileName(output);
 
-        if (!string.IsNullOrEmpty(output))
+        if (!string.IsNullOrEmpty(name) && !Directory.Exists(output))
         {
-            return output;
+            return name;
         }
 
-        output = Configuration.PackageName;
+        name = Configuration.PackageName + suffix;
 
         if (version)
         {
-            output += $"-{AppVersion}-{PackageRelease}";
+            name += $"-{AppVersion}-{PackageRelease}";
         }
 
-        return $"{output}.{arch}{ext}";
+        return $"{name}.{arch}{ext}";
+    }
+
+    /// <summary>
+    /// Overload.
+    /// </summary>
+    protected string GetOutputName(bool version, string arch, string ext)
+    {
+        return GetOutputName(version, null, arch, ext);
+    }
+
+    private static string GetOutputDirectory(ConfigurationReader conf)
+    {
+        var path = conf.Arguments.Output;
+
+        if (path != null)
+        {
+            if (!Path.IsPathFullyQualified(path))
+            {
+                path = Path.Combine(conf.OutputDirectory, path);
+            }
+
+            if (Directory.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return Path.GetDirectoryName(path) ?? conf.OutputDirectory;
     }
 
     private static string SplitVersion(string version, out string release)
@@ -552,23 +581,6 @@ public abstract class PackageBuilder
         }
 
         return version;
-    }
-
-    private static string GetOutputDirectory(ConfigurationReader conf)
-    {
-        var output = Path.GetDirectoryName(conf.Arguments.Output);
-
-        if (output != null)
-        {
-            if (Path.IsPathFullyQualified(output))
-            {
-                return output;
-            }
-
-            return Path.Combine(conf.OutputDirectory, output);
-        }
-
-        return conf.OutputDirectory;
     }
 
     private static IReadOnlyCollection<string> GetDefaultIcons(bool terminal)

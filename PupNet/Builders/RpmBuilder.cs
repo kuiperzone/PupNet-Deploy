@@ -66,15 +66,16 @@ public sealed class RpmBuilder : PackageBuilder
     {
         get
         {
-            var output = Path.GetFileName(Configuration.Arguments.Output);
+            var output = Configuration.Arguments.Output;
+            var name = Path.GetFileName(output);
 
-            if (string.IsNullOrEmpty(output))
+            if (string.IsNullOrEmpty(name) || Directory.Exists(output))
             {
                 // rpmbuild always treats name as directory - use standard notion
                 return "RPMS";
             }
 
-            return output;
+            return name;
         }
     }
 
