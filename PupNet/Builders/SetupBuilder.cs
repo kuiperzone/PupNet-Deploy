@@ -131,10 +131,12 @@ public class SetupBuilder : PackageBuilder
         if (Configuration.SetupCommandPrompt != null)
         {
             var title = EscapeBat(Configuration.SetupCommandPrompt);
-            var cmd = Configuration.StartCommand ?? EscapeBat(Configuration.AppBaseName);
-
+            var cmd = EscapeBat(Configuration.StartCommand ?? Configuration.AppBaseName);
             var path  = Path.Combine(BuildAppBin, PromptBat);
-            var script = $"start cmd /k \"cd /D %userprofile% & title {title} & echo {cmd} {AppVersion} & echo. & set path=%path%;%~dp0\"";
+
+            var echoCopy = Configuration.PublisherCopyright != null ? $"& echo {EscapeBat(Configuration.PublisherCopyright)}" : null;
+
+            var script = $"start cmd /k \"cd /D %userprofile% & title {title} & echo {cmd} {AppVersion} {echoCopy} & set path=%path%;%~dp0\"";
             Operations.WriteFile(path, script);
 
         }

@@ -38,7 +38,7 @@ public class DummyConf : ConfigurationReader
     /// will be removed from the content, leaving the value to fall back to its default.
     /// </summary>
     public DummyConf(PackageKind kind, string? omit = null)
-        : base(new ArgumentReader("-k " + kind), Create(omit))
+        : base(new ArgumentReader("-k " + kind, false), Create(omit))
     {
     }
 

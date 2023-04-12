@@ -26,7 +26,7 @@ public class MacroExpanderTest
     public void Expand_EnsureNoMacroOmitted()
     {
         // Use factory to create one
-        var host = new BuildHost(new DummyConf(PackageKind.AppImage));
+        var host = new BuildHost(new DummyConf(PackageKind.Zip));
 
         var sb = new StringBuilder();
 
@@ -45,7 +45,7 @@ public class MacroExpanderTest
     [Fact]
     public void Expand_EscapeXMLCharacters()
     {
-        var host = new BuildHost(new DummyConf(PackageKind.AppImage));
+        var host = new BuildHost(new DummyConf(PackageKind.Zip));
 
         // Has XML chars
         var summary = host.Macros.Expand("${APP_SHORT_SUMMARY}", true);

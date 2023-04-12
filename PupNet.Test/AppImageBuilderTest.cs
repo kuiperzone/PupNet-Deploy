@@ -26,18 +26,10 @@ public class AppImageBuilderTest
     [Fact]
     public void GetRuntimePath_RuntimeExistsForKnownArch()
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            // Ensure files are packaged
-            Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.X64)));
-            Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.Arm64)));
-            Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.Arm)));
-        }
-        else
-        {
-            // Linux files not packaged on Windows
-            Assert.False(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.X64)));
-        }
+        // Ensure files are packaged (even on Windows)
+        Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.X64)));
+        Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.Arm64)));
+        Assert.True(File.Exists(AppImageBuilder.GetRuntimePath(Architecture.Arm)));
 
         // There is no RID for linux-x86, so not possible to support for X86
         Assert.Throws<ArgumentException>(() => AppImageBuilder.GetRuntimePath(Architecture.X86));

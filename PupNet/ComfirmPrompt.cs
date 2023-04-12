@@ -26,7 +26,15 @@ public class ConfirmPrompt
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ConfirmPrompt(string? question = null)
+    public ConfirmPrompt(bool multi = false)
+        : this(null, multi)
+    {
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    public ConfirmPrompt(string? question, bool multi = false)
     {
         question = question?.Trim();
 
@@ -35,13 +43,26 @@ public class ConfirmPrompt
             question = "Continue?";
         }
 
-        PromptText = question + " [N/y] or ESC aborts? ";
+        if (multi)
+        {
+            IsMultiple = true;
+            PromptText += question + " [N/y] or ESC aborts: ";
+        }
+        else
+        {
+            PromptText = question + " [N/y]: ";
+        }
     }
 
     /// <summary>
     /// Gets the prompt text.
     /// </summary>
     public string PromptText { get; }
+
+    /// <summary>
+    /// Multiple prompts (adds Escape option).
+    /// </summary>
+    public bool IsMultiple { get; }
 
     /// <summary>
     /// Gets user response.

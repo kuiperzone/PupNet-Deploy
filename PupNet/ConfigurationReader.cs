@@ -32,15 +32,10 @@ public class ConfigurationReader
     public const string PathDisable = "NONE";
 
     /// <summary>
-    /// Default demo or unit test kind. Used in default constructor.
-    /// </summary>
-    public const PackageKind DemoKind = PackageKind.Rpm;
-
-    /// <summary>
     /// Default constructor. No arguments. Test or demo only.
     /// </summary>
     public ConfigurationReader(bool examples = false, string? metabase = null)
-        : this(DemoKind, false, metabase)
+        : this(PackageKind.AppImage, examples, metabase)
     {
     }
 
@@ -51,7 +46,7 @@ public class ConfigurationReader
     {
         // Used default options. Useful in unit test
         // generating example reference information.
-        Arguments = new($"-{ArgumentReader.KindShortArg} {kind}");
+        Arguments = new($"-{ArgumentReader.KindShortArg} {kind}", false);
         Reader = new();
         LocalDirectory = "";
         PackageName = AppBaseName;
@@ -77,6 +72,8 @@ public class ConfigurationReader
             AppImageArgs = "--sign";
             FlatpakBuilderArgs = "--gpg-keys=FILE";
             SetupCommandPrompt = "Command Prompt";
+            SetupSuffixOutput = "Setup";
+            SetupVersionOutput = true;
         }
 
         if (!string.IsNullOrEmpty(metabase))
@@ -100,7 +97,7 @@ public class ConfigurationReader
     /// given, these are treated as relative to this file location.
     /// </summary>
     public ConfigurationReader(ArgumentReader args, bool assertPaths = true)
-        : this(args, new IniReader(AssertConfPath(args.Value, assertPaths)), assertPaths)
+        : this(args, new IniReader(AssertConfPath(args.Value)), assertPaths)
     {
     }
 
@@ -519,16 +516,16 @@ public class ConfigurationReader
 
         if (p0 > -1)
         {
-            int p1 = content.IndexOf("\n", p0);
             p0 += prefix.Length;
+            int p1 = content.IndexOf("\n", p0);
 
             if (p1 > p0)
             {
-                // 01234567890
-                // # PFX 1.2n
-                var version = content.Substring(p0, p1 - p0 - 1).Trim().TrimStart(' ', '=', ':');
+                // 012345678901234567890123
+                // # PUPNET DEPLOY: 1.2.0n
+                var version = content.Substring(p0, p1 - p0).Trim().TrimStart(' ', '=', ':');
 
-                if (version.Length > 0 && version.Length < 12)
+                if (version.Length > 0 && version.Length < 16)
                 {
                     return version;
                 }
@@ -642,17 +639,11 @@ public class ConfigurationReader
         return sb.ToString();
     }
 
-    private static string AssertConfPath(string? path, bool assert)
+    private static string AssertConfPath(string? path)
     {
         if (string.IsNullOrEmpty(path))
         {
-            if (assert)
-            {
-                throw new ArgumentException($"Specify {Program.ConfExt} file (directory must contain a single file with the {Program.ConfExt} extension)");
-            }
-
-            // Dummy only (not in production)
-            return $"file{Program.ConfExt}";
+            throw new ArgumentException($"Specify {Program.ConfExt} file");
         }
 
         return path;

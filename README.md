@@ -6,10 +6,16 @@
 
 ## Introduction ##
 
-**PupNet Deploy** is a cross-platform deployment utility which publishes your .NET project and
-packages it as a ready-to-ship installation file in a single step.
+**PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
+installation file in a single step.
 
-**[DOWNLOAD](https://github.com/kuiperzone/PupNet/releases/latest)**
+To install for .NET7:
+
+    dotnet tool install -g KuiperZone.PupNet
+
+Or, for self-contained installers:
+
+**[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
 
 *If you like this project, don't forget to like and share.*
 
@@ -902,7 +908,20 @@ Type `pupnet --help conf` to see supported configuration reference information:
     specified at command line.
     Example: SetupVersionOutput = false
 
-## Gotchas ##
+## FAQs & Gotchas ##
+
+### PupNet.Conf Backward Compatibility ###
+New versions of PupNet will be backward compatible with existing pupnet.conf files.
+
+Moreover, where new parameters are added, you upgrade an existing file using:
+
+    pupnet file.pupnet.conf --upgrade-conf
+
+or
+
+    pupnet file.pupnet.conf --upgrade-conf --verbose
+
+With the --verbose option, the new file will contain document comments.
 
 ### Virtual Box and Symlinks ###
 If you are using VirtualBox with your project, note that symbolic links are disabled within shared folders by VirtualBox

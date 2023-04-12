@@ -1,9 +1,1 @@
-Remove version from new conf file creation
-
-Show name/version on Windows Command Prompt
-Nicer console icon
-Add ProjectDirectory
-Switch to show main icon if only command prompt used in Setup
-Add Setup option to install to admin
-Add Setup option to uninstall on upgrade - not done but added
 Add multiple --kind values to arguments?

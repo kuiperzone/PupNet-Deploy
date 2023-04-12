@@ -136,7 +136,7 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets whether output is for Windows exclusively. This will be true for Setup, and
-    /// false for Zip and Setup.
+    /// false for Zip and AppImage.
     /// </summary>
     public bool IsWindowsExclusive { get; }
 

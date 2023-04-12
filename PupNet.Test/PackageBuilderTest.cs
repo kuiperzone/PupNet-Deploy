@@ -84,7 +84,7 @@ public class PackageBuilderTest
         AssertOK(builder, PackageKind.Setup);
         Assert.Null(builder.MetaBuildPath);
 
-        Assert.StartsWith("HelloWorld-5.4.3-2.", builder.OutputName);
+        Assert.StartsWith("HelloWorldSetup-5.4.3-2.", builder.OutputName);
         Assert.EndsWith(".exe", builder.OutputName);
     }
 

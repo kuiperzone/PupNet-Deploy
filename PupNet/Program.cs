@@ -64,6 +64,9 @@ internal class Program
     /// </summary>
     public static string Version;
 
+    private const string DefaultBaseName = "app";
+
+
     static Program()
     {
         Version =  Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ??
@@ -122,7 +125,6 @@ internal class Program
                 if (decoder.ShowHelp == "macro" || decoder.ShowHelp == "macros")
                 {
                     Console.WriteLine("MACROS:");
-
                     Console.WriteLine("Macro variables may be used with the following configuration items:");
 
                     Console.WriteLine($"{nameof(ConfigurationReader.DesktopFile)}, {nameof(ConfigurationReader.MetaFile)}, {nameof(ConfigurationReader.DotnetPublishArgs)}, " +
@@ -148,10 +150,11 @@ internal class Program
                 return 0;
             }
 
-            if (decoder.IsUpdateConf)
+            if (decoder.IsUpgradeConf)
             {
-                // Undocumented feature. Internal use
+                // AssetFiles false is important here
                 var conf = new ConfigurationReader(decoder, false);
+
                 var path = conf.Reader.Filepath;
                 var name = Path.GetFileName(path);
                 var style = decoder.IsVerbose ? DocStyles.Comments : DocStyles.NoComments;
@@ -160,21 +163,19 @@ internal class Program
                 {
                     if (conf.PupnetVersion != null)
                     {
-                        Console.WriteLine($"Update {name} from version {conf.PupnetVersion} to {Program.Version}?");
+                        Console.WriteLine($"Upgrade {name} from version {conf.PupnetVersion} to {Program.Version}?");
                     }
                     else
                     {
-                        Console.WriteLine($"Update {name} to version {Program.Version}?");
+                        Console.WriteLine($"Upgrade {name} to version {Program.Version}?");
                     }
 
-                    if (decoder.IsVerbose)
+                    if (!decoder.IsVerbose)
                     {
-                        Console.WriteLine($"Update will have document comments.");
+                        Console.WriteLine($"NB. File will NOT have document comments (use with --{ArgumentReader.VerboseLongArg})");
                     }
-                    else
-                    {
-                        Console.WriteLine($"Update will NOT have document comments (use with --{ArgumentReader.VerboseLongArg} for this)");
-                    }
+
+                    Console.WriteLine();
 
                     if (!new ConfirmPrompt().Wait())
                     {
@@ -223,19 +224,19 @@ internal class Program
         if (all || args.NewFile == ArgumentReader.NewConfValue || args.NewFile == "true")
         {
             ok = true;
-            CreateNewSingleFile(ArgumentReader.NewConfValue, args);
+            CreateNewSingleFile(ArgumentReader.NewConfValue, all, args);
         }
 
         if (all || args.NewFile == ArgumentReader.NewDesktopValue)
         {
             ok = true;
-            CreateNewSingleFile(ArgumentReader.NewDesktopValue, args);
+            CreateNewSingleFile(ArgumentReader.NewDesktopValue, all, args);
         }
 
         if (all || args.NewFile == ArgumentReader.NewMetaValue)
         {
             ok = true;
-            CreateNewSingleFile(ArgumentReader.NewMetaValue, args);
+            CreateNewSingleFile(ArgumentReader.NewMetaValue, all, args);
         }
 
         if (!ok)
@@ -244,20 +245,20 @@ internal class Program
         }
     }
 
-    private static void CreateNewSingleFile(string newKind, ArgumentReader args)
+    private static void CreateNewSingleFile(string newKind, bool all, ArgumentReader args)
     {
         var path = GetNewPath(newKind, args.Value);
         var name = Path.GetFileName(path);
 
-        if (args.IsSkipYes || !File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?").Wait())
+        if (args.IsSkipYes || !File.Exists(path) || new ConfirmPrompt($"{name} exists. Replace?", all).Wait())
         {
             var fop = new FileOps();
             string? baseName = null;
 
-            if (newKind == ArgumentReader.NewAllValue)
+            if (all)
             {
                 // Link conf to expected other meta files
-                baseName = Path.GetFileNameWithoutExtension(GetNewPath(newKind, args.Value));
+                baseName = args.Value ?? DefaultBaseName;
             }
 
             switch (newKind)
@@ -280,7 +281,6 @@ internal class Program
 
     private static string GetNewPath(string newKind, string? baseName)
     {
-        const string Default = "app";
         string ext = ConfExt;
 
         switch (newKind)
@@ -298,7 +298,7 @@ internal class Program
             if (baseName.EndsWith('/') || baseName.EndsWith('\\'))
             {
                 // Provided a directory
-                return Path.Combine(baseName, Default);
+                return Path.Combine(baseName, DefaultBaseName);
             }
 
             if (!baseName.EndsWith(ext))
@@ -309,6 +309,6 @@ internal class Program
             return baseName;
         }
 
-        return Default + ext;
+        return DefaultBaseName + ext;
     }
 }

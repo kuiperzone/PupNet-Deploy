@@ -26,7 +26,7 @@ public class ArgumentReaderTest
     public void Version_DecodeOK()
     {
         // Also test verbose here
-        var args = new ArgumentReader("--version --verbose");
+        var args = new ArgumentReader("--version --verbose", false);
         Assert.True(args.ShowVersion);
         Assert.True(args.IsVerbose);
     }
@@ -34,10 +34,10 @@ public class ArgumentReaderTest
     [Fact]
     public void Help_DecodeOK()
     {
-        var args = new ArgumentReader("-h Macros");
+        var args = new ArgumentReader("-h Macros", false);
         Assert.Equal("macros", args.ShowHelp);
 
-        args = new ArgumentReader("--help");
+        args = new ArgumentReader("--help", false);
         Assert.Equal("true", args.ShowHelp);
     }
 
@@ -45,10 +45,10 @@ public class ArgumentReaderTest
     public void Value_DecodeOK()
     {
         // Default
-        var args = new ArgumentReader("f1.conf");
+        var args = new ArgumentReader("f1.conf", false);
         Assert.Equal("f1.conf", args.Value);
 
-        args = new ArgumentReader("f2.conf");
+        args = new ArgumentReader("f2.conf", false);
         Assert.Equal("f2.conf", args.Value);
     }
 
@@ -59,10 +59,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Equal(RuntimeConverter.DefaultRuntime, args.Runtime);
 
-        args = new ArgumentReader("-r test1");
+        args = new ArgumentReader("-r test1", false);
         Assert.Equal("test1", args.Runtime);
 
-        args = new ArgumentReader("--runtime test2");
+        args = new ArgumentReader("--runtime test2", false);
         Assert.Equal("test2", args.Runtime);
     }
 
@@ -74,7 +74,7 @@ public class ArgumentReaderTest
             var args = new ArgumentReader();
             Assert.Equal(PackageKind.AppImage, args.Kind);
 
-            args = new ArgumentReader("-k rpm");
+            args = new ArgumentReader("-k rpm", false);
             Assert.Equal(PackageKind.Rpm, args.Kind);
         }
 
@@ -83,7 +83,7 @@ public class ArgumentReaderTest
             var args = new ArgumentReader();
             Assert.Equal(PackageKind.Setup, args.Kind);
 
-            args = new ArgumentReader("-k zip");
+            args = new ArgumentReader("-k zip", false);
             Assert.Equal(PackageKind.Zip, args.Kind);
         }
     }
@@ -94,10 +94,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.VersionRelease);
 
-        args = new ArgumentReader("-v 5.4.3[2]");
+        args = new ArgumentReader("-v 5.4.3[2]", false);
         Assert.Equal("5.4.3[2]", args.VersionRelease);
 
-        args = new ArgumentReader("--app-version 5.4.3[2]");
+        args = new ArgumentReader("--app-version 5.4.3[2]", false);
         Assert.Equal("5.4.3[2]", args.VersionRelease);
     }
 
@@ -107,10 +107,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.Property);
 
-        args = new ArgumentReader("-p DEBUG");
+        args = new ArgumentReader("-p DEBUG", false);
         Assert.Equal("DEBUG", args.Property);
 
-        args = new ArgumentReader("--property DEBUG");
+        args = new ArgumentReader("--property DEBUG", false);
         Assert.Equal("DEBUG", args.Property);
     }
 
@@ -120,10 +120,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.Output);
 
-        args = new ArgumentReader("-o OutputName");
+        args = new ArgumentReader("-o OutputName", false);
         Assert.Equal("OutputName", args.Output);
 
-        args = new ArgumentReader("--output OutputName");
+        args = new ArgumentReader("--output OutputName", false);
         Assert.Equal("OutputName", args.Output);
     }
 
@@ -133,7 +133,7 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.Arch);
 
-        args = new ArgumentReader("--arch archname");
+        args = new ArgumentReader("--arch archname", false);
         Assert.Equal("archname", args.Arch);
     }
 
@@ -143,10 +143,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.False(args.IsRun);
 
-        args = new ArgumentReader("-u");
+        args = new ArgumentReader("-u", false);
         Assert.True(args.IsRun);
 
-        args = new ArgumentReader("--run");
+        args = new ArgumentReader("--run", false);
         Assert.True(args.IsRun);
     }
 
@@ -156,10 +156,10 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.False(args.IsSkipYes);
 
-        args = new ArgumentReader("-y");
+        args = new ArgumentReader("-y", false);
         Assert.True(args.IsSkipYes);
 
-        args = new ArgumentReader("--skip-yes");
+        args = new ArgumentReader("--skip-yes", false);
         Assert.True(args.IsSkipYes);
     }
 
@@ -169,14 +169,14 @@ public class ArgumentReaderTest
         var args = new ArgumentReader();
         Assert.Null(args.NewFile);
 
-        args = new ArgumentReader("FileName --new Conf");
+        args = new ArgumentReader("FileName --new Conf", false);
         Assert.Equal("conf", args.NewFile);
         Assert.Equal("FileName", args.Value);
 
-        args = new ArgumentReader("FileName --new");
+        args = new ArgumentReader("FileName --new", false);
         Assert.Equal("true", args.NewFile);
 
-        args = new ArgumentReader("-n Meta");
+        args = new ArgumentReader("-n Meta", false);
         Assert.Equal("meta", args.NewFile);
     }
 }

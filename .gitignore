@@ -23,8 +23,8 @@ PupWin/
 !.gitignore
 
 Thumbs.db
+Thumbs.db:encryptable
 desktop.ini
-
 
 ###############################################################################
 # Ignore Builds & Binaries

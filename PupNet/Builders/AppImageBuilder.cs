@@ -16,6 +16,7 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace KuiperZone.PupNet.Builders;
@@ -43,28 +44,29 @@ public class AppImageBuilder : PackageBuilder
 
         var list = new List<string>();
 
-        // Do the build
-        var arch = Arguments.Arch;
+        if (AppImageTool != null)
+        {
+            var arch = Arguments.Arch;
+            string fuse = arch != null ? GetRuntimePath(RuntimeConverter.ToArchitecture(arch)) : GetRuntimePath(Runtime.RuntimeArch);
+            var cmd = $"{AppImageTool} {Configuration.AppImageArgs} --runtime-file=\"{fuse}\" \"{BuildRoot}\" \"{OutputPath}\"";
 
-        if (AppImageTool == null)
+            if (Arguments.IsVerbose)
+            {
+                cmd += " --verbose";
+            }
+
+            list.Add(cmd);
+
+            if (Arguments.IsRun)
+            {
+                list.Add(OutputPath);
+            }
+        }
+        else
         {
             // Cannot run appimagetool on this platform
-            throw new InvalidOperationException($"Building of AppImages not supported on {RuntimeConverter.DefaultRuntime} development system");
-        }
-
-        string fuse = arch != null ? GetRuntimePath(RuntimeConverter.ToArchitecture(arch)) : GetRuntimePath(Runtime.RuntimeArch);
-        var cmd = $"{AppImageTool} {Configuration.AppImageArgs} --runtime-file=\"{fuse}\" \"{BuildRoot}\" \"{OutputPath}\"";
-
-        if (Arguments.IsVerbose)
-        {
-            cmd += " --verbose";
-        }
-
-        list.Add(cmd);
-
-        if (Arguments.IsRun)
-        {
-            list.Add(OutputPath);
+            // Add as warning, rather than throw as still use this class for unit testing
+            WarningSink.Add($"CRITICAL. Building of AppImages not supported on {RuntimeConverter.DefaultRuntime} development system");
         }
 
         PackageCommands = list;
@@ -230,6 +232,11 @@ public class AppImageBuilder : PackageBuilder
     /// </summary>
     public override void BuildPackage()
     {
+        if (AppImageTool == null)
+        {
+            throw new InvalidOperationException($"Building of AppImages not supported on {RuntimeConverter.DefaultRuntime} development system");
+        }
+
         var arch = Architecture;
 
         if (Arguments.Arch == null)
@@ -271,7 +278,7 @@ public class AppImageBuilder : PackageBuilder
             }
         }
 
-        // No supported
+        // Not supported
         return null;
     }
 

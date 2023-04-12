@@ -65,10 +65,10 @@
     </screenshots>
 
     <releases>
-        <release version="1.2.0" date="2023-04-11">
+        <release version="1.2.0" date="2023-04-13">
             <description>
                 <ul>
-                    <li>Now ships as a dotnet tool</li>
+                    <li>Now ships as a dotnet tool (.NET7)</li>
                     <li>Added CLI option to upgrade existing pupnet.conf file</li>
                     <li>Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup</li>
                     <li>Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup</li>
@@ -76,6 +76,7 @@
                     <li>Windows Setup now removes (re-writes) existing program group entries on upgrade</li>
                     <li>Windows Setup console window now echos command name and version on launch</li>
                     <li>Improved Windows Setup console icon</li>
+                    <li>Fixed trivial bug in --new command</li>
                     <li>Tweaks to formatting of --help output</li>
                     <li>Ships with: appimagetool 13 (2020-12-31)</li>
                     <li>Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2</li>

@@ -176,7 +176,7 @@ public class FileOps
             try
             {
                 Write("Create File: ", dst);
-                File.Copy(src, dst);
+                File.Copy(src, dst, true);
                 WriteLine(" ... OK");
             }
             catch

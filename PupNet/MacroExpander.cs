@@ -34,7 +34,7 @@ public class MacrosExpander
     /// Default constructor. Example values and unit test only.
     /// </summary>
     public MacrosExpander()
-        : this(new BuilderFactory().Create(new ConfigurationReader()))
+        : this(new BuilderFactory().Create(new ConfigurationReader(true)))
     {
     }
 

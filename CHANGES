@@ -1,12 +1,13 @@
-+ VERSION 1.2.0; 2023-04-11
-- Now ships as a dotnet tool
-- Added CLI option to upgrade existing pupnet.conf file
++ VERSION 1.2.0; 2023-04-13
+- Now ships as a dotnet tool (.NET7)
+- Added upgrade-conf CLI option to upgrade existing pupnet.conf file
 - Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup
 - Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup
 - Added ${LocalDirectory} macro
 - Windows Setup now removes (re-writes) existing program group entries on upgrade
 - Windows Setup console window now echos command name and version on launch
 - Improved Windows Setup console icon
+- Fixed trivial bug in --new command
 - Tweaks to formatting of --help output
 - Other minor changes
 - Ships with: appimagetool 13 (2020-12-31)

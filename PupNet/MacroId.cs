@@ -69,7 +69,7 @@ public static class MacroIdExtension
         switch (id)
         {
             // Direct from config
-            case MacroId.LocalDirectory: return "LOcAL_DIRECTORY";
+            case MacroId.LocalDirectory: return "LOCAL_DIRECTORY";
             case MacroId.AppBaseName: return "APP_BASE_NAME";
             case MacroId.AppFriendlyName: return "APP_FRIENDLY_NAME";
             case MacroId.AppId: return "APP_ID";
