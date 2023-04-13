@@ -3,11 +3,11 @@
 ## Introduction ##
 
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
-installation file in a single step.
+installation file in a single step. It is not to be confused with the `dotnet pack` command.
 
-It has been possible to cross-compile console C# applications for sometime now. More recently, the
-cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
-GUI applications to target a range of platforms, including: Linux, Windows, MacOS and Android.
+It has been possible to cross-compile console C# applications for sometime now. More recently, the cross-platform
+[Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured GUI applications to target a range of
+platforms, including: Linux, Windows, MacOS and Android.
 
 Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
