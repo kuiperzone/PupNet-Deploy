@@ -63,7 +63,7 @@ Alternatively, for self-contained installers:
 If you are using the AppImage deployment of PupNet, add it to your path and consider renaming the AppImage file to `pupnet`
 so that the instructions below will match your system.
 
-**Out of the box**, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
+Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
 however, you must first install the appropriate third-party builder tool against which PupNet will call.
 
 ### Flatpaks on Linux ###

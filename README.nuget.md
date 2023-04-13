@@ -18,6 +18,9 @@ Now, **PupNet Deploy** allows you to ship your dotnet application as:
 * RPM Package (binary)
 * Plain old Zip
 
+Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments
+however, you must first install the appropriate third-party builder tool against which PupNet will call.
+
 ## Getting Started ##
 For instructions on use, please see: **[github.com/kuiperzone/PupNet](https://github.com/kuiperzone/PupNet)**
 
