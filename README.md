@@ -13,6 +13,8 @@ To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
+Important: If you already have a previous version installed as a .deb or .rpm, remove it before installing as a dotnet tool.
+
 Alternatively, for self-contained installers:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
