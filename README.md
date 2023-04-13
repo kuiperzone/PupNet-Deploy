@@ -7,6 +7,8 @@
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
 installation file in a single step.
 
+*If you like this project, don't forget to like and share.*
+
 ## Introduction ##
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
@@ -60,8 +62,6 @@ Alternatively, for self-contained installers:
 
 If you are using the AppImage deployment of PupNet, add it to your path and consider renaming the AppImage file to `pupnet`
 so that the instructions below will match your system.
-
-*If you like this project, don't forget to like and share.*
 
 **Out of the box**, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
 however, you must first install the appropriate third-party builder tool against which PupNet will call.
