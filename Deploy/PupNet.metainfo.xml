@@ -65,6 +65,17 @@
     </screenshots>
 
     <releases>
+
+        <release version="1.2.1" date="2023-04-13">
+            <description>
+                <ul>
+                    <li>Bug fix: Unable to show --help or --version due to recent changes</li>
+                    <li>Ships with: appimagetool 13 (2020-12-31)</li>
+                    <li>Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2</li>
+                </ul>
+            </description>
+        </release>
+
         <release version="1.2.0" date="2023-04-13">
             <description>
                 <ul>

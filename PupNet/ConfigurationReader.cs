@@ -46,7 +46,7 @@ public class ConfigurationReader
     {
         // Used default options. Useful in unit test
         // generating example reference information.
-        Arguments = new($"-{ArgumentReader.KindShortArg} {kind}", false);
+        Arguments = new($"-{ArgumentReader.KindShortArg} {kind}");
         Reader = new();
         LocalDirectory = "";
         PackageName = AppBaseName;
@@ -97,7 +97,7 @@ public class ConfigurationReader
     /// given, these are treated as relative to this file location.
     /// </summary>
     public ConfigurationReader(ArgumentReader args, bool assertPaths = true)
-        : this(args, new IniReader(AssertConfPath(args.Value)), assertPaths)
+        : this(args, new IniReader(GetConfOrDefault(args.Value)), assertPaths)
     {
     }
 
@@ -476,7 +476,7 @@ public class ConfigurationReader
         sb.Append(CreateBreaker("WINDOWS SETUP OPTIONS", style));
 
         sb.Append(CreateHelpField(nameof(SetupAdminInstall), SetupAdminInstall, style,
-                $"Boolean (true or false) which specifies whether the application is to be installed in administrive",
+                $"Boolean (true or false) which specifies whether the application is to be installed in administrative",
                 $"mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm"));
 
         sb.Append(CreateHelpField(nameof(SetupCommandPrompt), SetupCommandPrompt, style,
@@ -639,14 +639,29 @@ public class ConfigurationReader
         return sb.ToString();
     }
 
-    private static string AssertConfPath(string? path)
+    private static string GetConfOrDefault(string? path)
     {
-        if (string.IsNullOrEmpty(path))
+        var dir = "./";
+
+        if (!string.IsNullOrEmpty(path))
         {
-            throw new ArgumentException($"Specify {Program.ConfExt} file");
+            if (!Directory.Exists(path))
+            {
+                return path;
+            }
+
+            // Exists as a directory
+            dir = path;
         }
 
-        return path;
+        var files = Directory.GetFiles(dir, "*" + Program.ConfExt, SearchOption.TopDirectoryOnly);
+
+        if (files.Length == 1)
+        {
+            return files[0];
+        }
+
+        throw new ArgumentException($"Specify {Program.ConfExt} file (otherwise directory must contain exactly one file with {Program.ConfExt} extension)");
     }
 
     private IReadOnlyCollection<string> GetCollection(string name, ValueFlags flags, string? mustContain = null, string? mustStart = null)

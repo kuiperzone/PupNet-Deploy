@@ -1,3 +1,8 @@
++ VERSION 1.2.1; 2023-04-13
+- Bug fix: Unable to show --help or --version due to recent changes
+- Ships with: appimagetool 13 (2020-12-31)
+- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 + VERSION 1.2.0; 2023-04-13
 - Now ships as a dotnet tool (.NET7)
 - Added upgrade-conf CLI option to upgrade existing pupnet.conf file

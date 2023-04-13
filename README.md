@@ -483,39 +483,42 @@ This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainf
 
 Type `pupnet --help` to display command arguments as expected.
 
+PupNet Deploy 1.2.1
+See also: https://github.com/kuiperzone/PupNet-Deploy
+
     USAGE:
-        pupnet [file.pupnet.conf] [--option-n value-n]
+        pupnet [<file.pupnet.conf>] [--option-n value-n]
 
     Example:
         pupnet app..pupnet.conf -y -r linux-arm64
 
-    If conf file is omitted, one in the working directory will be selected.
+    Always give .pupnet.conf file first. If .pupnet.conf file is omitted, the default is the one in the working directory.
 
     Build Options:
-        -k, --kind Zip|AppImage|Deb|Rpm|Flatpak|Setup
-        Package output kind. If omitted, one is chosen according to the runtime.
+        -k, --kind <Zip|AppImage|Deb|Rpm|Flatpak|Setup>
+        Package output kind. If omitted, one is chosen according to the runtime (AppImage on linux).
         Example: pupnet HelloWorld -k Flatpak
 
-        -r, --runtime value
+        -r, --runtime <linux-x64|linux-arm64|win-x64...>
         Dotnet publish runtime identifier. Default: linux-x64.
         Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
         See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 
-        -c, --build value
-        Optional build target (or 'Configuration' is dotnet terminology).
-        Value should be 'Release' or 'Debug'. Default: Release.
+        -c, --build <Release|Debug>
+        Optional build target (or 'Configuration' in dotnet terminology).
+        Value should be 'Release' or 'Debug' only. Default: Release.
 
-        -e, --clean [flag only]
-        Specifies whether to call 'dotnet clean' prior to 'dotnet publish'. Default: false.
+        -e, --clean
+        Call 'dotnet clean' prior to 'dotnet publish'. Default: false.
 
-        -v, --app-version value
-        Specifies application version-release in form 'VERSION[RELEASE]', where value in square
+        -v, --app-version <version[release]>
+        Specifies application version-release in form 'version[release]', where value in square
         brackets is package release. Overrides AppVersionRelease in conf file.
         Example: 1.2.3[1].
 
-        -p, --property value
-        Specifies a property to be supplied to dotnet publish command. Do not use for
-        app versioning. Example: -p DefineConstants=TRACE;DEBUG
+        -p, --property <name=value>
+        Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
+        Example: -p DefineConstants=TRACE;DEBUG
 
         --arch value
         Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
@@ -524,34 +527,40 @@ Type `pupnet --help` to display command arguments as expected.
         explicitly supplied here will be used to override. It should be provided in the form
         expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
 
-        -o, --output value
+        -o, --output <filename>
         Force package output filename. Normally this is derived from parameters in the configuration.
         This value will be used to override. Example: -o AppName.AppImage
 
-        --verbose [flag only]
-        Indicates verbose output when building. It can also used with --new.
+        --verbose
+        Indicates verbose output when building. It is used also with --new option.
 
-        -u, --run [flag only]
+        -u, --run
         Performs a test run of the application after successful build (where supported).
 
-        -y, --skip-yes [flag only]
+        -y, --skip-yes
         Skips confirmation prompts (assumes yes).
 
     Other Options:
 
-        -n, --new conf|desktop|meta|all [--verbose]
+        -n, --new <conf|desktop|meta|all> [--verbose] [--skip-yes]
         Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
         A base file name may optionally be given. If --verbose is used, a configuration file with
         documentation comments is generated. Use 'all' to generate a full set of configuration assets.
         Example: pupnet HelloWorld -n all --verbose
 
-        -h, --help args|macro|conf
+        --upgrade-conf [--verbose] [--skip-yes]
+        Upgrades supplied .pupnet.conf file to latest version parameters. For example, if the
+        conf file was created with program version 1.1 and new parameters where added in version
+        1.2, this command will upgrade the file by adding new parameters with default values.
+        If --verbose is used, a configuration file with documentation comments is generated.
+        Example: pupnet file.pupnet.conf --upgrade-conf --verbose
+
+        -h, --help <args|macro|conf>
         Show help information. Optional value specifies what kind of information to display.
         Default is 'args'. Example: pupnet -h macro
 
-        --version [flag only]
+        --version
         Show version and associated information.
-
 
 ### Macro Reference ###
 
@@ -563,113 +572,117 @@ Type `pupnet --help macro` to see supported macro reference information:
 
     IMPORTANT: Always use the ${MACRO_NAME} form, and not $MACRO_NAME.
 
-    APP_BASE_NAME
-    AppBaseName value from conf file
+    ** ${APP_BASE_NAME} **
+    Gives the AppBaseName value from the pupnet.conf file
     Example: ${APP_BASE_NAME} = HelloWorld
 
-    APP_FRIENDLY_NAME
-    AppFriendlyName value from conf file
+    ** ${APP_FRIENDLY_NAME} **
+    Gives the AppFriendlyName value from the pupnet.conf file
     Example: ${APP_FRIENDLY_NAME} = Hello World
 
-    APP_ID
-    AppId value from conf file
+    ** ${APP_ID} **
+    Gives the AppId value from the pupnet.conf file
     Example: ${APP_ID} = net.example.helloworld
 
-    APP_LICENSE_ID
-    AppLicenseId value from conf file
+    ** ${APP_LICENSE_ID} **
+    Gives the AppLicenseId value from the pupnet.conf file
     Example: ${APP_LICENSE_ID} = LicenseRef-Proprietary
 
-    APP_SHORT_SUMMARY
-    AppShortSummary value from conf file
+    ** ${APP_SHORT_SUMMARY} **
+    Gives the AppShortSummary value from the pupnet.conf file
     Example: ${APP_SHORT_SUMMARY} = A HelloWorld application
 
-    APP_VERSION
+    ** ${APP_VERSION} **
     Application version, excluding package-release extension
     Example: ${APP_VERSION} = 1.0.0
 
-    BUILD_APP_BIN
+    ** ${BUILD_APP_BIN} **
     Application build directory (i.e. the output of dotnet publish or C++ make)
-    Example: ${BUILD_APP_BIN} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir/opt/net.example.helloworld
+    Example: ${BUILD_APP_BIN} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-AppImage/AppDir/usr/bin
 
-    BUILD_ARCH
+    ** ${BUILD_ARCH} **
     Build architecture: x64, arm64, arm or x86 (may differ from package output notation)
     Example: ${BUILD_ARCH} = x64
 
-    BUILD_DATE
+    ** ${BUILD_DATE} **
     Build date in 'yyyy-MM-dd' format
-    Example: ${BUILD_DATE} = 2023-03-21
+    Example: ${BUILD_DATE} = 2023-04-13
 
-    BUILD_ROOT
+    ** ${BUILD_ROOT} **
     Root of the temporary application build directory
-    Example: ${BUILD_ROOT} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir
+    Example: ${BUILD_ROOT} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-AppImage/AppDir
 
-    BUILD_SHARE
+    ** ${BUILD_SHARE} **
     Linux 'usr/share' build directory under BuildRoot (empty for some deployments)
-    Example: ${BUILD_SHARE} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-Rpm/AppDir/usr/share
+    Example: ${BUILD_SHARE} = /tmp/KuiperZone.PupNet/net.example.helloworld-linux-x64-Release-AppImage/AppDir/usr/share
 
-    BUILD_TARGET
+    ** ${BUILD_TARGET} **
     Release or Debug (Release unless explicitly specified)
     Example: ${BUILD_TARGET} = Release
 
-    BUILD_YEAR
+    ** ${BUILD_YEAR} **
     Build year as 'yyyy'
     Example: ${BUILD_YEAR} = 2023
 
-    DEPLOY_KIND
+    ** ${DEPLOY_KIND} **
     Deployment output kind: appimage, flatpak, rpm, deb, setup, zip
-    Example: ${DEPLOY_KIND} = rpm
+    Example: ${DEPLOY_KIND} = appimage
 
-    DESKTOP_INTEGRATE
-    Gives the logical not of DesktopNoDisplay
+    ** ${DESKTOP_INTEGRATE} **
+    Gives the logical not of ${DESKTOP_NODISPLAY}
     Example: ${DESKTOP_INTEGRATE} = true
 
-    DESKTOP_NODISPLAY
-    DesktopNoDisplay value from conf file
+    ** ${DESKTOP_NODISPLAY} **
+    Gives the DesktopNoDisplay value from the pupnet.conf file
     Example: ${DESKTOP_NODISPLAY} = false
 
-    DESKTOP_TERMINAL
-    DesktopTerminal value from conf file
+    ** ${DESKTOP_TERMINAL} **
+    Gives the DesktopTerminal value from the pupnet.conf file
     Example: ${DESKTOP_TERMINAL} = true
 
-    DOTNET_RUNTIME
+    ** ${DOTNET_RUNTIME} **
     Dotnet publish runtime identifier used (RID)
     Example: ${DOTNET_RUNTIME} = linux-x64
 
-    INSTALL_BIN
+    ** ${INSTALL_BIN} **
     Path to application directory on target system (not the build system)
-    Example: ${INSTALL_BIN} = /opt/net.example.helloworld
+    Example: ${INSTALL_BIN} = usr/bin
 
-    INSTALL_EXEC
+    ** ${INSTALL_EXEC} **
     Path to application executable on target system (not the build system)
-    Example: ${INSTALL_EXEC} = /opt/net.example.helloworld/HelloWorld
+    Example: ${INSTALL_EXEC} = usr/bin/HelloWorld
 
-    PACKAGE_RELEASE
+    ** ${LOCAL_DIRECTORY} **
+    The pupnet.conf file directory
+    Example: ${LOCAL_DIRECTORY} =
+
+    ** ${PACKAGE_RELEASE} **
     Package release version
     Example: ${PACKAGE_RELEASE} = 1
 
-    PRIME_CATEGORY
-    PrimeCategory value from conf file
-    Example: ${PRIME_CATEGORY} =
+    ** ${PRIME_CATEGORY} **
+    Gives the PrimeCategory value from the pupnet.conf file
+    Example: ${PRIME_CATEGORY} = Utility
 
-    PUBLISHER_COPYRIGHT
-    PublisherCopyright value from conf file
-    Example: ${PUBLISHER_COPYRIGHT} = Copyright (C) Your Name 1970
+    ** ${PUBLISHER_COPYRIGHT} **
+    Gives the PublisherCopyright value from the pupnet.conf file
+    Example: ${PUBLISHER_COPYRIGHT} = Copyright (C) Acme Ltd 2023
 
-    PUBLISHER_EMAIL
-    PublisherEmail value from conf file
+    ** ${PUBLISHER_EMAIL} **
+    Gives the PublisherEmail value from the pupnet.conf file
     Example: ${PUBLISHER_EMAIL} = contact@example.net
 
-    PUBLISHER_LINK_NAME
-    PublisherLinkName value from conf file
-    Example: ${PUBLISHER_LINK_NAME} = Home Page
+    ** ${PUBLISHER_LINK_NAME} **
+    Gives the PublisherLinkName value from the pupnet.conf file
+    Example: ${PUBLISHER_LINK_NAME} = Project Page
 
-    PUBLISHER_LINK_URL
-    PublisherLinkUrl value from conf file
+    ** ${PUBLISHER_LINK_URL} **
+    Gives the PublisherLinkUrl value from the pupnet.conf file
     Example: ${PUBLISHER_LINK_URL} = https://example.net
 
-    PUBLISHER_NAME
-    PublisherName value from conf file
-    Example: ${PUBLISHER_NAME} = Your Name
+    ** ${PUBLISHER_NAME} **
+    Gives the PublisherName value from the pupnet.conf file
+    Example: ${PUBLISHER_NAME} = The Hello World Team
 
 ### Configuration Reference ###
 
@@ -690,7 +703,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Example: AppFriendlyName = Hello World
 
     ** AppId **
-    Mandatory application ID in reverse DNS form.
+    Mandatory application ID in reverse DNS form. This should stay constant for lifetime of the software.
     Example: AppId = net.example.helloworld
 
     ** AppVersionRelease **
@@ -713,6 +726,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ** AppLicenseFile **
     Optional path to a copyright/license text file. If provided, it will be packaged with the application
     and identified to package builder where supported.
+    Example: AppLicenseFile = LICENSE.txt
 
     ########################################
     # PUBLISHER
@@ -724,19 +738,22 @@ Type `pupnet --help conf` to see supported configuration reference information:
 
     ** PublisherCopyright **
     Optional copyright statement.
+    Example: PublisherCopyright = Copyright (C) Acme Ltd 2023
 
     ** PublisherLinkName **
     Optional publisher or application web-link name. Note that Windows Setup packages
     require both PublisherLinkName and PublisherLinkUrl in order to include the link as
-    an item in program menu entries.
-    Example: PublisherLinkName = Home Page
+    an item in program menu entries. Do not modify name, as may leave old entries in updated installations.
+    Example: PublisherLinkName = Project Page
 
     ** PublisherLinkUrl **
     Optional publisher or application web-link URL.
+    Example: PublisherLinkUrl = https://example.net
 
     ** PublisherEmail **
     Publisher or maintainer email contact. Although optional, some packages (such as Debian) require it
     and may fail unless provided.
+    Example: PublisherEmail = contact@example.net
 
     ########################################
     # DESKTOP INTEGRATION
@@ -760,6 +777,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     in order to use the correct install location. Other macros may be used to help automate the content.
     Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
     See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
+    Example: DesktopFile = Deploy/app.desktop
 
     ** StartCommand **
     Optional command name to start the application from the terminal. If, for example, AppBaseName is
@@ -768,23 +786,33 @@ Type `pupnet --help conf` to see supported configuration reference information:
     extension such as '.exe'. If empty, the application will not be in the path and cannot be started from
     the command line. For Windows Setup packages, see also SetupCommandPrompt. The
     StartCommand is not supported for all packages kinds. Default is empty (none).
+    Example: StartCommand = helloworld
 
     ** PrimeCategory **
     Optional category for the application. The value should be one of the recognised Freedesktop top-level
     categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value should be
     provided here which will be used, where supported, to populate metadata. The default is empty.
     See: https://specifications.freedesktop.org/menu-spec/latest/apa.html
+    Example: PrimeCategory = Utility
 
     ** MetaFile **
     Path to AppStream metadata file. It is optional, but recommended as it is used by software centers.
     Note. The contents of the files may use macro variables. Use 'pupnet --help macro' for reference.
     See: https://docs.appimage.org/packaging-guide/optional/appstream.html
+    Example: MetaFile = Deploy/app.metainfo.xml
 
     ** IconFiles **
     Optional icon file paths. The value may include multiple filenames separated with semicolon or given
     in multi-line form. Valid types are SVG, PNG and ICO (ICO ignored on Linux). Note that the inclusion
     of a scalable SVG is preferable on Linux, whereas PNGs must be one of the standard sizes and MUST
     include the size in the filename in the form: name.32x32.png' or 'name.32.png'.
+    Example: IconFiles = """
+        app.ico
+        app.svg
+        app.16x16.png
+        app.32x32.png
+        app.64x64.png
+    """
 
     ########################################
     # DOTNET PUBLISH
@@ -795,6 +823,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     file, or the directory containing it. If empty (default), a single project or solution file is
     expected under the same directory as this file. IMPORTANT. If set to 'NONE', dotnet publish
     is disabled (not called). Instead, only DotnetPostPublish is called.
+    Example: DotnetProjectPath = Source
 
     ** DotnetPublishArgs **
     Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version, or '-c'
@@ -812,6 +841,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     the location of this file. This value is optional, but becomes mandatory if DotnetProjectPath equals
     'NONE'. Note. This value may use macro variables. Additionally, scripts may use these as environment
     variables. Use 'pupnet --help macro' for reference.
+    Example: DotnetPostPublish = post-publish.sh
 
     ** DotnetPostPublishOnWindows **
     Post-publish (or standalone build) command on Windows (ignored on Linux). This should perform
@@ -819,6 +849,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     scripts. Multiple commands may be specified, separated by semicolon or given in multi-line form.
     Note. This value may use macro variables. Additionally, scripts may use these as environment
     variables. Use 'pupnet --help macro' for reference.
+    Example: DotnetPostPublishOnWindows = post-publish.bat
 
     ########################################
     # PACKAGE OUTPUT
@@ -834,7 +865,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ** OutputDirectory **
     Output directory, or subdirectory relative to this file. It will be created if it does not exist and
     will contain the final deploy output files. If empty, it defaults to the location of this file.
-    Example: OutputDirectory = Deploy/bin
+    Example: OutputDirectory = Deploy/OUT
 
     ########################################
     # APPIMAGE OPTIONS
@@ -842,6 +873,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
 
     ** AppImageArgs **
     Additional arguments for use with appimagetool. Useful for signing. Default is empty.
+    Example: AppImageArgs = --sign
 
     ** AppImageVersionOutput **
     Boolean (true or false) which sets whether to include the application version in the AppImage filename,
@@ -883,32 +915,45 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ** FlatpakBuilderArgs **
     Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
     See flatpak-builder --help.
+    Example: FlatpakBuilderArgs = --gpg-keys=FILE
 
     ########################################
     # WINDOWS SETUP OPTIONS
     ########################################
 
+    ** SetupAdminInstall **
+    Boolean (true or false) which specifies whether the application is to be installed in administrative
+    mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm
+    Example: SetupAdminInstall = false
+
     ** SetupCommandPrompt **
-    Optional command prompt title. The Windows installer will not add your application to the path.
-    However, if your package contains a command-line utility, setting this value will ensure that a
-    'Command Prompt' menu entry is added which, when launched, will open a command window with your
-    application directory in its path. Default is empty. See also StartCommand.
+    Optional command prompt title. The Windows installer will NOT add your application to the path. However,
+    if your package contains a command-line utility, setting this value will ensure that a 'Command Prompt'
+    program menu entry is added (with this title) which, when launched, will open a dedicated command
+    window with your application directory in its path. Default is empty. See also StartCommand.
+    Example: SetupCommandPrompt = Command Prompt
 
     ** SetupMinWindowsVersion **
     Mandatory value which specifies minimum version of Windows that your software runs on. Windows 8 = 6.2,
-    Windows 10/11 = 10. Default: 10. See 'MinVersion' parameter in: https://jrsoftware.org/ishelp/
+    Windows 10/11 = 10. Default: 10. See: https://jrsoftware.org/ishelp/topic_setup_minversion.htm
     Example: SetupMinWindowsVersion = 10
 
     ** SetupSignTool **
     Optional name and parameters of the Sign Tool to be used to digitally sign: the installer,
     uninstaller, and contained exe and dll files. If empty, files will not be signed.
-    See 'SignTool' parameter in: https://jrsoftware.org/ishelp/
+    See: https://jrsoftware.org/ishelp/topic_setup_signtool.htm
+
+    ** SetupSuffixOutput **
+    Optional suffix for the installer output filename. The default is empty, but you may wish set it to:
+    'Setup' or similar. This, for example, will output a file of name: HelloWorldSetup-x86_64.exe
+    Ignored if the output filename is specified at command line.
+    Example: SetupSuffixOutput = Setup
 
     ** SetupVersionOutput **
     Boolean (true or false) which sets whether to include the application version in the setup filename,
-    i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. It is ignored if the output filename is
-    specified at command line.
-    Example: SetupVersionOutput = false
+    i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. Ignored if the output filename is specified
+    at command line.
+    Example: SetupVersionOutput = true
 
 ## FAQs & Gotchas ##
 

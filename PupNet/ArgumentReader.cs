@@ -80,30 +80,30 @@ public class ArgumentReader
     /// Default constructor. Values are defaults only.
     /// </summary>
     public ArgumentReader()
-        : this(new ArgumentParser(""), false)
+        : this(new ArgumentParser(""))
     {
     }
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgumentReader(string[] args, bool findConf = true)
-        : this(new ArgumentParser(args), findConf)
+    public ArgumentReader(string[] args)
+        : this(new ArgumentParser(args))
     {
     }
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgumentReader(string args, bool findConf = false)
-        : this(new ArgumentParser(args), findConf)
+    public ArgumentReader(string args)
+        : this(new ArgumentParser(args))
     {
     }
 
     /// <summary>
     /// Constructor.
     /// </summary>
-    public ArgumentReader(ArgumentParser args, bool findConf)
+    public ArgumentReader(ArgumentParser args)
     {
         _string = args.ToString();
         Parser = args;
@@ -123,11 +123,6 @@ public class ArgumentReader
 
         if (NewFile == null)
         {
-            if (findConf)
-            {
-                Value = FindDefaultConf(Value);
-            }
-
             Kind = AssertEnum<PackageKind>(KindShortArg, KindLongArg,
                 args.GetOrDefault(KindShortArg, KindLongArg, new RuntimeConverter(Runtime).DefaultPackage.ToString()));
 
@@ -336,30 +331,6 @@ public class ArgumentReader
 
         throw new ArgumentException($"Invalid or absent value for -{sname}, --{lname}\n" +
             "Use one of: " + string.Join(',', Enum.GetValues<T>()));
-    }
-
-    private static string? FindDefaultConf(string? path)
-    {
-        var dir = "./";
-
-        if (!string.IsNullOrEmpty(path))
-        {
-            if (Directory.Exists(path))
-            {
-                return path;
-            }
-
-            dir = path;
-        }
-
-        var files = Directory.GetFiles(dir, "*" + Program.ConfExt, SearchOption.TopDirectoryOnly);
-
-        if (files.Length == 1)
-        {
-            return files[0];
-        }
-
-        throw new ArgumentException($"Specify {Program.ConfExt} file (otherwise directory must contain exactly one file with {Program.ConfExt} extension)");
     }
 
 }
