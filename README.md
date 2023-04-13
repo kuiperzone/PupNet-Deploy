@@ -9,11 +9,11 @@
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
 installation file in a single step.
 
-To install for .NET7:
+To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Or, for self-contained installers:
+Alternatively, for self-contained installers:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
 

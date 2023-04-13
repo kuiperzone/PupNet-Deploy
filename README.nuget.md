@@ -20,11 +20,11 @@ Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
 ## Getting Started ##
 
-To install for .NET7:
+To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Or, for self-contained installers:
+Alternatively, for self-contained installers:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
 

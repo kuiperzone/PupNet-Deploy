@@ -23,10 +23,18 @@
 		<Language>en-US</Language>
 		<PackageProjectUrl>https://github.com/kuiperzone/PupNet-Deploy</PackageProjectUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 
   	</PropertyGroup>
 
 	<ItemGroup>
+    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="2.0.0" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+
+		<None Include="..\README.nuget.md" Pack="true" PackagePath="\README.md"/>
 
 		<None Include="$(ProjectDir)\Assets\appimagetool-x86_64.AppImage" Link="appimagetool-x86_64.AppImage">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -48,11 +56,6 @@
 		<None Include="$(ProjectDir)\Assets\runtime-fuse2-armhf" Link="runtime-fuse2-armhf">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-
-	</ItemGroup>
-
-  	<ItemGroup>
-    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="2.0.0" />
 
 		<None Include="$(ProjectDir)\Assets\generic.ico" Link="generic.ico">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
