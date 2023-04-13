@@ -4,22 +4,24 @@
 
 # PupNet Deploy - Publish & Package for .NET #
 
-## Introduction ##
-
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
 installation file in a single step.
+
+## Install ##
 
 To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Important: If you already have a previous version installed as a .deb or .rpm, remove it before installing as a dotnet tool.
+**Important:** If you already have a previous version installed as a .deb or .rpm, remove it before installing as a dotnet tool.
 
 Alternatively, for self-contained installers:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
 
 *If you like this project, don't forget to like and share.*
+
+## Introduction ##
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
 cross-platform [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured
