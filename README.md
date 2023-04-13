@@ -267,9 +267,9 @@ Crucially, if we look again at the `DotnetPublishArgs` value:
 
     DotnetPublishArgs = -p:Version=${APP_VERSION} --self-contained true -p:DebugType=None -p:DebugSymbols=false
 
-Here, we can see that the version from our configuration is supplied to the build process as a variable (only supplies the
-application part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will need to
-specify the version both in application code and the `pupnet.conf` file in this case.
+Here, we can see that the version from our configuration is supplied to the build process as a variable (only the
+application part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will need
+to specify the version both in application code and the `pupnet.conf` file in this case.
 
 ### Command-Line Applications ###
 
@@ -337,7 +337,7 @@ Here are the contents of our example bash script:
 
 Additionally, you may leverage these so called post-publish operations to perform the actual build operation itself
 and populate the `${BUILD_APP_BIN}` directory with the output of your build process -- whatever that may be. In principle,
-you could use this to package the a C++ or Python application, provided that it is satisfactory that the application and
+you could use this to package a C++ or Python application, provided that it is satisfactory that the application and
 all its associated libraries are contained in a single directory.
 
 If you do this, you will wish to disable PupNet from calling `dotnet publish`, which can be done by setting
