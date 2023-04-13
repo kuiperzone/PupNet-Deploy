@@ -7,20 +7,6 @@
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
 installation file in a single step.
 
-## Install ##
-
-To install as a dotnet tool:
-
-    dotnet tool install -g KuiperZone.PupNet
-
-**Important:** If you already have a previous version installed as a .deb or .rpm, remove it before installing as a dotnet tool.
-
-Alternatively, for self-contained installers:
-
-**[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
-
-*If you like this project, don't forget to like and share.*
-
 ## Introduction ##
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the
@@ -60,12 +46,24 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
 
-## Prerequisites ##
+## Install & Prerequisites ##
 
-Install **PupNet** from the Download Page. If you use the AppImage deployment of PupNet, add it to your path and
-consider renaming the AppImage file to `pupnet` so that the instructions below will match your system.
+To install as a dotnet tool:
 
-Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
+    dotnet tool install -g KuiperZone.PupNet
+
+**Important:** If you already have a previous version installed as a .deb or .rpm, remove it before installing as a dotnet tool.
+
+Alternatively, for self-contained installers:
+
+**[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
+
+If you are using the AppImage deployment of PupNet, add it to your path and consider renaming the AppImage file to `pupnet`
+so that the instructions below will match your system.
+
+*If you like this project, don't forget to like and share.*
+
+**Out of the box**, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
 however, you must first install the appropriate third-party builder tool against which PupNet will call.
 
 ### Flatpaks on Linux ###
