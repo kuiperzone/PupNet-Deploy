@@ -64,7 +64,7 @@ If you are using the AppImage deployment of PupNet, add it to your path and cons
 so that the instructions below will match your system.
 
 Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. In order to build other deployments,
-however, you must first install the appropriate third-party builder tool against which PupNet will call.
+you must first install the appropriate third-party builder tool against which PupNet will call.
 
 ### Flatpaks on Linux ###
 PupNet requires `flatpak` and `flatpak-builder`. It will also be necessary to install a flatpak platform SDK
