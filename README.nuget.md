@@ -19,16 +19,15 @@ Now, **PupNet Deploy** allows you to ship your dotnet application as:
 * Plain old Zip
 
 ## Getting Started ##
+For instructions on use, please see: **[github.com/kuiperzone/PupNet](https://github.com/kuiperzone/PupNet)**
 
 To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Alternatively, for self-contained installers:
+Alternatively, for self-contained installers goto:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
-
-For instructions, please see: **[github.com/kuiperzone/PupNet](https://github.com/kuiperzone/PupNet)**
 
 *If you like this project, don't forget to like and share.*
 

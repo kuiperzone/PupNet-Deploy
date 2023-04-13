@@ -83,7 +83,7 @@
                     <li>Added CLI option to upgrade existing pupnet.conf file</li>
                     <li>Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup</li>
                     <li>Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup</li>
-                    <li>Added ${LocalDirectory} macro</li>
+                    <li>Added LOCAL_DIRECTORY macro</li>
                     <li>Windows Setup now removes (re-writes) existing program group entries on upgrade</li>
                     <li>Windows Setup console window now echos command name and version on launch</li>
                     <li>Improved Windows Setup console icon</li>
