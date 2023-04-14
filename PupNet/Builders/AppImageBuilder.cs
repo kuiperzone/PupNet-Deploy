@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace KuiperZone.PupNet.Builders;
@@ -184,23 +183,23 @@ public class AppImageBuilder : PackageBuilder
     /// <exception cref="ArgumentException"/>
     public static string GetRuntimePath(Architecture arch)
     {
-        // https://github.com/AppImage/type2-runtime/releases/tag/continuous
+        // From: https://github.com/AppImage/AppImageKit/releases/tag/13
         if (arch == System.Runtime.InteropServices.Architecture.X64)
         {
-            return Path.Combine(AssemblyDirectory, "runtime-fuse2-x86_64");
+            return Path.Combine(AssemblyDirectory, "runtime-x86_64");
         }
 
         if (arch == System.Runtime.InteropServices.Architecture.Arm64)
         {
-            return Path.Combine(AssemblyDirectory, "runtime-fuse2-aarch64");
+            return Path.Combine(AssemblyDirectory, "runtime-aarch64");
         }
 
         if (arch == System.Runtime.InteropServices.Architecture.Arm)
         {
-            return Path.Combine(AssemblyDirectory, "runtime-fuse2-armhf");
+            return Path.Combine(AssemblyDirectory, "runtime-armhf");
         }
 
-        throw new ArgumentException($"Unsupported runtime architecture {arch} - must be one of: x64, arm64, x86, arm");
+        throw new ArgumentException($"Unsupported runtime architecture {arch} - must be one of: x64, arm64, arm");
     }
 
 

@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
@@ -47,13 +47,13 @@
 		</None>
 
 
-		<None Include="$(ProjectDir)\Assets\runtime-fuse2-x86_64" Link="runtime-fuse2-x86_64">
+		<None Include="$(ProjectDir)\Assets\runtime-x86_64" Link="runtime-x86_64">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\runtime-fuse2-aarch64" Link="runtime-fuse2-aarch64">
+		<None Include="$(ProjectDir)\Assets\runtime-aarch64" Link="runtime-aarch64">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="$(ProjectDir)\Assets\runtime-fuse2-armhf" Link="runtime-fuse2-armhf">
+		<None Include="$(ProjectDir)\Assets\runtime-armhf" Link="runtime-armhf">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 

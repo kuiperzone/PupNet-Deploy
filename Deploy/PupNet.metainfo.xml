@@ -66,6 +66,18 @@
 
     <releases>
 
+        <release version="1.2.2" date="2023-04-14">
+            <description>
+                <ul>
+                    <li>Now supplied as .NET6 tool (explicitly built against .NET6 LTS rather than .NET7)</li>
+                    <li>Bug fix: AppImage failed to run on some systems (updated AppImage runtimes)</li>
+                    <li>Bug fix: Added 'BuildRequires: desktop-file-utils' to RPM spec file</li>
+                    <li>Ships with: appimagetool 13 (2020-12-31)</li>
+                    <li>Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2</li>
+                </ul>
+            </description>
+        </release>
+
         <release version="1.2.1" date="2023-04-13">
             <description>
                 <ul>

@@ -775,19 +775,10 @@ public class ConfigurationReader
                     throw new ArgumentException($"Configuration {name} must contain at least 2 characters");
                 }
 
-                /*
-                // Don't do this - too strict for many fields
-                // Leave it to Debian to fail if this is a problem
-                if (char.IsDigit(value[0]))
-                {
-                    throw new ArgumentException($"Configuration {name} cannot start with a numeric digit");
-                }
-                */
-
                 foreach (var c in value)
                 {
                     // Not force lower case, but we will convert as needed
-                    if (c != '-' && c != '+' && c != '.' && !char.IsAsciiLetterOrDigit(c))
+                    if (c != '-' && c != '+' && c != '.' && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9'))
                     {
                         if (c != '\n' || !flags.HasFlag(ValueFlags.Multi))
                         {
@@ -825,7 +816,7 @@ public class ConfigurationReader
                     value = Path.Combine(LocalDirectory, value);
                 }
 
-                if (flags.HasFlag(ValueFlags.AssertPath) && !Path.Exists(value))
+                if (flags.HasFlag(ValueFlags.AssertPath) && !File.Exists(value) && !Directory.Exists(value))
                 {
                     throw new FileNotFoundException($"Configuration {name} path not found {value}");
                 }

@@ -210,6 +210,7 @@ public sealed class RpmBuilder : PackageBuilder
 
         if (DesktopBuildPath != null || MetaBuildPath != null)
         {
+            sb.AppendLine("BuildRequires: desktop-file-utils");
             sb.AppendLine("BuildRequires: libappstream-glib");
             sb.AppendLine();
             sb.AppendLine("%check");

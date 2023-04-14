@@ -1,1 +1,21 @@
+Remove RPM desktop-file-validate or add to "BuildRequires"
+
+RPM "AutoReqProv" - investigate?
+
+Add "Requires" conf section for RPM and DEB:
+https://github.com/kuiperzone/PupNet-Deploy/issues/10
+
 Add multiple --kind values to arguments?
+
+Drop to .NET6 for tool
+
+Currently, ship runtime from:
+https://github.com/AppImage/type2-runtime/releases/tag/continuous
+as hinted at on AppImageKit page
+
+However, think we should use runtimes from:
+https://github.com/AppImage/AppImageKit/releases/tag/13
+
+Add parsable "changes" and integrate with RPM,deb and AppStream
+
+
