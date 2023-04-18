@@ -27,6 +27,8 @@ namespace KuiperZone.PupNet.Builders;
 /// </summary>
 public sealed class RpmBuilder : PackageBuilder
 {
+    private bool _specFilesHack;
+
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -159,6 +161,9 @@ public sealed class RpmBuilder : PackageBuilder
     {
         base.Create(desktop, metainfo);
 
+        // After create, we know the publish bin directory will be empty
+        _specFilesHack = true;
+
         // Rpm and Deb etc only. These get installed to /opt, but put 'link file' in /usr/bin
         if (BuildUsrBin != null && !string.IsNullOrEmpty(Configuration.StartCommand))
         {
@@ -169,7 +174,7 @@ public sealed class RpmBuilder : PackageBuilder
             if (!File.Exists(path))
             {
                 Operations.WriteFile(path, script);
-                Operations.Execute($"chmod a+x {path}");
+                Operations.Execute($"chmod a+rx {path}");
             }
         }
     }
@@ -182,6 +187,8 @@ public sealed class RpmBuilder : PackageBuilder
         Environment.SetEnvironmentVariable("SOURCE_DATE_EPOCH", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString());
 
         base.BuildPackage();
+
+        _specFilesHack = false;
     }
 
     private string GetSpec()
@@ -203,15 +210,40 @@ public sealed class RpmBuilder : PackageBuilder
             sb.AppendLine($"Url: {Configuration.PublisherLinkUrl}");
         }
 
-        // We expect dotnet "--self-contained true" to provide ALL dependencies in single directory
-        // https://rpm-list.redhat.narkive.com/KqUzv7C1/using-nodeps-with-rpmbuild-is-it-possible
-        sb.AppendLine();
-        sb.AppendLine("AutoReqProv: no");
+        sb.AppendLine($"AutoReq: {(Configuration.RpmAutoReq ? "yes" : "no")}");
+        sb.AppendLine($"AutoProv: {(Configuration.RpmAutoProv ? "yes" : "no")}");
 
-        if (DesktopBuildPath != null || MetaBuildPath != null)
+        /*
+        // Comment out for now, but may remove in future.
+        // Not essential but problematic on debian systems
+        if (DesktopBuildPath != null)
         {
             sb.AppendLine("BuildRequires: desktop-file-utils");
+        }
+
+        if (MetaBuildPath != null)
+        {
             sb.AppendLine("BuildRequires: libappstream-glib");
+        }
+        */
+
+        // We expect dotnet "--self-contained true" to provide ALL dependencies in single directory
+        // https://rpm-list.redhat.narkive.com/KqUzv7C1/using-nodeps-with-rpmbuild-is-it-possible
+        foreach (var item in Configuration.RpmRequires)
+        {
+            sb.AppendLine($"Requires: {item}");
+        }
+
+        // Description is mandatory, but just repeat summary
+        sb.AppendLine();
+        sb.AppendLine("%description");
+        sb.AppendLine(Configuration.AppShortSummary);
+
+        /*
+        // Comment out for now, but may remove in future.
+        // Not essential but problematic on debian systems
+        if (DesktopBuildPath != null || MetaBuildPath != null)
+        {
             sb.AppendLine();
             sb.AppendLine("%check");
 
@@ -225,21 +257,15 @@ public sealed class RpmBuilder : PackageBuilder
                 sb.AppendLine("appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/*.metainfo.xml");
             }
         }
-
-        // Description is mandatory, but just repeat summary
-        sb.AppendLine();
-        sb.AppendLine("%description");
-        sb.AppendLine(Configuration.AppShortSummary);
+        */
 
         // https://stackoverflow.com/questions/57385249/in-an-rpm-files-section-is-it-possible-to-specify-a-directory-and-all-of-its-fi
         sb.AppendLine();
         sb.AppendLine("%files");
 
-        var files = ListBuild(true);
-
-        if (files.Count != 0)
+        if (_specFilesHack)
         {
-            foreach (var item in files)
+            foreach (var item in ListBuild(true))
             {
                 var name = Path.GetFileNameWithoutExtension(item).ToLowerInvariant();
 

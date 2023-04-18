@@ -190,16 +190,20 @@ internal class Program
                 Console.WriteLine($"Updated {name} to version {Program.Version} OK");
                 return 0;
             }
+            else
+            {
+                // BUILD AND RUN
+                Console.WriteLine($"{ProductName} {Version}");
 
-            // BUILD AND RUN
-            Console.WriteLine($"{ProductName} {Version}");
-            Console.WriteLine($"Configuration: {decoder.Value ?? "[None]"}");
-            Console.WriteLine();
+                var path = ConfigurationReader.GetConfOrDefault(decoder.Value);
+                Console.WriteLine($"Configuration: {Path.GetFileName(path)}");
+                Console.WriteLine();
 
-            new BuildHost(decoder).Run();
+                new BuildHost(new ConfigurationReader(decoder, path)).Run();
 
-            Console.WriteLine();
-            return 0;
+                Console.WriteLine();
+                return 0;
+            }
         }
         catch (Exception e)
         {

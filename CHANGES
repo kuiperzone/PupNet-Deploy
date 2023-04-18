@@ -1,7 +1,20 @@
++ VERSION 1.3.0; 2023-04-17
+- Added RpmAutoProv and RpmAutoReq properties to configuration
+- Added RpmRequires property to configuration to allow specification of RPM dependencies
+- Added DebianRecommends property to configuration to allow specification of Debian dependencies
+- Now ensures execute permission is set on main executable after dotnet publish (.NET6 does not seem to guarantee this)
+- Now ensures that all files after dotnet publish have read permissions (.NET6 does not seem to guarantee this)
+- Removed desktop and metainfo validity checks in RPM build as non-essential but problematic where dependencies not met
+- Bug fix: The name of the pupnet.conf file was not always displayed when building a package
+- Bug fix: Debian Copyright file was not packaged
+- Bug fix: May have listed previous build files when building RPM package (display issue only)
+- Ships with: appimagetool 13 (2020-12-31)
+- Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 + VERSION 1.2.2; 2023-04-14
 - Now supplied as .NET6 tool (explicitly built against .NET6 LTS rather than .NET7)
 - Bug fix: AppImage failed to run on some systems (updated AppImage runtimes)
-- Big fix: Added 'BuildRequires: desktop-file-utils' to RPM spec file
+- Bug fix: Added 'BuildRequires: desktop-file-utils' to RPM spec file
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
@@ -13,7 +26,7 @@
 + VERSION 1.2.0; 2023-04-13
 - Now ships as a dotnet tool (.NET7)
 - Added upgrade-conf CLI option to upgrade existing pupnet.conf file
-- Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup
+- Added SetupAdminInstall to configuration to allow install with admin privileges in Windows Setup
 - Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup
 - Added ${LOCAL_DIRECTORY} macro
 - Windows Setup now removes (re-writes) existing program group entries on upgrade

@@ -164,7 +164,7 @@ public sealed class DebianBuilder : PackageBuilder
             if (!File.Exists(path))
             {
                 Operations.WriteFile(path, script);
-                Operations.Execute($"chmod a+x {path}");
+                Operations.Execute($"chmod a+rx {path}");
             }
         }
     }
@@ -174,13 +174,13 @@ public sealed class DebianBuilder : PackageBuilder
     /// </summary>
     public override void BuildPackage()
     {
-        base.BuildPackage();
-
-        if (BuildUsrShare != null && LicenseBuildPath != null)
+        if (Configuration.AppLicenseFile != null && BuildUsrShare != null)
         {
             var dest = Path.Combine(BuildUsrShare, "doc", _debianPackageName, "Copyright");
-            Operations.CopyFile(LicenseBuildPath, dest, true);
+            Operations.CopyFile(Configuration.AppLicenseFile, dest, true);
         }
+
+        base.BuildPackage();
     }
 
     private static string ToSection(string? category)
@@ -233,8 +233,17 @@ public sealed class DebianBuilder : PackageBuilder
         // Treated as comments
         sb.AppendLine($"License: {Configuration.AppLicenseId}");
         sb.AppendLine($"Vendor: {Configuration.PublisherName}");
-        sb.AppendLine();
 
+        bool started = false;
+        foreach (var item in Configuration.DebianRecommends)
+        {
+            sb.Append(started ? ", " : "Recommends: ");
+            sb.Append(item);
+            started = true;
+        }
+
+        // Required
+        sb.AppendLine();
 
         return sb.ToString();
     }

@@ -92,12 +92,21 @@ public class ConfigurationReader
     }
 
     /// <summary>
-    /// Production constructor. Reads from file. If assertPaths is true, it ensures that all reference
-    /// files exist and populates property values with fully qualified names. Where relative paths are
-    /// given, these are treated as relative to this file location.
+    /// Production constructor where the file path is either given as args.Value or a single file in the current
+    /// working directory. If assertPaths is true, it ensures that all reference files exist and populates
+    /// property values with fully qualified names. Where relative paths are given, these are treated as relative
+    /// to this file location.
     /// </summary>
     public ConfigurationReader(ArgumentReader args, bool assertPaths = true)
         : this(args, new IniReader(GetConfOrDefault(args.Value)), assertPaths)
+    {
+    }
+
+    /// <summary>
+    /// Production constructor in which the conf file path is given explicitly.
+    /// </summary>
+    public ConfigurationReader(ArgumentReader args, string confPath, bool assertPaths = true)
+        : this(args, new IniReader(confPath), assertPaths)
     {
     }
 
@@ -140,6 +149,12 @@ public class ConfigurationReader
 
         AppImageArgs = GetOptional(nameof(AppImageArgs), ValueFlags.None);
         AppImageVersionOutput = GetBool(nameof(AppImageVersionOutput), AppImageVersionOutput);
+
+        RpmAutoReq = GetBool(nameof(RpmAutoReq), RpmAutoReq);
+        RpmAutoProv = GetBool(nameof(RpmAutoProv), RpmAutoProv);
+        RpmRequires = GetCollection(nameof(RpmRequires), RpmRequires, ValueFlags.SafeNoSpace);
+
+        DebianRecommends = GetCollection(nameof(DebianRecommends), DebianRecommends, ValueFlags.SafeNoSpace);
 
         FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime), ValueFlags.StrictSafe);
         FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk), ValueFlags.StrictSafe);
@@ -232,6 +247,14 @@ public class ConfigurationReader
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
 
+    public bool RpmAutoReq { get; } = false;
+    public bool RpmAutoProv { get; } = true;
+    public IReadOnlyCollection<string> RpmRequires { get; } = new string[]
+        { "krb5-libs", "libicu", "openssl-libs", "zlib" };
+
+    public IReadOnlyCollection<string> DebianRecommends { get; } = new string[]
+        { "libc6", "libgcc1", "libgcc-s1", "libgssapi-krb5-2", "libicu", "libssl", "libstdc++6", "libunwind", "zlib1g" };
+
     public bool SetupAdminInstall { get; }
     public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
@@ -240,6 +263,37 @@ public class ConfigurationReader
     public bool SetupVersionOutput { get; }
 
     public string? PupnetVersion { get; }
+
+    /// <summary>
+    /// Ensures that the result is a valid pupnet.conf file. The result is 'path' if the value is not null or empty.
+    /// Otherwise, if null, the method looks in the current working directory for a single 'pupnet.conf' file.
+    /// If not file is found, it throws.
+    /// </summary>
+    /// <exception cref="FileNotFoundException"/>
+    public static string GetConfOrDefault(string? path)
+    {
+        var dir = "./";
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            if (!Directory.Exists(path))
+            {
+                return path;
+            }
+
+            // Exists as a directory
+            dir = path;
+        }
+
+        var files = Directory.GetFiles(dir, "*" + Program.ConfExt, SearchOption.TopDirectoryOnly);
+
+        if (files.Length == 1)
+        {
+            return files[0];
+        }
+
+        throw new FileNotFoundException($"Specify {Program.ConfExt} file (otherwise directory must contain exactly one file with {Program.ConfExt} extension)");
+    }
 
     /// <summary>
     /// Reads file associated with this configuration and returns the text. Returns null if path is null or
@@ -473,6 +527,37 @@ public class ConfigurationReader
 
 
 
+        sb.Append(CreateBreaker("RPM OPTIONS", style));
+
+        sb.Append(CreateHelpField(nameof(RpmAutoReq), RpmAutoReq, style,
+                $"Boolean (true or false) which specifies whether to build the RPM package with 'AutoReq' equal to yes or no.",
+                $"For dotnet application, the value should typically be false, but see RpmRequires below.",
+                $"Refer: https://rpm-software-management.github.io/rpm/manual/spec.html"));
+
+        sb.Append(CreateHelpField(nameof(RpmAutoProv), RpmAutoProv, style,
+                $"Boolean (true or false) which specifies whether to build the RPM package with 'AutoProv' equal to yes or no.",
+                $"Refer: https://rpm-software-management.github.io/rpm/manual/spec.html"));
+
+        sb.Append(CreateHelpField(nameof(RpmRequires), RpmRequires, true, style,
+                $"Optional list of RPM dependencies. The list may include multiple values separated with semicolon or given",
+                $"in multi-line form. If empty, a self-contained dotnet package will successfully run on many (but not all)",
+                $"Linux distros. In some cases, it will be necessary to explicitly specify additional dependencies.",
+                $"Default values are recommended for use with dotnet and RPM packages at the time of writing.",
+                $"For updated information, see: https://learn.microsoft.com/en-us/dotnet/core/install/linux-rhel#dependencies"));
+
+
+
+        sb.Append(CreateBreaker("DEBIAN OPTIONS", style));
+
+        sb.Append(CreateHelpField(nameof(DebianRecommends), DebianRecommends, true, style,
+                $"Optional list of Debian dependencies. The list may include multiple values separated with semicolon or given",
+                $"in multi-line form. If empty, a self-contained dotnet package will successfully run on many (but not all)",
+                $"Linux distros. In some cases, it will be necessary to explicitly specify additional dependencies.",
+                $"Default values are recommended for use with dotnet and Debian packages at the time of writing.",
+                $"For updated information, see: https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#dependencies"));
+
+
+
         sb.Append(CreateBreaker("WINDOWS SETUP OPTIONS", style));
 
         sb.Append(CreateHelpField(nameof(SetupAdminInstall), SetupAdminInstall, style,
@@ -639,34 +724,20 @@ public class ConfigurationReader
         return sb.ToString();
     }
 
-    private static string GetConfOrDefault(string? path)
-    {
-        var dir = "./";
-
-        if (!string.IsNullOrEmpty(path))
-        {
-            if (!Directory.Exists(path))
-            {
-                return path;
-            }
-
-            // Exists as a directory
-            dir = path;
-        }
-
-        var files = Directory.GetFiles(dir, "*" + Program.ConfExt, SearchOption.TopDirectoryOnly);
-
-        if (files.Length == 1)
-        {
-            return files[0];
-        }
-
-        throw new ArgumentException($"Specify {Program.ConfExt} file (otherwise directory must contain exactly one file with {Program.ConfExt} extension)");
-    }
-
     private IReadOnlyCollection<string> GetCollection(string name, ValueFlags flags, string? mustContain = null, string? mustStart = null)
     {
+        return GetCollection(name, Array.Empty<string>(), flags, mustContain, mustStart);
+    }
+
+    private IReadOnlyCollection<string> GetCollection(string name, IReadOnlyCollection<string> def, ValueFlags flags, string? mustContain = null, string? mustStart = null)
+    {
         var value = GetOptional(name, flags | ValueFlags.Multi);
+
+        if (value == null && Reader.Values.ContainsKey(name))
+        {
+            // Intentionally empty
+            return Array.Empty<string>();
+        }
 
         if (value != null)
         {
@@ -692,7 +763,7 @@ public class ConfigurationReader
             return list;
         }
 
-        return Array.Empty<string>();
+        return def;
     }
 
     private bool GetBool(string name, bool def)
@@ -750,7 +821,7 @@ public class ConfigurationReader
 
             foreach (var c in value)
             {
-                if (flags.HasFlag(ValueFlags.SafeNoSpace) && char.IsWhiteSpace(c))
+                if (flags.HasFlag(ValueFlags.SafeNoSpace) && char.IsWhiteSpace(c) && c != '\n' && c != '\r')
                 {
                     throw new ArgumentException($"{name} must not contain spaces or non-printing characters");
                 }

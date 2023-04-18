@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace KuiperZone.PupNet;
 
@@ -483,7 +484,31 @@ public abstract class PackageBuilder
     public virtual void BuildPackage()
     {
         // Must exist
-        Operations.AssertExists(Path.Combine(BuildAppBin, AppExecName));
+        var appPath = Path.Combine(BuildAppBin, AppExecName);
+        Operations.AssertExists(appPath);
+
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            // A bit of a hack for .NET6
+            // Need to ensure that all files have read universal read permission,
+            // and that main has execute permission. .NET6 does not seem to necessarily give these.
+            var hold = Operations.ShowCommands;
+
+            try
+            {
+                Operations.ShowCommands = false;
+                Operations.Execute($"chmod a+rx {appPath}");
+
+                foreach (var item in FileOps.ListFiles(BuildAppBin))
+                {
+                    Operations.Execute($"chmod a+r {Path.Combine(BuildAppBin, item)}");
+                }
+            }
+            finally
+            {
+                Operations.ShowCommands = hold;
+            }
+        }
 
         // Must come before we call ManifestContent
         if (Configuration.AppLicenseFile != null && LicenseBuildPath != null)

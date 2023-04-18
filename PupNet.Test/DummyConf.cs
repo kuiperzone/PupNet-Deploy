@@ -86,6 +86,12 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
         lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
 
+        lines.Add($"{nameof(ConfigurationReader.RpmAutoReq)} = true");
+        lines.Add($"{nameof(ConfigurationReader.RpmAutoProv)} = false");
+        lines.Add($"{nameof(ConfigurationReader.RpmRequires)} = rpm-requires1;rpm-requires2");
+
+        lines.Add($"{nameof(ConfigurationReader.DebianRecommends)} = deb-depends1;deb-depends2");
+
         lines.Add($"{nameof(ConfigurationReader.SetupAdminInstall)} = true");
         lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
         lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");

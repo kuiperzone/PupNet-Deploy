@@ -128,7 +128,7 @@ public class IniReader
             var hold = n;
             var name = ParseNameValue(content, ref n, out string value);
 
-            if (name.Length != 0 && value.Length != 0 && !dict.TryAdd(name, value))
+            if (name.Length != 0 && !dict.TryAdd(name, value))
             {
                 throw new ArgumentException(GetError($"Repeated key {name}", hold));
             }

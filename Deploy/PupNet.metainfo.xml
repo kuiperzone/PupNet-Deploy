@@ -66,6 +66,24 @@
 
     <releases>
 
+        <release version="1.3.0" date="2023-04-17">
+            <description>
+                <ul>
+                    <li>Added RpmAutoProv and RpmAutoReq properties to configuration</li>
+                    <li>Added RpmRequires property to configuration to allow specification of RPM dependencies</li>
+                    <li>Added DebianDepends property to configuration to allow specification of Debian dependencies</li>
+                    <li>Now ensures execute permission is set on main executable after dotnet publish (.NET6 does not seem to guarantee this)</li>
+                    <li>Now ensures that all files after dotnet publish have read permissions (.NET6 does not seem to guarantee this)</li>
+                    <li>Removed desktop and metainfo validity checks in RPM build as non-essential but problematic where dependencies not met</li>
+                    <li>Bug fix: The name of the pupnet.conf file was not always displayed when building a package</li>
+                    <li>Bug fix: Debian Copyright file was not packaged</li>
+                    <li>Bug fix: May have listed previous build files when building RPM package (display issue only)</li>
+                    <li>Ships with: appimagetool 13 (2020-12-31)</li>
+                    <li>Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2</li>
+                </ul>
+            </description>
+        </release>
+
         <release version="1.2.2" date="2023-04-14">
             <description>
                 <ul>
@@ -93,7 +111,7 @@
                 <ul>
                     <li>Now ships as a dotnet tool (.NET7)</li>
                     <li>Added CLI option to upgrade existing pupnet.conf file</li>
-                    <li>Added SetupAdminInstall to configuration to all install with admin privileges in Windows Setup</li>
+                    <li>Added SetupAdminInstall to configuration to allow install with admin privileges in Windows Setup</li>
                     <li>Added SetupSuffixOutput to configuration to allow control of naming of Windows Setup</li>
                     <li>Added LOCAL_DIRECTORY macro</li>
                     <li>Windows Setup now removes (re-writes) existing program group entries on upgrade</li>

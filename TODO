@@ -1,13 +1,15 @@
-Remove RPM desktop-file-validate or add to "BuildRequires"
-
-RPM "AutoReqProv" - investigate?
-
-Add "Requires" conf section for RPM and DEB:
-https://github.com/kuiperzone/PupNet-Deploy/issues/10
-
 Add multiple --kind values to arguments?
 
+Add parsable "changes" and integrate with RPM,deb and AppStream
+
+
+DONE
 Drop to .NET6 for tool
+RPM "AutoReqProv" - investigate?
+Remove RPM desktop-file-validate or add to "BuildRequires"
+Add "Requires" conf section for RPM and DEB:
+https://github.com/kuiperzone/PupNet-Deploy/issues/10
+https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#rpm-dependencies
 
 Currently, ship runtime from:
 https://github.com/AppImage/type2-runtime/releases/tag/continuous
@@ -15,7 +17,4 @@ as hinted at on AppImageKit page
 
 However, think we should use runtimes from:
 https://github.com/AppImage/AppImageKit/releases/tag/13
-
-Add parsable "changes" and integrate with RPM,deb and AppStream
-
 

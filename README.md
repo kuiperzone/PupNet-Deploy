@@ -106,6 +106,9 @@ or:
 
     sudo apt install rpm
 
+The RPM build process also requires the following packages: `desktop-file-utils`, `libappstream-glib`. If you
+encounter RPM builder errors, ensure that these are present on your system.
+
 It is possible to build RPM packages using `rpmbuild` on a Debian system although, again, you should
 use a virtual machines to test it.
 

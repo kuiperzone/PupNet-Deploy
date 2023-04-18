@@ -240,6 +240,47 @@ public class ConfigurationReaderTest
         Assert.Null(Create(nameof(ConfigurationReader.FlatpakBuilderArgs)).FlatpakBuilderArgs);
     }
 
+
+    [Fact]
+    public void RpmAutoReq_Bool_IsTrue()
+    {
+        Assert.True(Create().RpmAutoReq);
+        Assert.False(Create(nameof(ConfigurationReader.RpmAutoReq)).RpmAutoReq);
+    }
+
+    [Fact]
+    public void RpmAutoProv_Bool_IsFalse()
+    {
+        Assert.False(Create().RpmAutoProv);
+        Assert.True(Create(nameof(ConfigurationReader.RpmAutoProv)).RpmAutoProv);
+    }
+
+    [Fact]
+    public void RpmRequires_Optional_DecodeOK()
+    {
+        var args = Create().RpmRequires;
+
+        Assert.NotEmpty(args);
+        Assert.Contains("rpm-requires1", args);
+        Assert.Contains("rpm-requires2", args);
+
+        args = Create(nameof(ConfigurationReader.RpmRequires)).RpmRequires;
+        Assert.Contains("libicu", args);
+    }
+
+    [Fact]
+    public void DebianRecommends_Optional_DecodeOK()
+    {
+        var args = Create().DebianRecommends;
+
+        Assert.NotEmpty(args);
+        Assert.Contains("deb-depends1", args);
+        Assert.Contains("deb-depends2", args);
+
+        args = Create(nameof(ConfigurationReader.DebianRecommends)).DebianRecommends;
+        Assert.Contains("libicu", args);
+    }
+
     [Fact]
     public void SetupAdminInstall_Bool_IsTrue()
     {
