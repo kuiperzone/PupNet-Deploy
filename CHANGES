@@ -1,4 +1,4 @@
-+ VERSION 1.3.0; 2023-04-17
++ VERSION 1.3.0; 2023-04-18
 - Added RpmAutoProv and RpmAutoReq properties to configuration
 - Added RpmRequires property to configuration to allow specification of RPM dependencies
 - Added DebianRecommends property to configuration to allow specification of Debian dependencies
