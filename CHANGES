@@ -3,7 +3,7 @@
 - Added RpmRequires property to configuration to allow specification of RPM dependencies
 - Added DebianRecommends property to configuration to allow specification of Debian dependencies
 - Now ensures execute permission is set on main executable after dotnet publish (.NET6 does not seem to guarantee this)
-- Now ensures that all files after dotnet publish have read permissions (.NET6 does not seem to guarantee this)
+- Now ensures that all files after dotnet publish have "other read" permissions (.NET6 does not seem to guarantee this)
 - Removed desktop and metainfo validity checks in RPM build as non-essential but problematic where dependencies not met
 - Bug fix: The name of the pupnet.conf file was not always displayed when building a package
 - Bug fix: Debian Copyright file was not packaged
