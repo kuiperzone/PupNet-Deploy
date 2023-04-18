@@ -973,6 +973,19 @@ or
 
 With the --verbose option, the new file will contain document comments.
 
+### RPM and Deb Dependencies ###
+Although publishing a "self-contained" dotnet app may lead you to think that it is *self-contained*, in reality
+it may have additional dependencies which may create complexity when building RPM and Debian packages.
+
+Microsoft list additional dependencies for RPM and Debian, although these are also be distro specific:
+https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#rpm-dependencies
+
+From PupNet version 1.3.0 onward, the pupnet.conf supports the ability to define additional dependencies
+using the `RpmRequires` and `DebRecommends` fields. By default, they are populated with expected values, although
+these may be subject to change and you should review them for you application.
+
+*You should test RPM and Debian packages against your target distributions.*
+
 ### Virtual Box and Symlinks ###
 If you are using VirtualBox with your project, note that symbolic links are disabled within shared folders by VirtualBox
 itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
@@ -983,7 +996,7 @@ The RPM package builder creates subdirectories under the directory that you spec
 behaviour and cannot be overridden.
 
 ### Package Naming Convention is not Consistent ###
-You may notice that PupNet outputs differences in package naming styles:
+You may notice that PupNet outputs differences in package naming styles. For example:
 
     PupNet-Deploy.x86_64.AppImage
     pupnet-deploy_0.0.1-1_amd64.deb
@@ -1002,7 +1015,7 @@ or:
 
     sudo dnf remove helloworld
 
-This is not an issue with PupNet or necessarily with your AppStream metadata. Rather, having been installed from file,
+This is not an issue with PupNet or AppStream metadata. Rather, having been installed from file,
 the Gnome Software Center lacks certain other metadata it expects had the package originated from a repository.
 See [here for information](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7).
 
