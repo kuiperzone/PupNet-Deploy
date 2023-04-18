@@ -28,7 +28,7 @@ To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Alternatively, for self-contained installers goto:
+Alternatively, for self-contained installers go:
 
 **[DOWNLOAD & INSTALL](https://github.com/kuiperzone/PupNet/releases/latest)**
 
