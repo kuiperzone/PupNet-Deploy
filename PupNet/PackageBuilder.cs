@@ -497,11 +497,11 @@ public abstract class PackageBuilder
             try
             {
                 Operations.ShowCommands = false;
-                Operations.Execute($"chmod a+rx {appPath}");
+                Operations.Execute($"chmod a+rx \"{appPath}\"");
 
                 foreach (var item in FileOps.ListFiles(BuildAppBin))
                 {
-                    Operations.Execute($"chmod a+r {Path.Combine(BuildAppBin, item)}");
+                    Operations.Execute($"chmod a+r \"{Path.Combine(BuildAppBin, item)}\"");
                 }
             }
             finally

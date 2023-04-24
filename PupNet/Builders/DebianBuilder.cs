@@ -164,7 +164,7 @@ public sealed class DebianBuilder : PackageBuilder
             if (!File.Exists(path))
             {
                 Operations.WriteFile(path, script);
-                Operations.Execute($"chmod a+rx {path}");
+                Operations.Execute($"chmod a+rx \"{path}\"");
             }
         }
     }
