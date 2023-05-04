@@ -28,7 +28,7 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class MacrosExpander
 {
-    private readonly Dictionary<string, string> _cache = new();
+    private const string SpecialPrefix = "$$+";
 
     /// <summary>
     /// Default constructor. Example values and unit test only.
@@ -45,7 +45,6 @@ public class MacrosExpander
     {
         var args = builder.Arguments;
         var conf = builder.Configuration;
-
         Builder = builder;
 
         var dict = new Dictionary<MacroId, string>();
@@ -66,6 +65,8 @@ public class MacrosExpander
         dict.Add(MacroId.DesktopTerminal, conf.DesktopTerminal.ToString().ToLowerInvariant());
         dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
+        dict.Add(MacroId.AppStreamDescriptionXml, GetXmlDescription(conf.AppDescription));
+        dict.Add(MacroId.AppStreamChangelogXml, builder.ChangeLog.ToString(true));
         dict.Add(MacroId.AppVersion, builder.AppVersion);
         dict.Add(MacroId.PackageRelease, builder.PackageRelease);
         dict.Add(MacroId.DeployKind, args.Kind.ToString().ToLowerInvariant());
@@ -81,14 +82,7 @@ public class MacrosExpander
         dict.Add(MacroId.InstallBin, builder.InstallBin);
         dict.Add(MacroId.InstallExec, builder.InstallExec);
 
-        // For lookup
         Dictionary = dict;
-
-        foreach (var item in Dictionary)
-        {
-            // For operations
-            _cache.Add(item.Key.ToVar(), item.Value);
-        }
     }
 
     /// <summary>
@@ -109,19 +103,21 @@ public class MacrosExpander
     {
         if (!string.IsNullOrEmpty(content) && content.Contains("${"))
         {
-            foreach (var item in _cache)
+            // Temporary state which prevents recursion in replacement
+            content = content.Replace("$", SpecialPrefix + "$");
+
+            foreach (var item in Dictionary)
             {
-                if (escape)
-                {
-                    content = content.Replace(item.Key, SecurityElement.Escape(item.Value));
-                }
-                else
-                {
-                    content = content.Replace(item.Key, item.Value);
-                }
+                // NB. XML keys are special and should not be escaped
+                bool escapeThis = escape && !item.Key.ContainsXml();
+                content = content.Replace(SpecialPrefix + item.Key.ToVar(), escapeThis ? SecurityElement.Escape(item.Value) : item.Value);
             }
 
+            // Check here
             CheckForInvalidMacros(content, Builder.WarningSink, itemName);
+
+            // Undo temporary modification
+            content = content.Replace(SpecialPrefix + "$", "$");
         }
 
         return content;
@@ -208,36 +204,74 @@ public class MacrosExpander
 
     private static void CheckForInvalidMacros(string content, ICollection<string> warnings, string? itemName)
     {
-        int p0 = content.IndexOf("${");
+        const string MatchPrefix = SpecialPrefix + "${";
+
+        int p0 = content.IndexOf(MatchPrefix);
 
         if (p0 > -1)
         {
-            string s = content.Substring(p0, Math.Max(content.Length - p0, 5)) + "...";
+            string varStr = content.Substring(p0, Math.Max(content.Length - p0, 5)) + "...";
 
             // Find terminator
-            int temp = content.IndexOf("${", p0 + 1);
+            int next = content.IndexOf(MatchPrefix, p0 + 1);
             int p1 = content.IndexOf("}", p0 + 1);
 
-            if (p1 > p0 && (temp < 0 || p1 < temp))
+            if (p1 > p0 && (next < 0 || p1 < next))
             {
                 // abc ${INV}
                 // 0123456789
                 int cnt = p1 - p0 + 1;
-                s = content.Substring(p0, cnt);
+                varStr = content.Substring(p0, cnt);
             }
 
-            s = $"Invalid macro {s}";
+            varStr = "Invalid macro " + varStr.Replace(MatchPrefix, "${");
 
             if (!string.IsNullOrEmpty(itemName))
             {
-                s += $" in {itemName}";
+                varStr += $" in {itemName}";
             }
 
-            if (!warnings.Contains(s))
+            if (!warnings.Contains(varStr))
             {
-                warnings.Add(s);
+                warnings.Add(varStr);
             }
         }
+    }
+
+    private static string GetXmlDescription(IEnumerable<string> description)
+    {
+        bool newPara = true;
+        var sb = new StringBuilder();
+
+        foreach (var item in description)
+        {
+            // Empty lines only appear mid-content and never consecutive
+            if (newPara)
+            {
+                sb.Append("<p>");
+                sb.Append(SecurityElement.Escape(item));
+                newPara = false;
+            }
+            else
+            if (string.IsNullOrEmpty(item))
+            {
+                sb.Append("</p>");
+                sb.Append("\n\n");
+                newPara = true;
+            }
+            else
+            {
+                sb.Append('\n');
+                sb.Append(SecurityElement.Escape(item));
+            }
+        }
+
+        if (sb.Length != 0)
+        {
+            sb.Append("</p>");
+        }
+
+        return sb.ToString();
     }
 
 }

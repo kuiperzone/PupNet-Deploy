@@ -16,20 +16,17 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Globalization;
-using System.Text;
-
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Immutable version-item class.
+/// Immutable change-item class.
 /// </summary>
-public class VersionItem
+public class ChangeItem : IEquatable<ChangeItem>
 {
     /// <summary>
     /// Constructor which sets <see cref="Change"/> and <see cref="IsHeader"/> to false.
     /// </summary>
-    public VersionItem(string change)
+    public ChangeItem(string change)
     {
         Change = change;
     }
@@ -37,13 +34,11 @@ public class VersionItem
     /// <summary>
     /// Constructor which sets <see cref="Version"/>, <see cref="Date"/> and <see cref="IsHeader"/> to true.
     /// </summary>
-    public VersionItem(string version, DateTime date, string? title = null, string? contact = null)
+    public ChangeItem(string version, DateTime date)
     {
         IsHeader = true;
         Version = version;
         Date = date;
-        Title = title;
-        Contact = contact;
     }
 
     /// <summary>
@@ -62,64 +57,38 @@ public class VersionItem
     public DateTime Date { get; }
 
     /// <summary>
-    /// Gets the header title. It is null where <see cref="IsHeader"/> is false, and a valid string when true.
-    /// </summary>
-    public string? Title { get; }
-
-    /// <summary>
-    /// Gets the header contact. It is null where <see cref="IsHeader"/> is false, and a string value when true.
-    /// </summary>
-    public string? Contact { get; }
-
-    /// <summary>
     /// Gets the change description. It is null where <see cref="IsHeader"/> is true, and a valid single-line
     /// description where false.
     /// </summary>
     public string? Change { get; }
 
     /// <summary>
-    /// Overrides. Calls ToString(null).
+    /// Implements.
     /// </summary>
-    public override string ToString()
+    public bool Equals(ChangeItem? other)
     {
-        return ToString(null);
+        if (other == null)
+        {
+            return false;
+        }
+
+        return IsHeader == other.IsHeader && Change == other.Change &&
+            Version == other.Version && Date.Equals(other.Date);
     }
 
     /// <summary>
-    /// Returns either "+ Version;[Title;][Contact;]yyyy-MM-dd", or "- Change".
+    /// Overrides.
     /// </summary>
-    public string ToString(string? defaultContact)
+    public override bool Equals(object? other)
     {
-        const char Seperator = ';';
+        return Equals(other as ChangeItem);
+    }
 
-        if (Change != null)
-        {
-            return "- " + Change;
-        }
-
-        var sb = new StringBuilder("+ ");
-        sb.Append(Version);
-
-        if (!string.IsNullOrEmpty(Title))
-        {
-            sb.Append(Seperator);
-            sb.Append(Title);
-        }
-
-        if (!string.IsNullOrEmpty(Contact))
-        {
-            sb.Append(Seperator);
-            sb.Append(Contact);
-        }
-        else
-        if (!string.IsNullOrEmpty(defaultContact))
-        {
-            sb.Append(Seperator);
-            sb.Append(defaultContact);
-        }
-
-        sb.Append(Seperator);
-        sb.Append(Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
-        return sb.ToString();
+    /// <summary>
+    /// Overrides.
+    /// </summary>
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Version, Date, Change);
     }
 }

@@ -57,6 +57,17 @@ public class ConfigurationReaderTest
     }
 
     [Fact]
+    public void AppDescription_Optional_DecodeOK()
+    {
+        // Use of angle brackets deliberate
+        var lines = Create().AppDescription;
+        var exp = new string[] { "Line1", "<Line2>", "", "Line3 has ${LINE3_VAR}" };
+
+        Assert.Equal(exp, lines);
+        Assert.Empty(Create(nameof(ConfigurationReader.AppDescription)).AppDescription);
+    }
+
+    [Fact]
     public void AppLicenseId_Mandatory_DecodeOK()
     {
         Assert.Equal("LicenseRef-LICENSE", Create().AppLicenseId);
@@ -68,6 +79,13 @@ public class ConfigurationReaderTest
     {
         Assert.Equal("LICENSE", Create().AppLicenseFile);
         Assert.Null(Create(nameof(ConfigurationReader.AppLicenseFile)).AppLicenseFile);
+    }
+
+    [Fact]
+    public void AppChangeFile_Optional_DecodeOK()
+    {
+        Assert.Equal("CHANGELOG", Create().AppChangeFile);
+        Assert.Null(Create(nameof(ConfigurationReader.AppChangeFile)).AppChangeFile);
     }
 
     [Fact]

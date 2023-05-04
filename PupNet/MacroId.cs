@@ -39,6 +39,8 @@ public enum MacroId
     DesktopTerminal,
     PrimeCategory,
 
+    AppStreamDescriptionXml,
+    AppStreamChangelogXml,
     AppVersion,
     PackageRelease,
     DeployKind,
@@ -86,6 +88,8 @@ public static class MacroIdExtension
             case MacroId.PrimeCategory: return "PRIME_CATEGORY";
 
             // Others
+            case MacroId.AppStreamDescriptionXml: return "APPSTREAM_DESCRIPTION_XML";
+            case MacroId.AppStreamChangelogXml: return "APPSTREAM_CHANGELOG_XML";
             case MacroId.AppVersion: return "APP_VERSION";
             case MacroId.PackageRelease: return "PACKAGE_RELEASE";
             case MacroId.DeployKind: return "DEPLOY_KIND";
@@ -104,6 +108,14 @@ public static class MacroIdExtension
 
             default: throw new ArgumentException("Unknown macro " + id);
         }
+    }
+
+    /// <summary>
+    /// Returns true if the macro value may contain XML and/or other key names.
+    /// </summary>
+    public static bool ContainsXml(this MacroId id)
+    {
+        return id == MacroId.AppStreamDescriptionXml || id == MacroId.AppStreamChangelogXml;
     }
 
     /// <summary>
@@ -137,6 +149,8 @@ public static class MacroIdExtension
 
             case MacroId.DesktopIntegrate: return $"Gives the logical not of {MacroId.DesktopNoDisplay.ToVar()}";
 
+            case MacroId.AppStreamDescriptionXml: return "AppStream application description XML (use within the <description> element only)";
+            case MacroId.AppStreamChangelogXml: return "AppStream changelog XML content (use within the <releases> element only)";
             case MacroId.AppVersion: return "Application version, excluding package-release extension";
             case MacroId.PackageRelease: return "Package release version";
             case MacroId.DeployKind: return "Deployment output kind: appimage, flatpak, rpm, deb, setup, zip";

@@ -51,6 +51,11 @@ public class BuildHost
             Builder.WarningSink.Add($"WARNING. Configuration item {nameof(Configuration.AppId)} should be in reverse DNS form, i.e. 'net.example.appname'");
         }
 
+        if (!string.IsNullOrEmpty(Configuration.AppChangeFile) && Builder.ChangeLog.Items.Count == 0)
+        {
+            Builder.WarningSink.Add($"WARNING. Configuration supplied {nameof(Configuration.AppChangeFile)}, but content does not contain version information in recognised format");
+        }
+
         if (Configuration.PublisherLinkUrl != null && !Configuration.PublisherLinkUrl.Contains("://") && !Configuration.PublisherLinkUrl.Contains('.'))
         {
             // AppId must have a '://' and '.'
@@ -122,7 +127,7 @@ public class BuildHost
 
         if (!Builder.Kind.CanBuildOnSystem())
         {
-            Builder.WarningSink.Add($"CRITICAL. Building {Builder.Kind} packages is not supported on a {RuntimeConverter.SystemOS} development system");
+            Builder.WarningSink.Add($"CRITICAL. Building {Builder.Kind} packages is not supported on {RuntimeConverter.SystemOS} development systems");
         }
 
         PublishCommands = Macros.Expand(GetPublishCommands(Builder), nameof(PublishCommands));
@@ -264,6 +269,7 @@ public class BuildHost
         }
 
         AppendSection(sb, $"DESKTOP: {Path.GetFileName(Configuration.DesktopFile)}", ExpandedDesktop);
+        AppendSection(sb, $"CHANGELOG: {Path.GetFileName(Configuration.AppChangeFile)}", Builder.ChangeLog.ToString());
 
         if (verbose)
         {

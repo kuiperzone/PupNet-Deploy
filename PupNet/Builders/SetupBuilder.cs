@@ -174,7 +174,8 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"AppPublisher={Configuration.PublisherName}");
         sb.AppendLine($"AppCopyright={Configuration.PublisherCopyright}");
         sb.AppendLine($"AppPublisherURL={Configuration.PublisherLinkUrl}");
-        sb.AppendLine($"LicenseFile={LicenseBuildPath}");
+        sb.AppendLine($"InfoBeforeFile={Configuration.AppChangeFile}");
+        sb.AppendLine($"LicenseFile={Configuration.AppLicenseFile}");
         sb.AppendLine($"SetupIconFile={IconSource}");
 
         sb.AppendLine($"DefaultGroupName={Configuration.AppFriendlyName}");

@@ -1,3 +1,13 @@
++ VERSION 1.4.0; 2023-05-03
+- Added AppChangeFile property to configuration (important new feature - see website for information)
+- Added AppReadMeFile property to configuration (now used by Windows Setup builder)
+- Added ${APPSTREAM_CHANGELOG_XML} macro to support release information in AppStream metadata
+- Added changelog RPM package builder
+- Added changelog Debian package builder
+- Updated README documentation
+- Other minor changes
+- Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 + VERSION 1.3.1; 2023-05-01
 - Bugfix: Fix package creation when file path of contents contain spaces (enclose file path with quotes when executing chmod)
 

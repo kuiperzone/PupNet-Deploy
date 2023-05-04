@@ -64,6 +64,12 @@ public abstract class PackageBuilder
         }
 
         IconSource = GetSourceIcon(kind, Configuration.IconFiles);
+
+        // Ignore fact file might not exist if AssertPaths if false (test only)
+        if (Configuration.AssertPaths || File.Exists(Configuration.AppChangeFile))
+        {
+            ChangeLog = new(Configuration.AppChangeFile);
+        }
     }
 
     /// <summary>
@@ -106,6 +112,11 @@ public abstract class PackageBuilder
     /// Gets a reference to the configuration.
     /// </summary>
     public ConfigurationReader Configuration { get; }
+
+    /// <summary>
+    /// Gets the parsed changelog.
+    /// </summary>
+    public ChangeParser ChangeLog { get; } = new();
 
     /// <summary>
     /// Gets a "file operations" instance.
@@ -362,14 +373,15 @@ public abstract class PackageBuilder
     public abstract string? ManifestContent { get; }
 
     /// <summary>
-    /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written. If null, no file is saved.
-    /// The t
+    /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written.
+    /// Concrete subclass may override to specify custom location. If null, no file is written.
     /// </summary>
     public abstract string? ManifestBuildPath { get; }
 
     /// <summary>
-    /// Gets the destination path of the license file in the build directory. This is known because the packager
-    /// will copy <see cref="Configuration.LicenseFile"/> into <see cref="BinBin"/>. Null if no license specified.
+    /// Gets the destination path of the LICENSE file in the build directory. This will cause
+    /// <see cref="ConfigurationReader.AppLicenseFile"/> to be copied into <see cref="BinBin"/>.
+    /// Null if no license specified.
     /// </summary>
     public string? LicenseBuildPath
     {
@@ -378,6 +390,24 @@ public abstract class PackageBuilder
             if (Configuration.AppLicenseFile != null)
             {
                 return Path.Combine(BuildAppBin, Path.GetFileName(Configuration.AppLicenseFile));
+            }
+
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Gets the destination path of the readme/changelog file in the build directory. This will cause
+    /// <see cref="ConfigurationReader.AppChangeFile"/> to be copied into <see cref="BinBin"/>.
+    /// Null if no license specified.
+    /// </summary>
+    public string? ReadMeChangeBuildPath
+    {
+        get
+        {
+            if (Configuration.AppChangeFile != null)
+            {
+                return Path.Combine(BuildAppBin, Path.GetFileName(Configuration.AppChangeFile));
             }
 
             return null;
@@ -423,9 +453,8 @@ public abstract class PackageBuilder
         Operations.CreateDirectory(BuildAppBin);
 
         // For example, debian needs subdirectories for these files.
-        // Calls do nothing if respective property is null
+        // Calls do nothing if respective property is null or directory exists.
         Operations.CreateDirectory(Path.GetDirectoryName(ManifestBuildPath));
-        Operations.CreateDirectory(Path.GetDirectoryName(LicenseBuildPath));
 
         if (IsLinuxExclusive)
         {
@@ -510,11 +539,21 @@ public abstract class PackageBuilder
             }
         }
 
-        // Must come before we call ManifestContent
-        if (Configuration.AppLicenseFile != null && LicenseBuildPath != null)
+        // Copy associated files into bin directory
+        // These must come before we call ManifestContent
+        // We don't want to replace on these if they exist
+        if (LicenseBuildPath != null)
         {
+
             var content = Configuration.ReadAssociatedFile(Configuration.AppLicenseFile);
             Operations.WriteFile(LicenseBuildPath, content);
+        }
+
+        if (ReadMeChangeBuildPath != null)
+        {
+
+            var content = Configuration.ReadAssociatedFile(Configuration.AppChangeFile);
+            Operations.WriteFile(ReadMeChangeBuildPath, content);
         }
 
         // Write manifest just before build, as ManifestContents is virtual and

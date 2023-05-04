@@ -40,7 +40,7 @@ public class ConfigurationReader
     }
 
     /// <summary>
-    /// Constructor with kind. No other arguments. Test or demo only.
+    /// Constructor with kind using for test or demo only.
     /// </summary>
     public ConfigurationReader(PackageKind kind, bool examples, string? metabase = null)
     {
@@ -55,7 +55,10 @@ public class ConfigurationReader
 
         if (examples)
         {
+            AppDescription = Array.Empty<string>();
             AppLicenseFile = "LICENSE.txt";
+            AppChangeFile = "CHANGELOG.txt";
+
             PublisherCopyright = "Copyright (C) Acme Ltd 2023";
             PublisherLinkName = "Project Page";
             PublisherLinkUrl = "https://example.net";
@@ -122,8 +125,10 @@ public class ConfigurationReader
         AppId = GetMandatory(nameof(AppId), ValueFlags.StrictSafe);
         AppVersionRelease = GetMandatory(nameof(AppVersionRelease), ValueFlags.SafeNoSpace);
         AppShortSummary = GetMandatory(nameof(AppShortSummary), ValueFlags.None);
+        AppDescription = GetCollection(nameof(AppDescription), ValueFlags.MultiText);
         AppLicenseId = GetMandatory(nameof(AppLicenseId), ValueFlags.Safe);
-        AppLicenseFile = GetOptional(nameof(AppLicenseFile), ValueFlags.AssertPathWithDisable);
+        AppLicenseFile = GetOptional(nameof(AppLicenseFile), ValueFlags.AssertPath);
+        AppChangeFile = GetOptional(nameof(AppChangeFile), ValueFlags.AssertPath);
 
         PublisherName = GetMandatory(nameof(PublisherName), ValueFlags.Safe);
         PublisherCopyright = GetOptional(nameof(PublisherCopyright), ValueFlags.Safe);
@@ -176,14 +181,15 @@ public class ConfigurationReader
     [Flags]
     private enum ValueFlags
     {
-        None = 0x00,
-        Multi = 0x01,
-        Safe = 0x02,
-        SafeNoSpace = Safe | 0x04,
-        StrictSafe = SafeNoSpace | 0x08,
-        Path = Safe | 0x10,
-        AssertPath = Path | 0x20,
-        PathWithDisable = Path | 0x40,
+        None = 0x0000,
+        MultiItems = 0x0001,
+        MultiText = MultiItems | 0x0002,
+        Safe = 0x0004,
+        SafeNoSpace = Safe | 0x0008,
+        StrictSafe = SafeNoSpace | 0x0010,
+        Path = Safe | 0x0020,
+        AssertPath = Path | 0x0040,
+        PathWithDisable = Path | 0x0080,
         AssertPathWithDisable = AssertPath | PathWithDisable,
     };
 
@@ -212,8 +218,11 @@ public class ConfigurationReader
     public string AppId { get; } = "net.example.helloworld";
     public string AppVersionRelease { get; } = "1.0.0[1]";
     public string AppShortSummary { get; } = "A HelloWorld application";
+    public IReadOnlyCollection<string> AppDescription { get; } = new string[]
+        { "HelloWorld is a really friendly application.", "It says \"Hello\" and supports an additional \"Goodbye\" feature.", "", "It is the only app you'll ever need." };
     public string AppLicenseId { get; } = "LicenseRef-Proprietary";
     public string? AppLicenseFile { get; }
+    public string? AppChangeFile { get; }
 
     public string PublisherName { get; } = "The Hello World Team";
     public string? PublisherCopyright { get; } = "Copyright (C) Hello World Team 2023";
@@ -361,7 +370,13 @@ public class ConfigurationReader
                 $"to '1'. Note that the version-release value given here may be overridden from the command line."));
 
         sb.Append(CreateHelpField(nameof(AppShortSummary), AppShortSummary, style,
-                $"Mandatory single line application description."));
+                $"Mandatory single line application short summary description."));
+
+        sb.Append(CreateHelpField(nameof(AppDescription), AppDescription, true, style,
+                $"Optional multi-line application description which may provide longer text than {nameof(AppShortSummary)}.",
+                $"It should ideally contain several short paragraphs, while avoiding any complex formatting. The content",
+                $"is used by package builders where supported, including RPM and Debian, and may optionaly be used to",
+                $"populate the '<description>' element in the AppStream metadata through the use of a macro variable."));
 
         sb.Append(CreateHelpField(nameof(AppLicenseId), AppLicenseId, style,
                 $"Mandatory application license ID. This should be one of the recognised SPDX license",
@@ -369,8 +384,16 @@ public class ConfigurationReader
                 $"custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'."));
 
         sb.Append(CreateHelpField(nameof(AppLicenseFile), AppLicenseFile, style,
-                $"Optional path to a copyright/license text file. If provided, it will be packaged with the application",
-                $"and identified to package builder where supported."));
+                $"Optional path to application copyright/license text file. If provided, it will be packaged with the",
+                $"application and used with package builders where supported."));
+
+        sb.Append(CreateHelpField(nameof(AppChangeFile), AppChangeFile, style,
+                $"Optional path to application changelog file. IMPORTANT. If given, this file should contain version",
+                $"information in a predefined format. Namely, it should contain one or more version headings of form:",
+                $"'+ VERSION;[Title;][maintainer@email.com;]DATE', under which are to be listed change items of form:",
+                $"'- Change description'. Formatted information will be parsed and used to populate AppStream metadata.",
+                $"Additionally, it will be used with package builders where supported. NOTE. Superflous text is ignored,",
+                $"so that it may also contain README information. For information: {Program.ProjectUrl}."));
 
 
 
@@ -731,36 +754,62 @@ public class ConfigurationReader
 
     private IReadOnlyCollection<string> GetCollection(string name, IReadOnlyCollection<string> def, ValueFlags flags, string? mustContain = null, string? mustStart = null)
     {
-        var value = GetOptional(name, flags | ValueFlags.Multi);
+        flags |= ValueFlags.MultiItems;
+        var value = GetOptional(name, flags);
 
         if (value == null && Reader.Values.ContainsKey(name))
         {
-            // Intentionally empty
+            // Intentionally empty rather than default
             return Array.Empty<string>();
         }
 
         if (value != null)
         {
-            char sep = value.Contains('\n') ? '\n' : ';';
-            var list = new List<string>(value.Split(sep, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
-
-            for (int n = 0; n < list.Count; ++n)
+            if (flags.HasFlag(ValueFlags.MultiText))
             {
-                // Does nothing if not Path flag
-                list[n] = AssertPathFlags(name, list[n], flags);
+                // Accepts only '\n' separator
+                // Removes first and last empty, and consecutive empties
+                bool lastEmpty = true;
+                var list = new List<string>(value.Split('\n', StringSplitOptions.TrimEntries));
 
-                if (!string.IsNullOrEmpty(mustStart) && !list[n].StartsWith(mustStart))
+                for (int n = 0; n < list.Count; ++n)
                 {
-                    throw new ArgumentException($"{name} items must start with {mustStart}");
+                    bool currentEmpty = string.IsNullOrEmpty(list[n]);
+
+                    if (currentEmpty && (lastEmpty || n == list.Count - 1))
+                    {
+                        list.RemoveAt(n--);
+                    }
+
+                    lastEmpty = currentEmpty;
                 }
 
-                if (!string.IsNullOrEmpty(mustContain) && !list[n].Contains(mustContain))
-                {
-                    throw new ArgumentException($"{name} items must contain {mustContain}");
-                }
+                return list;
             }
+            else
+            {
+                // Accepts either '\n' or ';' separators. Always removes empty.
+                char sep = value.Contains('\n') ? '\n' : ';';
+                var list = new List<string>(value.Split(sep, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
-            return list;
+                for (int n = 0; n < list.Count; ++n)
+                {
+                    // Does nothing if not Path flag
+                    list[n] = AssertPathFlags(name, list[n], flags);
+
+                    if (!string.IsNullOrEmpty(mustStart) && !list[n].StartsWith(mustStart))
+                    {
+                        throw new ArgumentException($"{name} items must start with {mustStart}");
+                    }
+
+                    if (!string.IsNullOrEmpty(mustContain) && !list[n].Contains(mustContain))
+                    {
+                        throw new ArgumentException($"{name} items must contain {mustContain}");
+                    }
+                }
+
+                return list;
+            }
         }
 
         return def;
@@ -803,7 +852,7 @@ public class ConfigurationReader
             return null;
         }
 
-        if (!flags.HasFlag(ValueFlags.Multi) && value.Contains('\n'))
+        if (!flags.HasFlag(ValueFlags.MultiItems) && value.Contains('\n'))
         {
             throw new ArgumentException($"Use single line only for Configuration {name}");
         }
@@ -828,7 +877,7 @@ public class ConfigurationReader
 
                 if (c < ' ' || Invalid.Contains(c))
                 {
-                    if (c != '\n' || !flags.HasFlag(ValueFlags.Multi))
+                    if (c != '\n' || !flags.HasFlag(ValueFlags.MultiItems))
                     {
                         throw new ArgumentException($"Configuration {name} contains invalid characters");
                     }
@@ -851,7 +900,7 @@ public class ConfigurationReader
                     // Not force lower case, but we will convert as needed
                     if (c != '-' && c != '+' && c != '.' && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c < '0' || c > '9'))
                     {
-                        if (c != '\n' || !flags.HasFlag(ValueFlags.Multi))
+                        if (c != '\n' || !flags.HasFlag(ValueFlags.MultiItems))
                         {
                             throw new ArgumentException($"Configuration {name} contains invalid characters");
                         }
@@ -861,7 +910,7 @@ public class ConfigurationReader
         }
 
         // Cannot assert paths on a multi -- see GetCollection()
-        return flags.HasFlag(ValueFlags.Multi) ? value : AssertPathFlags(name, value, flags);
+        return flags.HasFlag(ValueFlags.MultiItems) ? value : AssertPathFlags(name, value, flags);
     }
 
     private string AssertPathFlags(string name, string value, ValueFlags flags)

@@ -35,7 +35,8 @@ public class MacroExpanderTest
             sb.AppendLine(item.ToVar());
         }
 
-        var test = host.Macros.Expand(sb.ToString());
+        // Need to remove embedded macro in test string
+        var test = host.Macros.Expand(sb.ToString()).Replace("${LINE3_VAR}", "LINE3_VAR");
 
         // Expect no remaining macros
         Console.WriteLine(test);
@@ -50,6 +51,18 @@ public class MacroExpanderTest
         // Has XML chars
         var summary = host.Macros.Expand("${APP_SHORT_SUMMARY}", true);
         Assert.Equal("Test &lt;application&gt; only", summary);
+    }
+
+    [Fact]
+    public void Expand_DoesNotRecurse()
+    {
+        var host = new BuildHost(new DummyConf(PackageKind.Zip));
+
+        // Content escape but has XML <p>
+        var desc = host.Macros.Expand("${APPSTREAM_DESCRIPTION_XML}", true);
+
+        // Line1\n<Line2>\n\nLine3 has ${VAR}
+        Assert.Equal("<p>Line1\n&lt;Line2&gt;</p>\n\n<p>Line3 has ${LINE3_VAR}</p>", desc);
     }
 
 }

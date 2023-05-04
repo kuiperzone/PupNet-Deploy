@@ -53,8 +53,10 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
         lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
         lines.Add($"{nameof(ConfigurationReader.AppShortSummary)} = Test <application> only");
+        lines.Add($"{nameof(ConfigurationReader.AppDescription)} = \n Line1\n<Line2>\n\n  Line3 has ${{LINE3_VAR}}\n");
         lines.Add($"{nameof(ConfigurationReader.AppLicenseId)} = LicenseRef-LICENSE");
         lines.Add($"{nameof(ConfigurationReader.AppLicenseFile)} = LICENSE");
+        lines.Add($"{nameof(ConfigurationReader.AppChangeFile)} = CHANGELOG");
 
         lines.Add($"{nameof(ConfigurationReader.PublisherName)} = Kuiper Zone");
         lines.Add($"{nameof(ConfigurationReader.PublisherCopyright)} = Copyright Kuiper Zone");
