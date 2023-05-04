@@ -1,4 +1,4 @@
-+ VERSION 1.4.0; 2023-05-03
++ VERSION 1.4.0; TBD
 - Added AppChangeFile property to configuration (important new feature - see website for information)
 - Added AppReadMeFile property to configuration (now used by Windows Setup builder)
 - Added ${APPSTREAM_CHANGELOG_XML} macro to support release information in AppStream metadata
