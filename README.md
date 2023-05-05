@@ -14,11 +14,22 @@ installation file in a single step.
 * [INTRODUCTION](#introduction)
 
 * [INSTALL & PREREQUISITES](#install-prerequisites)
-*   [AppImage Out of the Box](#appimage-out-of-the-box)
-*   [Flatpaks on Linux](#flatpak-on-linux)
-*   [Debian Packages on Linux](#debian-packages-on-linux)
-*   [RPM Packages on Linux](#rpm-packages-on-linux)
-*   [Setup Files on Windows](#setup-files-on-windows)
+    * [AppImage Out of the Box](#appimage-out-of-the-box)
+    * [Flatpaks on Linux](#flatpak-on-linux)
+    * [Debian Packages on Linux](#debian-packages-on-linux)
+    * [RPM Packages on Linux](#rpm-packages-on-linux)
+    * [Setup Files on Windows](#setup-files-on-windows)
+
+* [PUPNET CONFIGURATION](#pupnet-configuration)
+    * [Desktop File](#desktop-file)
+    * [AppStream Metadata](#appstream-metadata)
+    * [Icons](#icons)
+    * [Dotnet Project Path](#dotnet-project-path)
+    * [Dotnet Publish Arguments](#dotnet-publish-arguments)
+    * [Application Versioning & Changelog](#application-versioning-changelog)
+    * [Terminal vs GUI Applications](#terminal-vs-gui-applications)
+    * [Custom Post-Publish Operations](#custom-post-publish-operations)
+    * [Debian & RPM Considerations](#debian-rpm-considerations)
 
 
 ## INTRODUCTION <a name="introduction"/>
@@ -136,7 +147,7 @@ so that PupNet can call the `iscc` compiler. See screenshot below below:
 </p>
 
 
-## PUPNET CONFIGURATION ##
+## PUPNET CONFIGURATION <a name="pupnet-configuration"/>
 
 **Hello World for PupNet** is a demonstration project for PupNet Deploy. It will be instructive to discuss
 the major configuration elements with reference to this simple project, as it demonstrates all the major
@@ -162,7 +173,7 @@ This is a simple ini file in which the deployment project is configured. You wil
 Where local paths are given, they are local to the `.conf` file, rather than your current working directory.
 Always use the forward-slash '/' as a path separator for cross-platform compatibility.
 
-### Desktop File ###
+### Desktop File <a name="desktop-file"/>
 
 Note the `DesktopFile` parameter which provides a path to a Linux `.desktop` file. *If you leave it blank, one will
 be generated automatically.* In the Hello World demo, we have specified a file in order to show the contents...
@@ -211,13 +222,14 @@ behavior on Windows with that on Linux).
 
 This will create a new file for you under: `name.desktop`
 
+### AppStream Metadata <a name="appstream-metadata"/>
 
-### AppStream Metadata ###
+The `MetaFile` parameter specifies the path to a local AppStream metadata XML file. This applies to Linux only and
+is optional. This metadata is used by software centers to display information about installed applications. For
+detail information, see [AppStream Metadata Quick Start](https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html).
 
-The `MetaFile` parameter specifies the path to a local AppStream metadata XML file. It is optional and, if
-omitted, no `.metainfo.xml` file is shipped with your application.
-
-Take a look, for example, at the file provided under: `Deploy/app.metainfo.xml`.
+If you omit the `MetaFile` property, no `.metainfo.xml` file is shipped with your application. But let's assume you
+wish to provide metadata, so take a look at the file provided under: `Deploy/app.metainfo.xml` in the Hello World demo.
 
 Again, you will notice that macro variables are used. These are entirely optional here and simply mean, that as far
 as possible, deployment configuration data is specified in one place only (i.e. your `pupnet.conf` file). However,
@@ -235,7 +247,7 @@ in more detail below.
 This will create a new file for you under: `name.metainfo.xml`
 
 
-### Icons ###
+### Icons <a name="icons"/>
 
 Multiple desktop icons are provided with the `IconPaths` parameter. You can use semi-colon as a separator, such as:
 `IconPaths = icon1.ico;icon2.64x64.png;icon3.svg`, or present them in multi-line form as shown in the Hello World demo:
@@ -260,7 +272,7 @@ Windows `ico` file ignored.
 For Windows `Setup` packages, on the other hand, only the `ico` file is used, and PNG and SVG files are ignored.
 
 
-### Dotnet Project Path ###
+### Dotnet Project Path <a name="dotnet-project-path"/>
 
 When building the deployment, PupNet first calls `dotnet publish` on your project. To do this, it needs to know where
 your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that the `DotnetProjectPath` value is empty,
@@ -271,7 +283,7 @@ empty. Otherwise use this field to specify the path to your solution or project 
 of the configuration file.
 
 
-### Dotnet Publish Arguments ###
+### Dotnet Publish Arguments <a name="dotnet-publish-arguments"/>
 
 The `DotnetPublishArgs` parameter is used to specify values to supply to the `dotnet publish` call:
 
@@ -285,7 +297,7 @@ compile the application, but to publish all dependencies into a single directory
 consider using Native AOT as well).
 
 
-### Application Versioning & Changelog ###
+### Application Versioning & Changelog <a name="application-versioning-changelog"/>
 
 #### Application Version (AppVersionRelease) ####
 The application version (plus release number) is specified in the `pupnet.conf` file, for example:
@@ -367,7 +379,7 @@ metadata (after macro expansion) by using `--verbose` command line option when b
 Finally, it should be stressed that this feature is entirely optional. If it does not suit your project, leave
 `AppChangeFile` blank and specify version release information in your AppStream metadata file yourself (or just omit it).
 
-### Terminal vs GUI Applications ###
+### Terminal vs GUI Applications <a name="terminal-vs-gui-applications"/>
 
 While the Hello World demo is a terminal application, it was envisaged that a typical use case for PupNet
 would be to deploy GUI applications built with Avalonia that are integrated with the desktop.
@@ -400,7 +412,7 @@ Console entry is written to the Program Files menu (using the title you supply) 
 dedicated command window with your application directory in the user path.
 
 
-### Custom Post-Publish Operations ###
+### Custom Post-Publish Operations <a name="custom-post-publish-operations"/>
 
 In `HelloWorld.pupnet.conf`, we see the lines:
 
@@ -460,7 +472,7 @@ IMPORTANT: If you do this, you will need to disable PupNet from calling `dotnet 
 `DotnetProjectPath = NONE`.
 
 
-### Debian and RPM Considerations ###
+### Debian & RPM Considerations <a name="debian-rpm-considerations"/>
 
 #### Install Location ####
 With Debian and RPM deployments, your application will be installed to the `/opt` directory, rather than `/usr/bin`.
