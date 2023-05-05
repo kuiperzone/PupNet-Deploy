@@ -420,7 +420,7 @@ For a GUI application, you will want to ensure the following:
     DesktopNoDisplay = false
     DesktopTerminal = false
 
-You may typically leave `StartCommand` empty, but may set if you wish.
+You may typically leave `StartCommand` empty, but may set it if you wish.
 
 #### Terminal Application ####
 IMPORTANT: Your terminal application will not be in the user's path by default, so note `StartCommand` and
@@ -431,15 +431,17 @@ IMPORTANT: Your terminal application will not be in the user's path by default, 
     StartCommand = command-name
     SetupCommandPrompt = Command Prompt
 
-(You may wish, however, to provide a desktop entry for your terminal app by setting `DesktopNoDisplay` to false.)
+For command line only apps, you would typically set `DesktopNoDisplay` true, but you may give your application a desktop
+entry by setting it to false if you wish.
 
-With `StartCommand`, you should set a simple command name for application which will be located in the path. This will be
-realized via a tiny bash script on Linux, or bat file on Windows, which will launch your main application. If, for example,
-your runnable file is something like 'Zone.Kuiper.HelloWorld', you may set `StartCommand` simply to 'helloworld'.
+With `StartCommand`, you should set a simple command name for application which will be located in the user's path after
+installation. This will actually be realized via a tiny bash script on Linux, or bat file on Windows, which will launch
+your main application (the rest of your application will not be in the path). If, for example, your runnable file is
+something like 'Zone.Kuiper.HelloWorld', you may set `StartCommand` simply to 'helloworld'.
 
-On Windows, a different application is taken. The `SetupCommandPrompt` is a Windows only option which ensures that a
+On Windows, a different approach is taken. The `SetupCommandPrompt` is a Windows only option which ensures that a
 Console entry is written to the Program Files menu (using the title you supply) which, when launched, will open a
-dedicated command window with your application directory in the user path.
+dedicated command window with your application directory in the path for the session.
 
 
 ### Custom Post-Publish Operations <a name="custom-post-publish-operations"/>
@@ -517,7 +519,7 @@ https://learn.microsoft.com/en-us/dotnet/core/install/linux-scripted-manual#rpm-
 
 From PupNet version 1.3.0 onward, the pupnet.conf file supports the ability to define such additional dependencies
 using the `RpmRequires` and `DebRecommends` properties. By default, they are populated with typically expected values
-(below), although these may be subject to change and you should review them for you application.
+(below), although these may be subject to change and you should review them for your application.
 
     RpmRequires = """
         krb5-libs
@@ -703,8 +705,8 @@ This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainf
 Where possible, new versions of PupNet will be backward compatible with existing pupnet.conf files. If ever this
 is not the case, it will be explicitly stated.
 
-New configuration properties may be added and old ones removed or deprecated. Where a new PupNet version results in
-changes to configuration properties, you can upgrade an existing pupnet.conf file to the latest format using:
+New configuration properties may be added and old ones removed or deprecated, however. Where a new PupNet version results
+in changes to configuration properties, you can upgrade an existing pupnet.conf file to the latest format using:
 
     pupnet [file.pupnet.conf] --upgrade-conf
 
@@ -715,14 +717,14 @@ or
 Your existing file will "backed-up" by appending an ".old" extension, and a new file written containing new properties
 with their default values.
 
-Using the --verbose option (above), causes the new file to contain extensive document comments. Without it, the new file
+Using the `--verbose` option (above), causes the new file to contain extensive document comments. Without it, the new file
 will be stripped of comments.
 
 See also version specific changes below.
 
 ### Version 1.4 Changes <a name="version-1.4-changes"/>
 
-PupNet version 1.4 introduced new `AppDescription` and `AppChangeFile` configuration properties. If you wish to
+PupNet version 1.4.0 introduced new `AppDescription` and `AppChangeFile` configuration properties. If you wish to
 make use of them, populate `AppDescription` with a longer application description (example below), and point `AppChangeFile`
 to a changelog or README file containing formatted version information.
 
@@ -748,16 +750,16 @@ make use of these new features:
         ${APPSTREAM_DESCRIPTION_XML}
     </description>
 
-Here, you may replace your default description text, but keep any other language text.
-
+Here, you may replace your default description text, but keep any other language text. And:
 
     <releases>
         ${APPSTREAM_CHANGELOG_XML}
     </releases>
 
-With this, you should remove existing version release information.
+With this one, you should remove existing version release information if ${APPSTREAM_CHANGELOG_XML} is going to be
+populated from `AppChangeFile`.
 
-In addition to AppStream metadata, the `AppDescription` content is also now used in the construction of RPM and DEB
+In addition to AppStream metadata, the `AppDescription` content is now also used in the construction of RPM and DEB
 packages.
 
 
@@ -1327,13 +1329,13 @@ You may notice that PupNet outputs differences in package naming styles. For exa
     PupNet-Deploy.x86_64.AppImage
     pupnet-deploy_0.0.1-1_amd64.deb
 
-PupNet follows the naming conventions used with the respective packages. This includes different CPU architecture
-naming conventions.
+PupNet follows the naming conventions used with the respective packages. This includes, for example, different CPU
+architecture naming conventions. In some, it normal to include the version in the file, but not in others.
 
 ### RPM & Debian Packages Cannot be Removed using Gnome Software Center <a name="rpm-debian-packages-cannot-be-removed-using-gnome-software-center"/>
 
 If you install your RPM and DEB packages from a local file (rather than a repository) they will, courtesy of your
-AppStream metadata, show up in the Gnome Software Center GUI, as expected. However, you may find that they cannot be
+AppStream metadata, show up in the Gnome Software Center, as expected. However, you may find that they cannot be
 launched or removed using the GUI.
 
 Instead, they must be removed from the command line, like so:
@@ -1344,8 +1346,8 @@ or:
 
     sudo dnf remove helloworld
 
-This is not an issue with PupNet or AppStream metadata. Rather, having been installed from file,
-the Gnome Software Center lacks certain other metadata it expects had the package originated from a repository.
+This is not an issue with PupNet or AppStream metadata. Rather, having been installed from file, the Gnome Software Center
+lacks certain other metadata it expects had the package originated from a repository.
 See [here for information](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7).
 
 
@@ -1370,18 +1372,18 @@ In the process, however, I had cause to reflect on certain things, including the
 because I intended to use Flatpak to deploy my other [application project](https://github.com/kuiperzone/AvantGarde),
 but found that there are several important scenarios which Flatpak cannot support, including the deployment of development
 tools. Regardless, I still thought it useful for developers to be able ship software in formats convenient for users,
-so I added Flatpak to PupNet. However, I took out my anger by adding RPM and Debian formats as well.
+so I added Flatpak to PupNet. However, I took out my anger by adding RPM and Debian formats in order to provide alternatives.
 
-I would not be keen on adding more formats in the Linux space, as each deployment option must be maintained. Rather, I
-would be interested to see how things play out in the future, especially with regard Snap packages. I note also the
-trend toward centralized repository-only distribution models. For example, here is a quote from the
+I would not be keen on adding more formats in the Linux space, however, as each deployment option must be maintained.
+Rather, I would be interested to see how things play out in the future, especially with regard Snap packages. I note also
+the trend toward centralized repository-only distribution models. For example, here is a quote from the
 [Gnome Team](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7):
 
 *Stand-alone RPM files are really not a use case we want to encourage people to use.*
 
 Repository only installations is not a paradigm I am fully onboard with, although I recognize its advantages. Rather,
-I support the idea of freedom and that means developers and users having the freedom to create and share software without
-necessarily having to go through third-parties who may act as gate-keepers.
+I support the idea of freedom and that means developers and users having the freedom to create and share software themselves,
+without necessarily having to go through third-parties who may act as gate-keepers.
 
 This is why I support [AppImage](https://github.com/AppImage/AppImageKit) as a means of software distribution on Linux,
 as it always best to keep the choice!
