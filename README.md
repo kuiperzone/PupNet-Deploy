@@ -756,7 +756,7 @@ Here, you may replace your default description text, but keep any other language
         ${APPSTREAM_CHANGELOG_XML}
     </releases>
 
-With this one, you should remove existing version release information if ${APPSTREAM_CHANGELOG_XML} is going to be
+With this one, you should remove existing version release information if `${APPSTREAM_CHANGELOG_XML}` is going to be
 populated from `AppChangeFile`.
 
 In addition to AppStream metadata, the `AppDescription` content is now also used in the construction of RPM and DEB
