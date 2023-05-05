@@ -195,9 +195,11 @@ Now, take a look at the `HelloWorld.pupnet.conf` in the root of the project.
     <img src="Media/Screenie-Configuration.png" style="width:60%;max-width:400px;"/>
 </p>
 
-This is a simple ini file in which the deployment project is configured. You will see that each parameter is documented.
-Where local paths are given, they are local to the `.conf` file, rather than your current working directory.
-Always use the forward-slash '/' as a path separator for cross-platform compatibility.
+This is a simple ini file in which the deployment project is configured. Where local paths are given, they are local
+to the `.conf` file, rather than your current working directory. Always use the forward-slash '/' as a path separator
+for cross-platform compatibility.
+
+You will see that each parameter is documented. However, we will discuss key properties and issues below.
 
 ### Desktop File <a name="desktop-file"/>
 
@@ -257,14 +259,14 @@ detail information, see [AppStream Metadata Quick Start](https://www.freedesktop
 If you omit the `MetaFile` property, no `.metainfo.xml` file is shipped with your application. But let's assume you
 wish to provide metadata, so take a look at the file provided under: `Deploy/app.metainfo.xml` in the Hello World demo.
 
-Again, you will notice that macro variables are used. These are entirely optional here and simply mean, that as far
+Again, you will notice that macro variables are used. These are entirely optional here and simply mean that, as far
 as possible, deployment configuration data is specified in one place only (i.e. your `pupnet.conf` file). However,
 you may still wish to edit and extend this file to provide a screenshot, international language translations and
 additional information such as keywords.
 
 **IMPORTANT:** Since PupNet version 1.4.0, the macros `${APPSTREAM_DESCRIPTION_XML}` and `${APPSTREAM_CHANGELOG_XML}`
 may be used to auto-populate the default application description, and change (release) information. These are described
-in more detail below.
+in more detail below under [Application Versioning](#application-versioning-changelog).
 
 **Hint:** You can use PupNet itself to generate a metadata template file for a new project:
 
@@ -291,11 +293,11 @@ Multiple desktop icons are provided with the `IconPaths` parameter. You can use 
 Note the use of *triple quotes* here for multi-line values.
 
 Use only the `svg`, `png` and `ico` file types. On Linux, `svg` and `png` files will be installed appropriately and the
-Windows `ico` file ignored.
+Windows `ico` file ignored. For Windows `Setup` packages, on the other hand, only the `ico` file is used, and PNG and SVG
+files are ignored.
 
-**IMPORTANT:** It is necessary to specify the size of PNG files by embedding their size in the filename, as shown, or simply as: `name.64.png`.
-
-For Windows `Setup` packages, on the other hand, only the `ico` file is used, and PNG and SVG files are ignored.
+**IMPORTANT:** It is necessary to specify the size of PNG files by embedding their size in the filename, as shown above,
+or simply as: `name.64.png`.
 
 
 ### Dotnet Project Path <a name="dotnet-project-path"/>
@@ -320,7 +322,7 @@ configuration and command line arguments.
 
 As an absolute minimum, we always want to include `--self-contained true`, as this will cause dotnet not only to
 compile the application, but to publish all dependencies into a single directory. (From .NET8 onward you may wish to
-consider using Native AOT as well).
+consider using Native AOT).
 
 
 ### Application Versioning & Changelog <a name="application-versioning-changelog"/>
@@ -355,7 +357,8 @@ macro variable which may optionally be used within the `<release>` element of yo
 that lengthy version change information need only be specified once (in a changelog or README file).
 
 Version change information is to be provided as one or more version release sections prefixed with '+' and a leading
-version number, suffixed with trailing date, with subsequent change items prefixed with '-', as follows:
+version number, and suffixed with trailing date. Subsequent change items are prefixed with '-', as shown below.
+Note that ';' is used as a separator.
 
     + VERSION;[Other fields ignored;]yyyy-MM-dd
     - Change feature 3
@@ -365,8 +368,8 @@ version number, suffixed with trailing date, with subsequent change items prefix
     - Change feature 1
     - Change feature 2
 
-Note that ';' is used as a separator. Additional fields, between the VERSION number and trailing date, may used to
-ive a version title and/or maintainer contact, as below.
+Additional fields, between the VERSION number and trailing date, may used as you wish, i.e. to give a version title
+and/or maintainer contact information, as below.
 
     + VERSION 1.3.1; Patch Release; nobody@kuiper.zone; 2023-05-01
     - Bugfix: Fix package creation when file path of contents contain spaces (enclose file path with quotes when executing chmod)
@@ -382,6 +385,7 @@ The following two examples are "legal":
     - Long change line
       describing feature 3
     - Change feature 4
+
 
     + 1.3.1;2023-05-01
 
