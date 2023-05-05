@@ -31,6 +31,32 @@ installation file in a single step.
     * [Custom Post-Publish Operations](#custom-post-publish-operations)
     * [Debian & RPM Considerations](#debian-rpm-considerations)
 
+* [BUILDING THE HELLO WORLD DEMO](#building-the-hello-world-demo)
+    * [On Linux](#on-linux)
+    * [On Windows](#on-windows)
+
+* [CREATING NEW PUPNET PROJECT FILE](#creating-new-pupnet-project-files)
+
+* [BACKWARD COMPATIBILITY & UPGRADING YOUR CONFIGURATION](#backward-compatibility-upgrading-your-configuration)
+    * [Version 1.4 Changes](#version-1.4-changes)
+
+* [HELP SYSTEM REFERENCE](#help-system-reference)
+    * [Command Arguments](#command-arguments)
+    * [Macro Reference](#macro-reference)
+    * [Configuration Reference](#configuration-reference)
+
+* [FAQs & GOTCHAS](#faqs-gotchas)
+    * [Virtual Box & Symlinks](#virtual-box-symlinks)
+    * [RPM Outputs to a Subdirectory](#rpm-outputs-to-a-subdirectory)
+    * [Package Naming is not Consistent](#package-naming-is-not-consistent)
+    * [RPM & Debian Packages Cannot be Removed using Gnome Software Center](#rpm-debian-packages-cannot-be-removed-using-gnome-software-center)
+
+* [ADDITIONAL INFORMATION](#additional-information)
+    * [Brief Discussion on Past & Future](#brief-discussion-on-past-future)
+    * [Notes on Extending PupNet](#notes-on-extending-pupnet)
+    * [An Application which uses PupNet Deploy](#an-application-which-uses-pupnet-deploy)
+    * [Copyright & License](#copyright-license)
+
 
 ## INTRODUCTION <a name="introduction"/>
 
@@ -511,7 +537,7 @@ using the `RpmRequires` and `DebRecommends` properties. By default, they are pop
 *You should test RPM and Debian packages against your target distributions.*
 
 
-## BUILDING THE HELLO WORLD DEMO ##
+## BUILDING THE HELLO WORLD DEMO <a name="building-the-hello-world-demo"/>
 
 **Hello World for PupNet** can be built for all package kinds, including `appimage`, `flatpak`, `deb`, `rpm`, `zip`
 and `setup` for Windows.
@@ -521,7 +547,7 @@ to your local drive. Ensure that you have installed the prerequisites above, or 
 
 In the terminal, CD into the root of the project directory.
 
-### On Linux ###
+### On Linux <a name="on-linux"/>
 
 Assuming you're on Linux, type:
 
@@ -624,8 +650,7 @@ We can view more information, including the AppStream metadata contents, by usin
 
 The `--verbose` option is useful in other areas too, as we will see below.
 
-
-### On Windows ###
+### On Windows <a name="on-windows"/>
 
 On a Windows machine with InnoSetup installed, type:
 
@@ -647,7 +672,7 @@ included a link to our home page, which is optional.
 Moreover, there is a "Command Prompt" option to launch a dedicated command window, as described above.
 
 
-## CREATING NEW PUPNET PROJECT FILES ##
+## CREATING NEW PUPNET PROJECT FILES <a name="creating-new-pupnet-project-files"/>
 
 If you're starting a new project, you will wish to generate a new `pupnet.conf` file and possibly the associated
 desktop and AppStream metadata files as well.
@@ -670,7 +695,7 @@ In fact, we can generate a complete set of files, as follows:
 This creates not only the `pupnet.conf` file, but the `.desktop` and a `.metainfo.xml` template as well.
 
 
-## BACKWARD COMPATIBILITY & UPGRADING YOUR CONFIGURATION ##
+## BACKWARD COMPATIBILITY & UPGRADING YOUR CONFIGURATION <a name="backward-compatibility-upgrading-your-configuration"/>
 Where possible, new versions of PupNet will be backward compatible with existing pupnet.conf files. If ever this
 is not the case, it will be explicitly stated.
 
@@ -691,7 +716,7 @@ will be stripped of comments.
 
 See also version specific changes below.
 
-### Version 1.4 Changes ###
+### Version 1.4 Changes <a name="version-1.4-changes"/>
 
 PupNet version 1.4 introduced new `AppDescription` and `AppChangeFile` configuration properties. If you wish to
 make use of them, populate `AppDescription` with a longer application description (example below), and point `AppChangeFile`
@@ -732,9 +757,9 @@ In addition to AppStream metadata, the `AppDescription` content is also now used
 packages.
 
 
-## HELP SYSTEM REFERENCE ##
+## HELP SYSTEM REFERENCE <a name="help-system-reference"/>
 
-### Command Arguments ###
+### Command Arguments <a name="command-arguments"/>
 
 Type `pupnet --help` to display command arguments as expected.
 
@@ -817,7 +842,7 @@ Type `pupnet --help` to display command arguments as expected.
     --version
     Show version and associated information.
 
-### Macro Reference ###
+### Macro Reference <a name="macro-reference"/>
 
 Type `pupnet --help macro` to see supported macro reference information:
 
@@ -943,7 +968,7 @@ Type `pupnet --help macro` to see supported macro reference information:
     Gives the PublisherName value from the pupnet.conf file
     Example: ${PUBLISHER_NAME} = The Hello World Team
 
-### Configuration Reference ###
+### Configuration Reference <a name="configuration-reference"/>
 
 Type `pupnet --help conf` to see supported configuration reference information:
 
@@ -1277,18 +1302,22 @@ Type `pupnet --help conf` to see supported configuration reference information:
     at command line.
     Example: SetupVersionOutput = true
 
-## FAQs & GOTCHAS ##
 
-### Virtual Box and Symlinks ###
+## FAQs & GOTCHAS <a name="faqs-gotchas"/>
+
+### Virtual Box & Symlinks <a name="virtual-box-symlinks"/>
+
 If you are using VirtualBox with your project, note that symbolic links are disabled within shared folders by VirtualBox
 itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
 directory in the virtual machine. Alternatively, it is possible to enable shared-folder symlinks in VirtualBox.
 
-### RPM Outputs to a Subdirectory ###
+### RPM Outputs to a Subdirectory <a name="rpm-outputs-to-a-subdirectory"/>
+
 The RPM package builder creates subdirectories under the directory that you specify. This is normal
 behaviour and cannot be overridden.
 
-### Package Naming Convention is not Consistent ###
+### Package Naming is not Consistent <a name="package-naming-is-not-consistent"/>
+
 You may notice that PupNet outputs differences in package naming styles. For example:
 
     PupNet-Deploy.x86_64.AppImage
@@ -1297,7 +1326,8 @@ You may notice that PupNet outputs differences in package naming styles. For exa
 PupNet follows the naming conventions used with the respective packages. This includes different CPU architecture
 naming conventions.
 
-### RPM and Debian Packages Cannot be Removed using Gnome Software Center ###
+### RPM & Debian Packages Cannot be Removed using Gnome Software Center <a name="rpm-debian-packages-cannot-be-removed-using-gnome-software-center"/>
+
 If you install your RPM and DEB packages from a local file (rather than a repository) they will, courtesy of your
 AppStream metadata, show up in the Gnome Software Center GUI, as expected. However, you may find that they cannot be
 launched or removed using the GUI.
@@ -1315,9 +1345,9 @@ the Gnome Software Center lacks certain other metadata it expects had the packag
 See [here for information](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7).
 
 
-## ADDITIONAL INFORMATION ##
+## ADDITIONAL INFORMATION <a name="additional-information"/>
 
-### Brief Discussion on the Past and Future ###
+### Brief Discussion on Past & Future <a name="brief-discussion-on-past-future"/>
 
 PupNet Deploy began life as a bash script called "*Publish-AppImage for .NET*":
 
@@ -1352,7 +1382,7 @@ necessarily having to go through third-parties who may act as gate-keepers.
 This is why I support [AppImage](https://github.com/AppImage/AppImageKit) as a means of software distribution on Linux,
 as it always best to keep the choice!
 
-### How to Extend PupNet ###
+### Notes on Extending PupNet <a name="notes-on-extending-pupnet"/>
 
 All that being said, it may be advantageous at some point to have the ability to deploy to MacOS, Android and iOS.
 However, these are not technologies with which I am familiar.
@@ -1367,7 +1397,7 @@ the `BuilderFactory` class.
 
 Please do feel free to post questions to the Github Discussion area. Where possible, I will happy to respond.
 
-### An Application using PupNet Deploy ###
+### An Application which uses PupNet Deploy <a name="an-application-which-uses-pupnet-deploy"/>
 
 [AvantGarde](https://github.com/kuiperzone/AvantGarde) is a cross-platform XAML previewer for the C# Avalonia Framework,
 and the primary previewer solution when developing on Linux.
@@ -1379,7 +1409,7 @@ and the primary previewer solution when developing on Linux.
 </p>
 
 
-### Copyright & License ###
+### Copyright & License <a name="copyright-license"/>
 
 Copyright (C) Andy Thomas, 2023. Website: https://kuiper.zone
 
@@ -1395,12 +1425,11 @@ You should have received a copy of the GNU Affero General Public License along
 with PupNet. If not, see <https://www.gnu.org/licenses/>.
 
 #### Embedded Assets ####
-
 PupNet embeds "appimagetool", from the "AppImageKit".
 AppImageKit is Copyright (C) 2004-20 Simon Peter:
 https://github.com/AppImage/AppImageKit
 
-### Non-code Assets ####
+#### Non-code Assets ####
 Images and non-code assets are not subject to AGPL.
 
 Project Logo: Copyright (C) Andy Thomas, 2023.
