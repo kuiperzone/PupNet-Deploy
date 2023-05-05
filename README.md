@@ -49,7 +49,7 @@ installation file in a single step.
     * [Virtual Box & Symlinks](#virtual-box-symlinks)
     * [RPM Outputs to a Subdirectory](#rpm-outputs-to-a-subdirectory)
     * [Package Naming is not Consistent](#package-naming-is-not-consistent)
-    * [RPM & Debian Packages Cannot be Removed using Gnome Software Center](#rpm-debian-packages-cannot-be-removed-using-gnome-software-center)
+    * [Package Cannot be Removed using Gnome Software Center](#package-cannot-be-removed-using-gnome-software-center)
 
 * [ADDITIONAL INFORMATION](#additional-information)
     * [Brief Discussion on Past & Future](#brief-discussion-on-past-future)
@@ -1332,19 +1332,23 @@ You may notice that PupNet outputs differences in package naming styles. For exa
 PupNet follows the naming conventions used with the respective packages. This includes, for example, different CPU
 architecture naming conventions. In some, it normal to include the version in the file, but not in others.
 
-### RPM & Debian Packages Cannot be Removed using Gnome Software Center <a name="rpm-debian-packages-cannot-be-removed-using-gnome-software-center"/>
+### Package Cannot be Removed using Gnome Software Center <a name="package-cannot-be-removed-using-gnome-software-center"/>
 
-If you install your RPM and DEB packages from a local file (rather than a repository) they will, courtesy of your
-AppStream metadata, show up in the Gnome Software Center, as expected. However, you may find that they cannot be
-launched or removed using the GUI.
+If you install your Flatpak, RPM or DEB package directly from a local file (rather than a repository) they will,
+courtesy of your AppStream metadata, show up in the Gnome Software Center, as expected. However, you may find that they
+cannot be launched or removed using the GUI.
 
 Instead, they must be removed from the command line, like so:
 
-    sudo apt remove helloworld
+    sudo flatpak uninstall zone.kuiper.helloworld
 
 or:
 
     sudo dnf remove helloworld
+
+or:
+
+    sudo apt remove helloworld
 
 This is not an issue with PupNet or AppStream metadata. Rather, having been installed from file, the Gnome Software Center
 lacks certain other metadata it expects had the package originated from a repository.
