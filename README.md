@@ -15,7 +15,7 @@ installation file in a single step.
 
 * [INSTALL & PREREQUISITES](#install-prerequisites)
 
-[AppImage Out of the Box](#appImage-out-of-the-box)
+[AppImage Out of the Box](#appimage-out-of-the-box)
 [Flatpaks on Linux](#flatpak-on-linux)
 [Debian Packages on Linux](#debian-packages-on-linux)
 [RPM Packages on Linux](#rpm-packages-on-linux)
@@ -76,7 +76,7 @@ Alternatively, for self-contained installers:
 If you are using the AppImage deployment of PupNet, add it to your path and consider renaming the AppImage file to `pupnet`
 so that the instructions below will match your system.
 
-### AppImage Out of the Box <a name="appImage-out-of-the-box"/>
+### AppImage Out of the Box <a name="appimage-out-of-the-box"/>
 Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. **There is no need to install any
 AppImage tools therefore.** In order to build other deployments, however, you must first install the appropriate
 third-party builder tool against which PupNet will call.
