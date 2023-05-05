@@ -401,7 +401,7 @@ public abstract class PackageBuilder
     /// <see cref="ConfigurationReader.AppChangeFile"/> to be copied into <see cref="BinBin"/>.
     /// Null if no license specified.
     /// </summary>
-    public string? ReadMeChangeBuildPath
+    public string? ChangeBuildPath
     {
         get
         {
@@ -549,11 +549,11 @@ public abstract class PackageBuilder
             Operations.WriteFile(LicenseBuildPath, content);
         }
 
-        if (ReadMeChangeBuildPath != null)
+        if (ChangeBuildPath != null)
         {
 
             var content = Configuration.ReadAssociatedFile(Configuration.AppChangeFile);
-            Operations.WriteFile(ReadMeChangeBuildPath, content);
+            Operations.WriteFile(ChangeBuildPath, content);
         }
 
         // Write manifest just before build, as ManifestContents is virtual and

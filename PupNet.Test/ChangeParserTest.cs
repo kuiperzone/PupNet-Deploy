@@ -84,13 +84,13 @@ public class ChangeParserTest
     {
         var changes = new ChangeParser(_source);
 
-        var exp = "<release version=\"1.0.1\"date=\"2023-05-01\"><description><ul>\n" +
+        var exp = "<release version=\"1.0.1\" date=\"2023-05-01\"><description><ul>\n" +
             "<li>Change1-a</li>\n" +
             "<li>Change1-b second line</li>\n" +
             "<li>Change1-c</li>\n" +
             "</ul></description></release>\n" +
             "\n" +
-            "<release version=\"1.0.2\"date=\"2023-05-02\"><description><ul>\n" +
+            "<release version=\"1.0.2\" date=\"2023-05-02\"><description><ul>\n" +
             "<li>Change2</li>\n" +
             "</ul></description></release>";
 

@@ -55,7 +55,7 @@ public static class MetaTemplates
         return string.Join('\n', list);
     }
 
-    private static string GetMetaInfoTemplate()
+    private static string GetMetaInfoTemplate(bool comments = true)
     {
         const string IndentX1 = "    ";
         const string IndentX2 = IndentX1 + "    ";
@@ -68,6 +68,12 @@ public static class MetaTemplates
         sb.AppendLine($"<component type=\"desktop-application\">");
         sb.AppendLine($"{IndentX1}<metadata_license>MIT</metadata_license>");
         sb.AppendLine();
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX1}<!-- Note the use of macros to automate most (but not all) content below -->");
+        }
+
         sb.AppendLine($"{IndentX1}<id>{MacroId.AppId.ToVar()}</id>");
         sb.AppendLine($"{IndentX1}<name>{MacroId.AppFriendlyName.ToVar()}</name>");
         sb.AppendLine($"{IndentX1}<summary>{MacroId.AppShortSummary.ToVar()}</summary>");
@@ -79,14 +85,26 @@ public static class MetaTemplates
 	    sb.AppendLine($"{IndentX1}<launchable type=\"desktop-id\">{MacroId.AppId.ToVar()}.desktop</launchable>");
         sb.AppendLine();
         sb.AppendLine($"{IndentX1}<description>");
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX2}<!-- See {nameof(ConfigurationReader.AppDescription)} in configuration -->");
+        }
+
         sb.AppendLine($"{IndentX2}{MacroId.AppStreamDescriptionXml.ToVar()}");
-        sb.AppendLine($"{IndentX2}<!--");
-        sb.AppendLine($"{IndentX2}<p>This is a longer application description which may span several short paragraph.");
-        sb.AppendLine($"{IndentX2}You may either specify it yourself directly here, or have it populated automatically");
-        sb.AppendLine($"{IndentX2}from AppDescription property in the pupnet.conf file using the macro above.</p>");
-        sb.AppendLine($"{IndentX2}<p>Either delete this comment if using the macro, or uncomment and provide your own");
-        sb.AppendLine($"{IndentX2}content here (delete the macro directly above in this case).</p>");
-        sb.AppendLine($"{IndentX2}-->");
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX2}<!--");
+            sb.AppendLine($"{IndentX2}<p>This is a longer application description in the default (English) language");
+            sb.AppendLine($"{IndentX2}which may span several short paragraphs. You may either specify it yourself");
+            sb.AppendLine($"{IndentX2}directly here, or have it populated automatically using the macro above.</p>");
+            sb.AppendLine($"{IndentX2}<p>IMPORTANT. If you wish to provide your own (default) description here, delete the");
+            sb.AppendLine($"{IndentX2}macro directly above. In either case, you may wish to provide other language");
+            sb.AppendLine($"{IndentX2}descriptions here also.</p>");
+            sb.AppendLine($"{IndentX2}-->");
+        }
+
         sb.AppendLine($"{IndentX1}</description>");
         sb.AppendLine();
         sb.AppendLine($"{IndentX1}<!-- Freedesktop Categories -->");
@@ -94,36 +112,52 @@ public static class MetaTemplates
         sb.AppendLine($"{IndentX2}<category>{MacroId.PrimeCategory.ToVar()}</category>");
         sb.AppendLine($"{IndentX1}</categories>");
         sb.AppendLine();
-        sb.AppendLine($"{IndentX1}<!-- Uncomment to provide keywords");
-        sb.AppendLine($"{IndentX1}<keywords>");
-        sb.AppendLine($"{IndentX2}<keyword translate=\"no\">IDE</keyword>");
-        sb.AppendLine($"{IndentX2}<keyword>development</keyword>");
-        sb.AppendLine($"{IndentX2}<keyword>programming</keyword>");
-        sb.AppendLine($"{IndentX2}<keyword xml:lang=\"de\">entwicklung</keyword>");
-        sb.AppendLine($"{IndentX2}<keyword xml:lang=\"de\">programmierung</keyword>");
-        sb.AppendLine($"{IndentX1}</keywords>");
-        sb.AppendLine($"{IndentX1}-->");
-        sb.AppendLine();
-        sb.AppendLine($"{IndentX1}<!-- Uncomment to provide screenshots");
-        sb.AppendLine($"{IndentX1}<screenshots>");
-        sb.AppendLine($"{IndentX2}<screenshot type=\"default\">");
-        sb.AppendLine($"{IndentX3}<image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>");
-        sb.AppendLine($"{IndentX2}</screenshot>");
-        sb.AppendLine($"{IndentX1}</screenshots>");
-        sb.AppendLine($"{IndentX1}-->");
-        sb.AppendLine();
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX1}<!-- Uncomment to provide keywords");
+            sb.AppendLine($"{IndentX1}<keywords>");
+            sb.AppendLine($"{IndentX2}<keyword translate=\"no\">IDE</keyword>");
+            sb.AppendLine($"{IndentX2}<keyword>development</keyword>");
+            sb.AppendLine($"{IndentX2}<keyword>programming</keyword>");
+            sb.AppendLine($"{IndentX2}<keyword xml:lang=\"de\">entwicklung</keyword>");
+            sb.AppendLine($"{IndentX2}<keyword xml:lang=\"de\">programmierung</keyword>");
+            sb.AppendLine($"{IndentX1}</keywords>");
+            sb.AppendLine($"{IndentX1}-->");
+            sb.AppendLine();
+            sb.AppendLine($"{IndentX1}<!-- Uncomment to provide screenshots");
+            sb.AppendLine($"{IndentX1}<screenshots>");
+            sb.AppendLine($"{IndentX2}<screenshot type=\"default\">");
+            sb.AppendLine($"{IndentX3}<image>https://i.postimg.cc/0jc8xxxC/Hello-Computer.png</image>");
+            sb.AppendLine($"{IndentX2}</screenshot>");
+            sb.AppendLine($"{IndentX1}</screenshots>");
+            sb.AppendLine($"{IndentX1}-->");
+            sb.AppendLine();
+        }
+
         sb.AppendLine($"{IndentX1}<releases>");
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX2}<!-- See {nameof(ConfigurationReader.AppChangeFile)} in configuration -->");
+        }
+
         sb.AppendLine($"{IndentX2}{MacroId.AppStreamChangelogXml.ToVar()}");
-        sb.AppendLine($"{IndentX2}<!-- Uncomment below and delete macro directly above to specify changes yourself");
-        sb.AppendLine($"{IndentX2}<release version=\"1.0.0\" date=\"2023-05-04\">");
-        sb.AppendLine($"{IndentX3}<description>");
-        sb.AppendLine($"{IndentX4}<ul>");
-        sb.AppendLine($"{IndentX5}<li>Added feature 1</li>");
-        sb.AppendLine($"{IndentX5}<li>Added feature 2</li>");
-        sb.AppendLine($"{IndentX4}</ul>");
-        sb.AppendLine($"{IndentX3}<description>");
-        sb.AppendLine($"{IndentX2}</release>");
-        sb.AppendLine($"{IndentX2}-->");
+
+        if (comments)
+        {
+            sb.AppendLine($"{IndentX2}<!-- Or, uncomment below and delete macro directly above to specify changes yourself");
+            sb.AppendLine($"{IndentX2}<release version=\"1.0.0\" date=\"2023-05-04\">");
+            sb.AppendLine($"{IndentX3}<description>");
+            sb.AppendLine($"{IndentX4}<ul>");
+            sb.AppendLine($"{IndentX5}<li>Added feature 1</li>");
+            sb.AppendLine($"{IndentX5}<li>Added feature 2</li>");
+            sb.AppendLine($"{IndentX4}</ul>");
+            sb.AppendLine($"{IndentX3}<description>");
+            sb.AppendLine($"{IndentX2}</release>");
+            sb.AppendLine($"{IndentX2}-->");
+        }
+
         sb.AppendLine($"{IndentX1}</releases>");
         sb.AppendLine();
         sb.AppendLine($"</component>");

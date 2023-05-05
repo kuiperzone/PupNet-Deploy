@@ -1,15 +1,26 @@
-+ VERSION 1.4.0; TBD
-- Added AppChangeFile property to configuration (important new feature - see website for information)
-- Added AppReadMeFile property to configuration (now used by Windows Setup builder)
++ VERSION 1.4.0; 2023-05-05
+
+- Added 'AppDescription' property to configuration (IMPORTANT NEW FEATURE - see website for information)
+- Added ${APPSTREAM_DESCRIPTION_XML} macro to support release information in AppStream metadata
+- Updated AppStream metadata template to include ${APPSTREAM_CHANGELOG_XML}
+- Now uses 'AppDescription' content when building both RPM and DEB packages
+
+- Added 'AppChangeFile' property to configuration (IMPORTANT NEW FEATURE - see website for information)
 - Added ${APPSTREAM_CHANGELOG_XML} macro to support release information in AppStream metadata
-- Added changelog RPM package builder
-- Added changelog Debian package builder
-- Updated README documentation
-- Other minor changes
+- Updated AppStream metadata template to include ${APPSTREAM_DESCRIPTION_XML}
+- The AppChangeFile file is now packaged verbatim to the bin directory of deployments
+- Added 'InfoBeforeFile' to show AppChangeFile file content
+- Added CHANGELOG section to console output when building a package (contains parsed changes only)
+
+- Added MACRO section (verbose only) to console output when building a package (useful for debugging)
+- Extensive updates to README documentation
+- Other minor corrections and changes
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 
 + VERSION 1.3.1; 2023-05-01
 - Bugfix: Fix package creation when file path of contents contain spaces (enclose file path with quotes when executing chmod)
+
 
 + VERSION 1.3.0; 2023-04-18
 - Added RpmAutoProv and RpmAutoReq properties to configuration
@@ -24,6 +35,7 @@
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
+
 + VERSION 1.2.2; 2023-04-14
 - Now supplied as .NET6 tool (explicitly built against .NET6 LTS rather than .NET7)
 - Bugfix: AppImage failed to run on some systems (updated AppImage runtimes)
@@ -31,10 +43,12 @@
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
+
 + VERSION 1.2.1; 2023-04-13
 - Bugfix: Unable to show --help or --version due to recent changes
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 
 + VERSION 1.2.0; 2023-04-13
 - Now ships as a dotnet tool (.NET7)
@@ -51,16 +65,19 @@
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
+
 + VERSION 1.1.0; 2023-03-30
 - Now ships internally with fuse run-times to allow cross-build for: x64, am64 (aarch64) and Arm (32-bit) architectures.
 - Support for building AppImages on 32-bit Arm development platforms
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.0
 
+
 + VERSION 1.0.1; 2023-03-22
 - Now shows AppImageTool version only on Linux.
 - Minor updates to built-in help information.
 - Added screenshot to metainfo.xml
+
 
 + VERSION 1.0.0; 2023-03-22
 - Initial Release

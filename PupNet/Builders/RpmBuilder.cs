@@ -238,7 +238,19 @@ public sealed class RpmBuilder : PackageBuilder
         // Description is mandatory, but just repeat summary
         sb.AppendLine();
         sb.AppendLine("%description");
-        sb.AppendLine(Configuration.AppShortSummary);
+
+        if (Configuration.AppDescription.Count != 0)
+        {
+            foreach (var item in Configuration.AppDescription)
+            {
+                sb.AppendLine(item);
+            }
+        }
+        else
+        {
+            // Fallback
+            sb.AppendLine(Configuration.AppShortSummary);
+        }
 
         /*
         // Comment out for now, but may remove in future.

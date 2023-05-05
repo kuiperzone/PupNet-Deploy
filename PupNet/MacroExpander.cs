@@ -160,20 +160,23 @@ public class MacrosExpander
     /// </summary>
     public override string ToString()
     {
-        return ToString(false);
+        return ToString(false, false);
     }
 
     /// <summary>
     /// Provides detail information.
     /// </summary>
-    public string ToString(bool verbose)
+    public string ToString(bool verbose, bool includeXml)
     {
         var sb = new StringBuilder();
         var sorted = new SortedDictionary<string, MacroId>();
 
         foreach (var item in Dictionary.Keys)
         {
-            sorted.Add(item.ToName(), item);
+            if (includeXml || !item.ContainsXml())
+            {
+                sorted.Add(item.ToName(), item);
+            }
         }
 
         bool more = false;
@@ -193,10 +196,19 @@ public class MacrosExpander
                 sb.AppendLine(" **");
 
                 sb.AppendLine(item.Value.ToHint());
-                sb.Append("Example: ");
-            }
 
-            sb.AppendLine($"{item.Value.ToVar()} = {Dictionary[item.Value]}");
+                var value = Dictionary[item.Value];
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    sb.Append("Example: ");
+                    sb.AppendLine($"{item.Value.ToVar()} = {Dictionary[item.Value]}");
+                }
+            }
+            else
+            {
+                sb.AppendLine($"{item.Value.ToVar()} = {Dictionary[item.Value]}");
+            }
         }
 
         return sb.ToString().Trim();

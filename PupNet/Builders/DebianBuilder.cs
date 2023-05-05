@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System.Globalization;
 using System.Text;
 
 namespace KuiperZone.PupNet.Builders;
@@ -222,6 +221,21 @@ public sealed class DebianBuilder : PackageBuilder
         sb.AppendLine($"Priority: optional");
         sb.AppendLine($"Architecture: {Architecture}");
         sb.AppendLine($"Description: {Configuration.AppShortSummary}");
+
+        // https://www.debian.org/doc/debian-policy/ch-controlfields.html#s-f-description
+        foreach (var item in Configuration.AppDescription)
+        {
+            if (!string.IsNullOrEmpty(item))
+            {
+                sb.Append("  ");
+                sb.AppendLine(item);
+            }
+            else
+            {
+                sb.AppendLine(" .");
+            }
+        }
+
 
         if (!string.IsNullOrEmpty(Configuration.PublisherLinkUrl))
         {

@@ -292,9 +292,13 @@ public class BuildHost
                 temp.AppendLine(Path.GetRelativePath(Builder.BuildRoot, Builder.MetaBuildPath));
             }
 
-            AppendSection(sb, "DEPLOY ASSETS", temp.ToString().TrimEnd());
+            AppendSection(sb, "DEPLOY ASSETS", temp.ToString().TrimEnd(), true);
             AppendSection(sb, $"METAINFO: {Path.GetFileName(Configuration.MetaFile)}", ExpandedMetaInfo);
             AppendSection(sb, $"MANIFEST: {Path.GetFileName(Builder.ManifestBuildPath)}", Builder.ManifestContent?.TrimEnd());
+
+            AppendSection(sb, "MACROS", Macros.ToString(false, false), true);
+            sb.AppendLine();
+            sb.AppendLine("NB. Macros with XML content are not listed above.");
         }
 
         string? proj = Path.GetFileName(Configuration.DotnetProjectPath);
@@ -305,9 +309,9 @@ public class BuildHost
         }
 
         AppendSection(sb, $"BUILD PROJECT{proj}", PublishCommands);
-        AppendSection(sb, $"BUILD PACKAGE: {Builder.OutputName}", Builder.PackageCommands);
 
-        AppendSection(sb, "ISSUES", Builder.WarningSink.Count > 0 ? Builder.WarningSink : new string[] { "[None Detected]" });
+        AppendSection(sb, $"BUILD PACKAGE: {Builder.OutputName}", Builder.PackageCommands);
+        AppendSection(sb, "ISSUES", Builder.WarningSink, true);
 
         return sb.ToString().Trim();
     }
@@ -336,12 +340,12 @@ public class BuildHost
         sb.AppendLine(value);
     }
 
-    private static void AppendSection(StringBuilder sb, string title, ICollection<string> content)
+    private static void AppendSection(StringBuilder sb, string title, ICollection<string> content, bool alwaysShow = false)
     {
-        AppendSection(sb, title, (IReadOnlyCollection<string>)content);
+        AppendSection(sb, title, (IReadOnlyCollection<string>)content, alwaysShow);
     }
 
-    private static void AppendSection(StringBuilder sb, string title, IReadOnlyCollection<string> content)
+    private static void AppendSection(StringBuilder sb, string title, IReadOnlyCollection<string> content, bool alwaysShow = false)
     {
         if (content.Count != 0)
         {
@@ -353,14 +357,20 @@ public class BuildHost
                 sb.AppendLine(item);
             }
         }
-    }
-
-    private static void AppendSection(StringBuilder sb, string title, string? content)
-    {
-        if (!string.IsNullOrEmpty(content))
+        else
+        if (alwaysShow)
         {
             AppendHeader(sb, title);
-            sb.AppendLine(content);
+            sb.AppendLine("NONE");
+        }
+    }
+
+    private static void AppendSection(StringBuilder sb, string title, string? content, bool alwaysShow = false)
+    {
+        if (alwaysShow || !string.IsNullOrEmpty(content))
+        {
+            AppendHeader(sb, title);
+            sb.AppendLine(!string.IsNullOrEmpty(content) ? content : "[NONE]");
         }
     }
 

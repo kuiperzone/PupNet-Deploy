@@ -41,6 +41,8 @@ public class MacroIdTest
         Assert.Equal("PRIME_CATEGORY", MacroId.PrimeCategory.ToName());
 
         // Others
+        Assert.Equal("APPSTREAM_DESCRIPTION_XML", MacroId.AppStreamDescriptionXml.ToName());
+        Assert.Equal("APPSTREAM_CHANGELOG_XML", MacroId.AppStreamChangelogXml.ToName());
         Assert.Equal("APP_VERSION", MacroId.AppVersion.ToName());
         Assert.Equal("DEPLOY_KIND", MacroId.DeployKind.ToName());
         Assert.Equal("DOTNET_RUNTIME", MacroId.DotnetRuntime.ToName());

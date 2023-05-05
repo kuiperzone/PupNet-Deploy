@@ -1,9 +1,9 @@
 Add multiple --kind values to arguments?
-
-Add parsable "changes" and integrate with RPM,deb and AppStream
+Add <ul> parsing to AppDescription
 
 
 DONE
+Add parsable "changes" and integrate with RPM,deb and AppStream
 Drop to .NET6 for tool
 RPM "AutoReqProv" - investigate?
 Remove RPM desktop-file-validate or add to "BuildRequires"

@@ -174,7 +174,7 @@ public class ChangeParser
 
                 sb.Append("<release version=\"");
                 sb.Append(SecurityElement.Escape(item.Version));
-                sb.Append("\"date=\"");
+                sb.Append("\" date=\"");
                 sb.Append(item.Date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
                 sb.Append("\">");
                 sb.Append("<description><ul>");

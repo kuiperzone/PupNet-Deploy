@@ -370,16 +370,17 @@ public class ConfigurationReader
                 $"to '1'. Note that the version-release value given here may be overridden from the command line."));
 
         sb.Append(CreateHelpField(nameof(AppShortSummary), AppShortSummary, style,
-                $"Mandatory single line application short summary description."));
+                $"Mandatory single line application summary text in default (English) language."));
 
         sb.Append(CreateHelpField(nameof(AppDescription), AppDescription, true, style,
-                $"Optional multi-line application description which may provide longer text than {nameof(AppShortSummary)}.",
-                $"It should ideally contain several short paragraphs, while avoiding any complex formatting. The content",
-                $"is used by package builders where supported, including RPM and Debian, and may optionaly be used to",
+                $"Optional multi-line (surround with triple \"\"\" quotes) application description which provides",
+                $"longer explanation than {nameof(AppShortSummary)} in default language. Text separated by an empty line will be",
+                $"treated as separate paragraphs. Avoid complex formatting and do not use HTML or markdown. This content",
+                $"is used by package builders where supported, including RPM and DEB, and may optionally be used to",
                 $"populate the '<description>' element in the AppStream metadata through the use of a macro variable."));
 
         sb.Append(CreateHelpField(nameof(AppLicenseId), AppLicenseId, style,
-                $"Mandatory application license ID. This should be one of the recognised SPDX license",
+                $"Mandatory application license ID. This should be one of the recognized SPDX license",
                 $"identifiers, such as: 'MIT', 'GPL-3.0-or-later' or 'Apache-2.0'. For a proprietary or",
                 $"custom license, use 'LicenseRef-Proprietary' or 'LicenseRef-LICENSE'."));
 
@@ -390,10 +391,11 @@ public class ConfigurationReader
         sb.Append(CreateHelpField(nameof(AppChangeFile), AppChangeFile, style,
                 $"Optional path to application changelog file. IMPORTANT. If given, this file should contain version",
                 $"information in a predefined format. Namely, it should contain one or more version headings of form:",
-                $"'+ VERSION;[Title;][maintainer@email.com;]DATE', under which are to be listed change items of form:",
-                $"'- Change description'. Formatted information will be parsed and used to populate AppStream metadata.",
-                $"Additionally, it will be used with package builders where supported. NOTE. Superflous text is ignored,",
-                $"so that it may also contain README information. For information: {Program.ProjectUrl}."));
+                $"'+ VERSION;DATE', under which are to be listed change items of form: '- Change description'. Formatted",
+                $"information will be parsed and used to populate AppStream metadata. Additionally, it will be packaged",
+                $"with the application and used with package builders where supported. NOTE. Superfluous text in the file",
+                $"is ignored, so the file may also contain README information.",
+                $"For information: {Program.ProjectUrl}."));
 
 
 
@@ -414,8 +416,8 @@ public class ConfigurationReader
                 $"Optional publisher or application web-link URL."));
 
         sb.Append(CreateHelpField(nameof(PublisherEmail), PublisherEmail, style,
-                $"Publisher or maintainer email contact. Although optional, some packages (such as Debian) require it",
-                $"and may fail unless provided."));
+                $"Publisher or maintainer email contact. Although optional, some package builders (i.e. DEB) require it",
+                $"and may warn or fail unless provided."));
 
 
 
@@ -428,26 +430,26 @@ public class ConfigurationReader
 
         sb.Append(CreateHelpField(nameof(DesktopTerminal), DesktopTerminal, style,
                 $"Boolean (true or false) which indicates whether the application runs in the terminal, rather than",
-                $"providing a GUI. It is used only to populate the 'Terminal' field of the .desktop file."));
+                $"providing a GUI. It is used to populate the 'Terminal' field of the .desktop file."));
 
         sb.Append(CreateHelpField(nameof(DesktopFile), DesktopFile, style,
                 $"Optional path to a Linux desktop file. If empty (default), one will be generated automatically from",
                 $"the information in this file. Supplying a custom file, however, allows for mime-types and",
                 $"internationalisation. If supplied, the file MUST contain the line: 'Exec={MacroId.InstallExec.ToVar()}'",
                 $"in order to use the correct install location. Other macros may be used to help automate the content.",
-                $"Note. The contents of the files may use macro variables. Use {macroHelp} for reference.",
+                $"Note. {Program.ProductName} can generate you a desktop file. Use --help and {macroHelp} for reference.",
                 $"See: https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html"));
 
         sb.Append(CreateHelpField(nameof(StartCommand), StartCommand, style,
                 $"Optional command name to start the application from the terminal. If, for example, {nameof(AppBaseName)} is",
-                $"'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant",
-                $"(i.e. 'helloworld'). It must not contain spaces or invalid filename characters. Do not add any",
-                $"extension such as '.exe'. If empty, the application will not be in the path and cannot be started from",
-                $"the command line. For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupCommandPrompt)}. The",
-                $"{nameof(StartCommand)} is not supported for all packages kinds. Default is empty (none)."));
+                $"'Zone.Kuiper.HelloWorld', the value here may be set to a simpler and/or lower-case variant such as",
+                $"'helloworld'. It must not contain spaces or invalid filename characters. Do not add any extension such",
+                $"as '.exe'. If empty, the application will not be in the path and cannot be started from the command line.",
+                $"For Windows {nameof(PackageKind.Setup)} packages, see also {nameof(SetupCommandPrompt)}. {nameof(StartCommand)} is not",
+                $"supported for all packages kinds (i.e. Flatpak). Default is empty (none)."));
 
         sb.Append(CreateHelpField(nameof(PrimeCategory), PrimeCategory, style,
-                $"Optional category for the application. The value should be one of the recognised Freedesktop top-level",
+                $"Optional category for the application. The value should be one of the recognized Freedesktop top-level",
                 $"categories, such as: Audio, Development, Game, Office, Utility etc. Only a single value should be",
                 $"provided here which will be used, where supported, to populate metadata. The default is empty.",
                 $"See: https://specifications.freedesktop.org/menu-spec/latest/apa.html"));
@@ -474,9 +476,9 @@ public class ConfigurationReader
                 $"is disabled (not called). Instead, only {nameof(DotnetPostPublish)} is called."));
 
         sb.Append(CreateHelpField(nameof(DotnetPublishArgs), DotnetPublishArgs, style,
-                $"Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), app version, or '-c'",
-                $"(configuration) here as they will be added (i.e. via {nameof(AppVersionRelease)}). Typically you want as a",
-                $"minimum: '-p:Version={MacroId.AppVersion.ToVar()} --self-contained true'. Additional useful arguments include:",
+                $"Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), or '-c' (configuration)",
+                $"here as they will be added according to command line arguments. Typically you want as a minimum:",
+                $"'-p:Version={MacroId.AppVersion.ToVar()} --self-contained true'. Additional useful arguments include:",
                 $"'-p:DebugType=None -p:DebugSymbols=false -p:PublishSingleFile=true -p:PublishReadyToRun=true",
                 $"-p:PublishTrimmed=true -p:TrimMode=link'. Note. This value may use macro variables. Use {macroHelp}",
                 $"for reference. See: https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"));
@@ -502,7 +504,7 @@ public class ConfigurationReader
 
         sb.Append(CreateHelpField(nameof(PackageName), PackageName, style,
                 $"Optional package name (excludes version etc.). If empty, defaults to {nameof(AppBaseName)}. However, it is",
-                $"used not only to specify the base output filename, but to identify the application in .deb and .rpm",
+                $"used not only to specify the base output filename, but to identify the application in DEB and RPM",
                 $"packages. You may wish, therefore, to ensure that the value represents a unique name. Naming",
                 $"requirements are strict and must contain only alpha-numeric and '-', '+' and '.' characters."));
 

@@ -165,7 +165,9 @@ public class IniReader
 
                 while (true)
                 {
-                    line = line.Trim();
+                    // Never want surrounding spaces or tabs
+                    line = line.Trim().Replace("\t", "  ");
+
                     pos = line.IndexOf(EndMultiQuote);
 
                     if (pos > -1)
