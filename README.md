@@ -55,7 +55,7 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
 
-## INSTALL & PREREQUISITES ## <a name="paragraph1"></a>
+## INSTALL & PREREQUISITES <a name="paragraph1"/>
 
 To install as a dotnet tool:
 
