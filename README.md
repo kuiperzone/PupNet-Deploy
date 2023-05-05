@@ -15,7 +15,12 @@ installation file in a single step.
 
 * [INSTALL & PREREQUISITES](#example2)
 
-* [AppImage Out of the Box](#AppImage Out of the Box)
+## On this page
+{:.no_toc}
+
+- TOC
+{:toc}
+
 
 ## INTRODUCTION ##
 
@@ -56,7 +61,7 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
 
-## INSTALL & PREREQUISITES [](#){name=example2}
+## INSTALL & PREREQUISITES ## [](#){name=example2}
 
 To install as a dotnet tool:
 
