@@ -9,7 +9,7 @@
 - Added ${APPSTREAM_CHANGELOG_XML} macro to support release information in AppStream metadata
 - Updated AppStream metadata template to include ${APPSTREAM_DESCRIPTION_XML}
 - The AppChangeFile file is now packaged verbatim to the bin directory of deployments
-- Added 'InfoBeforeFile' to show AppChangeFile file content
+- Added 'InfoBeforeFile' to Windows Setup in order to show AppChangeFile file content
 - Added CHANGELOG section to console output when building a package (contains parsed changes only)
 
 - Added MACRO section (verbose only) to console output when building a package (useful for debugging)
