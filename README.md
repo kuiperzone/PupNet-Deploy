@@ -15,8 +15,7 @@ installation file in a single step.
 
 * [INSTALL & PREREQUISITES](#example2)
 
-
-
+* [AppImage Out of the Box](#AppImage Out of the Box)
 
 ## INTRODUCTION ##
 
