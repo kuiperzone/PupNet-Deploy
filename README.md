@@ -14,12 +14,11 @@ installation file in a single step.
 * [INTRODUCTION](#introduction)
 
 * [INSTALL & PREREQUISITES](#install-prerequisites)
-
-[AppImage Out of the Box](#appimage-out-of-the-box)
-[Flatpaks on Linux](#flatpak-on-linux)
-[Debian Packages on Linux](#debian-packages-on-linux)
-[RPM Packages on Linux](#rpm-packages-on-linux)
-[Setup Files on Windows](#setup-files-on-windows)
+*   [AppImage Out of the Box](#appimage-out-of-the-box)
+*   [Flatpaks on Linux](#flatpak-on-linux)
+*   [Debian Packages on Linux](#debian-packages-on-linux)
+*   [RPM Packages on Linux](#rpm-packages-on-linux)
+*   [Setup Files on Windows](#setup-files-on-windows)
 
 
 ## INTRODUCTION <a name="introduction"/>
