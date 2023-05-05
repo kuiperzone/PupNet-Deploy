@@ -11,12 +11,18 @@ installation file in a single step.
 
 ## CONTENTS ##
 
-* [INTRODUCTION](#INTRODUCTION)
+* [INTRODUCTION](#introduction)
 
-* [INSTALL & PREREQUISITES](#paragraph1)
+* [INSTALL & PREREQUISITES](#install-prerequisites)
+
+[AppImage Out of the Box](#appImage-out-of-the-box)
+[Flatpaks on Linux](#flatpak-on-linux)
+[Debian Packages on Linux](#debian-packages-on-linux)
+[RPM Packages on Linux](#rpm-packages-on-linux)
+[Setup Files on Windows](#setup-files-on-windows)
 
 
-## INTRODUCTION ##
+## INTRODUCTION <a name="introduction"/>
 
 It has been possible to cross-compile console C# applications for sometime now. More recently, the cross-platform
 [Avalonia](https://github.com/AvaloniaUI/Avalonia) replacement for WPF allows fully-featured GUI applications to target
@@ -55,7 +61,7 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
 
-## INSTALL & PREREQUISITES <a name="paragraph1"/>
+## INSTALL & PREREQUISITES <a name="install-prerequisites"/>
 
 To install as a dotnet tool:
 
@@ -70,12 +76,13 @@ Alternatively, for self-contained installers:
 If you are using the AppImage deployment of PupNet, add it to your path and consider renaming the AppImage file to `pupnet`
 so that the instructions below will match your system.
 
-### AppImage Out of the Box ###
+### AppImage Out of the Box <a name="appImage-out-of-the-box"/>
 Out of the box, PupNet can create AppImages on Linux and Zip files on all platforms. **There is no need to install any
 AppImage tools therefore.** In order to build other deployments, however, you must first install the appropriate
 third-party builder tool against which PupNet will call.
 
-### Flatpaks on Linux ###
+### Flatpaks on Linux <a name="flatpak-on-linux"/>
+
 PupNet requires `flatpak` and `flatpak-builder`. It will also be necessary to install a flatpak platform SDK and runtime.
 As appropriate, use:
 
@@ -92,7 +99,7 @@ And then use flatpak to install:
 Here, the version number (22.08) was the latest at the time of writing, but will be subject to update.
 See [Flatpak Available Runtimes](https://docs.flatpak.org/en/latest/available-runtimes.html).
 
-### Deb Packages on Linux ###
+### Debian Packages on Linux <a name="debian-packages-on-linux"/>
 
 PupNet requires `dpkg-deb`. So, as appropriate:
 
@@ -105,7 +112,7 @@ or:
 It is possible to build Debian packages using `dpkg-deb` on an RPM based system. However, it is not recommended to
 test install a Debian package on an RPM machine (use a virtual machines to test it).
 
-### RPM Packages on Linux ###
+### RPM Packages on Linux <a name="rpm-packages-on-linux"/>
 
 PupNet requires `rpmbuild`. As appropriate:
 
@@ -118,8 +125,7 @@ or:
 It is possible to build RPM packages using `rpmbuild` on a Debian system. However, as above, it is not recommended to
 test install an RPM package on a Debian machine (use a virtual machines to test it).
 
-
-### Setup Files on Windows ###
+### Setup Files on Windows <a name="setup-files-on-windows"/>
 
 PupNet leverages [InnoSetup](https://jrsoftware.org/isinfo.php) on Windows. Download and install it.
 
