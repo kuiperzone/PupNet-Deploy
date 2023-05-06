@@ -35,7 +35,7 @@ installation file in a single step.
     * [On Linux](#on-linux)
     * [On Windows](#on-windows)
 
-* [CREATING NEW PUPNET PROJECT FILE](#creating-new-pupnet-project-files)
+* [CREATING NEW PUPNET PROJECT FILES](#creating-new-pupnet-project-files)
 
 * [BACKWARD COMPATIBILITY & UPGRADING YOUR CONFIGURATION](#backward-compatibility-upgrading-your-configuration)
     * [Version 1.4 Changes](#version-1.4-changes)

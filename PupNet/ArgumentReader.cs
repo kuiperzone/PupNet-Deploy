@@ -240,7 +240,7 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine("Build Options:");
 
-        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} <{string.Join('|', Enum.GetNames<PackageKind>())}>");
+        sb.AppendLine($"{indent}-{KindShortArg}, --{KindLongArg} <{string.Join('|', Enum.GetNames<PackageKind>()).ToLowerInvariant()}>");
         sb.AppendLine($"{indent}Package output kind. If omitted, one is chosen according to the runtime ({PackageKind.AppImage} on linux).");
         sb.AppendLine($"{indent}Example: {Program.CommandName} HelloWorld -{KindShortArg} {PackageKind.Flatpak}");
         sb.AppendLine();
