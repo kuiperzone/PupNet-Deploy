@@ -153,7 +153,7 @@ public static class MetaTemplates
             sb.AppendLine($"{IndentX5}<li>Added feature 1</li>");
             sb.AppendLine($"{IndentX5}<li>Added feature 2</li>");
             sb.AppendLine($"{IndentX4}</ul>");
-            sb.AppendLine($"{IndentX3}<description>");
+            sb.AppendLine($"{IndentX3}</description>");
             sb.AppendLine($"{IndentX2}</release>");
             sb.AppendLine($"{IndentX2}-->");
         }
