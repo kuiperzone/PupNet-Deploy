@@ -22,8 +22,7 @@ using System.Text;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Handles Console interaction, publishes the dotnet application and creates and executes a concrete instance of
-/// <see cref="PackageBuilder"/>.
+/// Creates a concrete instance of <see cref="PackageBuilder"/>, and handles the Console interaction with the user.
 /// </summary>
 public class BuildHost
 {

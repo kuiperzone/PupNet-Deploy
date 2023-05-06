@@ -24,7 +24,12 @@ namespace KuiperZone.PupNet;
 /// <summary>
 /// A base class for package build operations. It defines a working build directory structure under which the
 /// application is to be published by dotnet, along with other assets such a desktop, AppStream metadata
-/// and icons. The subclass is to define package specific values and operations by overriding key members.
+/// and icons (think 'AppDir' for AppImage, or BUILDROOT for RPM). It is Linux centric, where on Windows unused
+/// properties are ignored. The subclass is to define package specific values and operations by overriding key
+/// members, and implement the build operation. The build operation is a two-stage process in which
+/// <see cref="Create"/> is first called and information present on the console. Note that many of properties of
+/// this class are public purely to make them accessible to <see cref="BuildHost"/> class so they can be presented
+/// to the user. When the user confirms <see cref="BuildPackage"/> is called to perform the build.
 /// </summary>
 public abstract class PackageBuilder
 {
@@ -59,11 +64,17 @@ public abstract class PackageBuilder
 
         if (IconPaths.Count == 0)
         {
-            // Always has some linux icons
+            // Fallback to embedded icons on Linux
             IconPaths = GetShareIconPaths(Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
         }
 
         IconSource = GetSourceIcon(kind, Configuration.IconFiles);
+
+        if (IconSource == null)
+        {
+            // Fallback to embedded icons on Linux
+            IconSource = GetSourceIcon(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
+        }
 
         // Ignore fact file might not exist if AssertPaths if false (test only)
         if (Configuration.AssertPaths || File.Exists(Configuration.AppChangeFile))
@@ -334,13 +345,14 @@ public abstract class PackageBuilder
     /// <summary>
     /// Gets the source path of the "prime" icon, i.e. the single icon considered to be the most generally suitable.
     /// On Linux this is the first SVG file encountered, or the largest PNG otherwise. On Windows, it is the first ICO
-    /// file encountered.
+    /// file encountered. It is a full path to the source icon on build.
     /// </summary>
     public string? IconSource { get; }
 
     /// <summary>
-    /// A sequence of source icon paths (key) and their destinations (value) under <see cref="PackageBuilder.BuildShareIcons"/>.
-    /// Default generic icons are provided if the configuration supplies none. Always empty on Windows.
+    /// A sequence of source icon paths (key) and their install destinations (value) under
+    /// <see cref="PackageBuilder.BuildShareIcons"/>. Default generic icons are provided if the configuration supplies
+    /// none. Always empty on Windows.
     /// </summary>
     public IReadOnlyDictionary<string, string> IconPaths { get; }
 
@@ -655,7 +667,7 @@ public abstract class PackageBuilder
         string name = terminal ? "terminal" : "generic";
 
         // Leave windows icon out - leave InnoSetup to assign own
-        // list.Add(Path.Combine(AssemblyDirectory, $"{name}.icon"));
+        // list.Add(Path.Combine(AssemblyDirectory, $"{name}.ico"));
 
         list.Add(Path.Combine(AssemblyDirectory, $"{name}.16x16.png"));
         list.Add(Path.Combine(AssemblyDirectory, $"{name}.24x24.png"));

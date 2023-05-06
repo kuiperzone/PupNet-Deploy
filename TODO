@@ -1,5 +1,6 @@
 Add multiple --kind values to arguments?
 Add <ul> parsing to AppDescription
+Implement auto system test for maximal and minimal conf files
 
 
 DONE

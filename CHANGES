@@ -1,3 +1,11 @@
++ VERSION 1.4.1; 2023-05-06
+- Bugfix #16: AppImage and Flatpak builds rejected AppStream metadata if conf.AppDescription was empty. Now defaults to AppShortSummary.
+- Bugfix #15: AppImage and Flatpak builds rejected AppStream metadata if conf.AppChangeFileEmpty.
+- Bugfix #14: AppImage failed if conf.IconPaths empty. On Linux a default icon will be used (previously worked but was broken due to change).
+- Bugfix #13: Incorrect </description> tag in AppStream example text (may be uncommented by used)
+- Ships with: appimagetool 13 (2020-12-31)
+- Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 + VERSION 1.4.0; 2023-05-05
 
 - Added 'AppDescription' property to configuration (IMPORTANT NEW FEATURE - see website for information)
@@ -15,6 +23,7 @@
 - Added MACRO section (verbose only) to console output when building a package (useful for debugging)
 - Extensive updates to README documentation
 - Other minor corrections and changes
+- Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 

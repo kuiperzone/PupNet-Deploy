@@ -373,11 +373,11 @@ public class ConfigurationReader
                 $"Mandatory single line application summary text in default (English) language."));
 
         sb.Append(CreateHelpField(nameof(AppDescription), AppDescription, true, style,
-                $"Optional multi-line (surround with triple \"\"\" quotes) application description which provides",
-                $"longer explanation than {nameof(AppShortSummary)} in default language. Text separated by an empty line will be",
-                $"treated as separate paragraphs. Avoid complex formatting and do not use HTML or markdown. This content",
-                $"is used by package builders where supported, including RPM and DEB, and may optionally be used to",
-                $"populate the '<description>' element in the AppStream metadata through the use of a macro variable."));
+                $"Multi-line (surround with triple \"\"\" quotes) application description which provides longer explanation",
+                $"than {nameof(AppShortSummary)} in default language. Optional but it is recommended to specify this. Text",
+                $"separated by an empty line will be treated as separate paragraphs. Avoid complex formatting and do not",
+                $"use HTML or markdown. This content is used by package builders where supported, including RPM and DEB,",
+                $"and is used to populate the {MacroId.AppStreamDescriptionXml.ToVar()} element used in AppStream metadata."));
 
         sb.Append(CreateHelpField(nameof(AppLicenseId), AppLicenseId, style,
                 $"Mandatory application license ID. This should be one of the recognized SPDX license",
@@ -392,11 +392,9 @@ public class ConfigurationReader
                 $"Optional path to application changelog file. IMPORTANT. If given, this file should contain version",
                 $"information in a predefined format. Namely, it should contain one or more version headings of form:",
                 $"'+ VERSION;DATE', under which are to be listed change items of form: '- Change description'. Formatted",
-                $"information will be parsed and used to populate AppStream metadata. Additionally, it will be packaged",
-                $"with the application and used with package builders where supported. NOTE. Superfluous text in the file",
-                $"is ignored, so the file may also contain README information.",
-                $"For information: {Program.ProjectUrl}."));
-
+                $"information will be parsed and used to expand the {MacroId.AppStreamChangelogXml.ToVar()} macro used",
+                $"for AppStream metadata (superfluous text is ignored, so the file may also contain README information).",
+                $"The given file will also be packaged with the application verbatim. See: {Program.ProjectUrl}."));
 
 
         sb.Append(CreateBreaker("PUBLISHER", style));

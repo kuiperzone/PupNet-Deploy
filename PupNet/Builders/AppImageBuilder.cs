@@ -220,6 +220,11 @@ public class AppImageBuilder : PackageBuilder
         {
             Operations.CopyFile(IconSource, Path.Combine(BuildRoot, Configuration.AppId + Path.GetExtension(IconSource)));
         }
+        else
+        {
+            // Icon expected on Linux. Defaults to be provided in none in conf
+            throw new InvalidOperationException("Expected IconSource but was null");
+        }
 
         // IMPORTANT - Create AppRun link
         // ln -s {target} {link}

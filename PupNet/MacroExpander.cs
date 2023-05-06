@@ -65,8 +65,6 @@ public class MacrosExpander
         dict.Add(MacroId.DesktopTerminal, conf.DesktopTerminal.ToString().ToLowerInvariant());
         dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
 
-        dict.Add(MacroId.AppStreamDescriptionXml, GetXmlDescription(conf.AppDescription));
-        dict.Add(MacroId.AppStreamChangelogXml, builder.ChangeLog.ToString(true));
         dict.Add(MacroId.AppVersion, builder.AppVersion);
         dict.Add(MacroId.PackageRelease, builder.PackageRelease);
         dict.Add(MacroId.DeployKind, args.Kind.ToString().ToLowerInvariant());
@@ -81,6 +79,27 @@ public class MacrosExpander
 
         dict.Add(MacroId.InstallBin, builder.InstallBin);
         dict.Add(MacroId.InstallExec, builder.InstallExec);
+
+        if (conf.AppDescription.Count != 0)
+        {
+            dict.Add(MacroId.AppStreamDescriptionXml, GetXmlDescription(conf.AppDescription));
+        }
+        else
+        {
+            // Macro cannot be empty - use mandatory AppShortSummary instead
+            dict.Add(MacroId.AppStreamDescriptionXml, $"<p>{SecurityElement.Escape(conf.AppShortSummary)}</p>");
+        }
+
+        if (builder.ChangeLog.Items.Count != 0)
+        {
+            dict.Add(MacroId.AppStreamChangelogXml, builder.ChangeLog.ToString(true));
+        }
+        else
+        {
+            // Macro cannot be empty - manufacture minimal change
+            var change = $"<release version=\"{builder.AppVersion}\" date=\"{DateTime.UtcNow.ToString("yyyy-MM-dd")}\">";
+            dict.Add(MacroId.AppStreamChangelogXml, change);
+        }
 
         Dictionary = dict;
     }
