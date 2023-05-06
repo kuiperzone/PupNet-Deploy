@@ -122,7 +122,7 @@ public class PackageBuilderTest
 
             Assert.EndsWith($"usr/share/applications/net.example.helloworld.desktop", builder.DesktopBuildPath);
 
-            Assert.Equal($"Assets/Icon.svg", builder.IconSource);
+            Assert.Equal($"Assets/Icon.svg", builder.PrimaryIcon);
 
             Assert.Contains($"Assets/Icon.svg", builder.IconPaths.Keys);
             Assert.Contains($"Assets/Icon.32x32.png", builder.IconPaths.Keys);
@@ -141,7 +141,7 @@ public class PackageBuilderTest
             Assert.Null(builder.DesktopBuildPath);
 
             // Linux sep is ok
-            Assert.Equal($"Assets/Icon.ico", builder.IconSource);
+            Assert.Equal($"Assets/Icon.ico", builder.PrimaryIcon);
             Assert.True(builder.IconPaths.Count == 0);
         }
         else

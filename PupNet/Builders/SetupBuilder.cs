@@ -176,7 +176,7 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"AppPublisherURL={Configuration.PublisherLinkUrl}");
         sb.AppendLine($"InfoBeforeFile={Configuration.AppChangeFile}");
         sb.AppendLine($"LicenseFile={Configuration.AppLicenseFile}");
-        sb.AppendLine($"SetupIconFile={IconSource}");
+        sb.AppendLine($"SetupIconFile={PrimaryIcon}");
 
         sb.AppendLine($"DefaultGroupName={Configuration.AppFriendlyName}");
         sb.AppendLine($"DefaultDirName={{autopf}}\\{Configuration.AppBaseName}");
@@ -188,9 +188,9 @@ public class SetupBuilder : PackageBuilder
 
         sb.AppendLine($"PrivilegesRequired={(Configuration.SetupAdminInstall ? "admin" : "lowest")}");
 
-        if (IconSource != null)
+        if (PrimaryIcon != null)
         {
-            sb.AppendLine($"UninstallDisplayIcon={{app}}\\{Path.GetFileName(IconSource)}");
+            sb.AppendLine($"UninstallDisplayIcon={{app}}\\{Path.GetFileName(PrimaryIcon)}");
         }
 
         if (!string.IsNullOrEmpty(Configuration.SetupSignTool))
@@ -204,9 +204,9 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"Source: \"{BuildAppBin}\\*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs signonce;");
         sb.AppendLine($"Source: \"{BuildAppBin}\\*\"; Excludes: \"*.exe,*.dll\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
 
-        if (IconSource != null)
+        if (PrimaryIcon != null)
         {
-            sb.AppendLine($"Source: \"{IconSource}\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
+            sb.AppendLine($"Source: \"{PrimaryIcon}\"; DestDir: \"{{app}}\"; Flags: ignoreversion recursesubdirs createallsubdirs;");
         }
 
         if (Configuration.SetupCommandPrompt != null)

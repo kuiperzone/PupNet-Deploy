@@ -65,15 +65,18 @@ public abstract class PackageBuilder
         if (IconPaths.Count == 0)
         {
             // Fallback to embedded icons on Linux
+            // Should always empty on non-linux systems
             IconPaths = GetShareIconPaths(Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
         }
 
-        IconSource = GetSourceIcon(kind, Configuration.IconFiles);
+        // Should be ico on Windows, or SVG or PNG on linux
+        PrimaryIcon = GetSourceIcon(kind, Configuration.IconFiles);
 
-        if (IconSource == null)
+        if (PrimaryIcon == null)
         {
+            // It can be null on Windows.
             // Fallback to embedded icons on Linux
-            IconSource = GetSourceIcon(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
+            PrimaryIcon = GetSourceIcon(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
         }
 
         // Ignore fact file might not exist if AssertPaths if false (test only)
@@ -347,7 +350,7 @@ public abstract class PackageBuilder
     /// On Linux this is the first SVG file encountered, or the largest PNG otherwise. On Windows, it is the first ICO
     /// file encountered. It is a full path to the source icon on build.
     /// </summary>
-    public string? IconSource { get; }
+    public string? PrimaryIcon { get; }
 
     /// <summary>
     /// A sequence of source icon paths (key) and their install destinations (value) under
@@ -729,19 +732,24 @@ public abstract class PackageBuilder
                 return item;
             }
 
-            if (!kind.TargetsWindows() && ext == ".svg")
+            if (!kind.TargetsWindows())
             {
-                // Or this for non-windows
-                return item;
-            }
+                // For non-windows
+                if (ext == ".svg")
+                {
+                    // Preferred
+                    return item;
+                }
 
-            // Get biggest PNG
-            int size = GetStandardPngSize(item);
+                // Or biggest PNG
+                int size = GetStandardPngSize(item);
 
-            if (size > max)
-            {
-                max = size;
-                rslt = item;
+                if (size > max)
+                {
+                    max = size;
+                    rslt = item;
+                }
+
             }
         }
 

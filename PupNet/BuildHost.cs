@@ -240,18 +240,18 @@ public class BuildHost
         AppendPair(sb, nameof(Builder.AppVersion), Builder.AppVersion);
         AppendPair(sb, nameof(Builder.PackageRelease), Builder.PackageRelease);
 
-        if (Configuration.StartCommand != null && Builder.SupportsStartCommand)
+        if (Builder.SupportsStartCommand)
         {
-            AppendPair(sb, nameof(Configuration.StartCommand), Configuration.StartCommand);
+            AppendPair(sb, nameof(Configuration.StartCommand), Configuration.StartCommand ?? "[None]");
         }
         else
         {
-            AppendPair(sb, nameof(Configuration.StartCommand), Configuration.StartCommand + " [Not Supported]");
+            AppendPair(sb, nameof(Configuration.StartCommand), "[Not Supported]");
         }
 
         if (Builder.Kind == PackageKind.Setup)
         {
-            AppendPair(sb, nameof(Configuration.SetupCommandPrompt), Configuration.SetupCommandPrompt);
+            AppendPair(sb, nameof(Configuration.SetupCommandPrompt), Configuration.SetupCommandPrompt ?? "[None]");
         }
 
         AppendHeader(sb, $"OUTPUT: {Arguments.Kind.ToString().ToUpperInvariant()}");
@@ -268,10 +268,11 @@ public class BuildHost
         }
 
         AppendSection(sb, $"DESKTOP: {Path.GetFileName(Configuration.DesktopFile)}", ExpandedDesktop);
-        AppendSection(sb, $"CHANGELOG: {Path.GetFileName(Configuration.AppChangeFile)}", Builder.ChangeLog.ToString());
 
         if (verbose)
         {
+            AppendSection(sb, $"CHANGELOG: {Path.GetFileName(Configuration.AppChangeFile)}", Builder.ChangeLog.ToString());
+
             var temp = new StringBuilder();
 
             foreach (var item in Builder.IconPaths)

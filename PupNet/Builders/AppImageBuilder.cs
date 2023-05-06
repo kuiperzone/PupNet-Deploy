@@ -216,14 +216,14 @@ public class AppImageBuilder : PackageBuilder
         Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".desktop"), desktop);
         Operations.WriteFile(Path.Combine(BuildRoot, Configuration.AppId + ".appdata.xml"), metainfo);
 
-        if (IconSource != null)
+        if (PrimaryIcon != null)
         {
-            Operations.CopyFile(IconSource, Path.Combine(BuildRoot, Configuration.AppId + Path.GetExtension(IconSource)));
+            Operations.CopyFile(PrimaryIcon, Path.Combine(BuildRoot, Configuration.AppId + Path.GetExtension(PrimaryIcon)));
         }
         else
         {
             // Icon expected on Linux. Defaults to be provided in none in conf
-            throw new InvalidOperationException("Expected IconSource but was null");
+            throw new InvalidOperationException($"Expected {nameof(PrimaryIcon)} but was null");
         }
 
         // IMPORTANT - Create AppRun link
