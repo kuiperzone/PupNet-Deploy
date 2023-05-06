@@ -97,7 +97,7 @@ public class MacrosExpander
         else
         {
             // Macro cannot be empty - manufacture minimal change
-            var change = $"<release version=\"{builder.AppVersion}\" date=\"{DateTime.UtcNow.ToString("yyyy-MM-dd")}\">";
+            var change = $"<release version=\"{builder.AppVersion}\" date=\"{DateTime.UtcNow.ToString("yyyy-MM-dd")}\"/>";
             dict.Add(MacroId.AppStreamChangelogXml, change);
         }
 

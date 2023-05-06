@@ -2,6 +2,11 @@ Add multiple --kind values to arguments?
 Add <ul> parsing to AppDescription
 Implement auto system test for maximal and minimal conf files
 
+HANDY
+dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.4.1
+dotnet tool install KuiperZone.PupNet -g --add-source ./Deploy/OUT
+dotnet tool uninstall KuiperZone.PupNet -g
+
 
 DONE
 Add parsable "changes" and integrate with RPM,deb and AppStream
