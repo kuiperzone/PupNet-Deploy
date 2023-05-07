@@ -23,6 +23,78 @@ namespace KuiperZone.PupNet.Test;
 public class MacroExpanderTest
 {
     [Fact]
+    public void AppDescriptionToXml_HandlesEmpty()
+    {
+        Assert.Empty(MacroExpander.AppDescriptionToXml(Array.Empty<string>()));
+        Assert.Empty(MacroExpander.AppDescriptionToXml(new string[]{"", "  ", ""}));
+    }
+
+    [Fact]
+    public void AppDescriptionToXml_HandlesParagraphsAndLists()
+    {
+        var value = new List<string>();
+        value.Add("Para1 Line1\n");
+        value.Add("Para1 Line2\n");
+        value.Add("Para1 Line3");
+        value.Add("");
+        value.Add("Para2 Line1 with escapes <>");
+        value.Add("");
+        value.Add("Para3 Line1");
+        value.Add("");
+        value.Add("- List 1-1");
+        value.Add("- List 1-2");
+        value.Add("");
+        value.Add("Para4 Line1");
+        value.Add("* List 2-1");
+        value.Add("* List 2-2");
+        value.Add("Para5 Line1");
+
+        var exp = new StringBuilder();
+        exp.Append("<p>Para1 Line1\n");
+        exp.Append("Para1 Line2\n");
+        exp.Append("Para1 Line3</p>\n");
+        exp.Append("\n");
+        exp.Append("<p>Para2 Line1 with escapes &lt;&gt;</p>\n");
+        exp.Append("\n");
+        exp.Append("<p>Para3 Line1</p>\n");
+        exp.Append("\n");
+        exp.Append("<ul>\n");
+        exp.Append("<li>List 1-1</li>\n");
+        exp.Append("<li>List 1-2</li>\n");
+        exp.Append("</ul>\n");
+        exp.Append("\n");
+        exp.Append("<p>Para4 Line1</p>\n");
+        exp.Append("\n");
+        exp.Append("<ul>\n");
+        exp.Append("<li>List 2-1</li>\n");
+        exp.Append("<li>List 2-2</li>\n");
+        exp.Append("</ul>\n");
+        exp.Append("\n");
+        exp.Append("<p>Para5 Line1</p>");
+
+        var html = MacroExpander.AppDescriptionToXml(value);
+
+        // Console.WriteLine("===========================");
+        // Console.WriteLine(html);
+        // Console.WriteLine("===========================");
+
+        Assert.Equal(exp.ToString(), html);
+
+        // Append trailing list
+        value.Add("");
+        value.Add("+ List 3-1");
+
+        exp.Append("\n");
+        exp.Append("\n");
+        exp.Append("<ul>\n");
+        exp.Append("<li>List 3-1</li>\n");
+        exp.Append("</ul>");
+
+        html = MacroExpander.AppDescriptionToXml(value);
+        Assert.Equal(exp.ToString(), html);
+    }
+
+    [Fact]
     public void Expand_EnsureNoMacroOmitted()
     {
         // Use factory to create one
@@ -35,8 +107,8 @@ public class MacroExpanderTest
             sb.AppendLine(item.ToVar());
         }
 
-        // Need to remove embedded macro in test string
-        var test = host.Macros.Expand(sb.ToString()).Replace("${LINE3_VAR}", "LINE3_VAR");
+        // Need to remove known embedded macro in test string put there by DummyConf
+        var test = host.Macros.Expand(sb.ToString()).Replace("${MACRO_VAR}", "MACRO_VAR");
 
         // Expect no remaining macros
         Console.WriteLine(test);
@@ -58,11 +130,9 @@ public class MacroExpanderTest
     {
         var host = new BuildHost(new DummyConf(PackageKind.Zip));
 
-        // Content escape but has XML <p>
+        // Content we expect ${MACRO_VAR} by DummyConf
         var desc = host.Macros.Expand("${APPSTREAM_DESCRIPTION_XML}", true);
-
-        // Line1\n<Line2>\n\nLine3 has ${VAR}
-        Assert.Equal("<p>Line1\n&lt;Line2&gt;</p>\n\n<p>Line3 has ${LINE3_VAR}</p>", desc);
+        Assert.Contains("${MACRO_VAR}", desc);
     }
 
 }

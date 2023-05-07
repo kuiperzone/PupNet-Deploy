@@ -26,14 +26,14 @@ namespace KuiperZone.PupNet;
 /// Expands macros for use in fields and file contents. When expanding, simple search-replace
 /// is used. Therefore important to specify "${NAME}", and not "$NAME".
 /// </summary>
-public class MacrosExpander
+public class MacroExpander
 {
     private const string SpecialPrefix = "$$+";
 
     /// <summary>
     /// Default constructor. Example values and unit test only.
     /// </summary>
-    public MacrosExpander()
+    public MacroExpander()
         : this(new BuilderFactory().Create(new ConfigurationReader(true)))
     {
     }
@@ -41,7 +41,7 @@ public class MacrosExpander
     /// <summary>
     /// Production constructor.
     /// </summary>
-    public MacrosExpander(PackageBuilder builder)
+    public MacroExpander(PackageBuilder builder)
     {
         var args = builder.Arguments;
         var conf = builder.Configuration;
@@ -63,7 +63,7 @@ public class MacrosExpander
         dict.Add(MacroId.DesktopNoDisplay, conf.DesktopNoDisplay.ToString().ToLowerInvariant());
         dict.Add(MacroId.DesktopIntegrate, (!conf.DesktopNoDisplay).ToString().ToLowerInvariant());
         dict.Add(MacroId.DesktopTerminal, conf.DesktopTerminal.ToString().ToLowerInvariant());
-        dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "");
+        dict.Add(MacroId.PrimeCategory, conf.PrimeCategory ?? "Utility");
 
         dict.Add(MacroId.AppVersion, builder.AppVersion);
         dict.Add(MacroId.PackageRelease, builder.PackageRelease);
@@ -82,7 +82,7 @@ public class MacrosExpander
 
         if (conf.AppDescription.Count != 0)
         {
-            dict.Add(MacroId.AppStreamDescriptionXml, GetXmlDescription(conf.AppDescription));
+            dict.Add(MacroId.AppStreamDescriptionXml, AppDescriptionToXml(conf.AppDescription));
         }
         else
         {
@@ -113,6 +113,95 @@ public class MacrosExpander
     /// Gets a dictionary of macros.
     /// </summary>
     public IReadOnlyDictionary<MacroId, string> Dictionary { get; }
+
+    /// <summary>
+    /// Public for unit test only. Converts plain test with paragraphs separated by two or more empty lines
+    /// to basic HTML. Also inserted &lt;ul&gt; items for lines beginning with "- " or "* ".
+    /// </summary>
+    public static string AppDescriptionToXml(IEnumerable<string> description)
+    {
+        bool paraFlag = false;
+        bool listFlag = false;
+        var sb = new StringBuilder();
+
+        foreach (var item in description)
+        {
+            var line = item.Trim();
+
+            if (string.IsNullOrEmpty(line))
+            {
+                if (paraFlag)
+                {
+                    sb.Append("</p>\n\n");
+                }
+                else
+                if (listFlag)
+                {
+                    sb.Append("</ul>\n\n");
+                }
+
+                paraFlag = false;
+                listFlag = false;
+            }
+            else
+            if (line.StartsWith("* ") || line.StartsWith("+ ") || line.StartsWith("- "))
+            {
+                line = line.TrimStart('*', '+', '-').TrimStart();
+
+                if (paraFlag)
+                {
+                    sb.Append("</p>\n\n");
+                    paraFlag = false;
+                }
+
+                if (!listFlag)
+                {
+                    sb.Append("<ul>\n");
+                }
+
+                sb.Append("<li>");
+                sb.Append(SecurityElement.Escape(line));
+                sb.Append("</li>\n");
+                listFlag = true;
+            }
+            else
+            {
+                if (listFlag)
+                {
+                    sb.Append("</ul>\n\n");
+                    listFlag = false;
+                }
+
+                if (paraFlag)
+                {
+                    sb.Append('\n');
+                    sb.Append(SecurityElement.Escape(line));
+                }
+                else
+                {
+                    sb.Append("<p>");
+                    sb.Append(SecurityElement.Escape(line));
+                }
+
+                paraFlag = true;
+            }
+        }
+
+        if (sb.Length != 0)
+        {
+            if (paraFlag)
+            {
+                sb.Append("</p>");
+            }
+            else
+            if (listFlag)
+            {
+                sb.Append("</ul>");
+            }
+        }
+
+        return sb.ToString();
+    }
 
     /// <summary>
     /// Expand all macros in text content. Simple search replace. Case sensitive.
@@ -267,42 +356,6 @@ public class MacrosExpander
                 warnings.Add(varStr);
             }
         }
-    }
-
-    private static string GetXmlDescription(IEnumerable<string> description)
-    {
-        bool newPara = true;
-        var sb = new StringBuilder();
-
-        foreach (var item in description)
-        {
-            // Empty lines only appear mid-content and never consecutive
-            if (newPara)
-            {
-                sb.Append("<p>");
-                sb.Append(SecurityElement.Escape(item));
-                newPara = false;
-            }
-            else
-            if (string.IsNullOrEmpty(item))
-            {
-                sb.Append("</p>");
-                sb.Append("\n\n");
-                newPara = true;
-            }
-            else
-            {
-                sb.Append('\n');
-                sb.Append(SecurityElement.Escape(item));
-            }
-        }
-
-        if (sb.Length != 0)
-        {
-            sb.Append("</p>");
-        }
-
-        return sb.ToString();
     }
 
 }

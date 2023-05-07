@@ -23,13 +23,15 @@ namespace KuiperZone.PupNet;
 
 /// <summary>
 /// A base class for package build operations. It defines a working build directory structure under which the
-/// application is to be published by dotnet, along with other assets such a desktop, AppStream metadata
-/// and icons (think 'AppDir' for AppImage, or BUILDROOT for RPM). It is Linux centric, where on Windows unused
-/// properties are ignored. The subclass is to define package specific values and operations by overriding key
-/// members, and implement the build operation. The build operation is a two-stage process in which
-/// <see cref="Create"/> is first called and information present on the console. Note that many of properties of
-/// this class are public purely to make them accessible to <see cref="BuildHost"/> class so they can be presented
-/// to the user. When the user confirms <see cref="BuildPackage"/> is called to perform the build.
+/// application is to be published by dotnet, along with other assets such a desktop file (Linux), AppStream metadata
+/// and icons (think 'AppDir' for AppImage, or buildroot for RPM). It is Linux centric, where on Windows or non-Linux
+/// unused properties are ignored (may be null). The subclass is to define package specific values and operations by
+/// overriding key members, and implement the build operation. Note that many of properties of this class are public
+/// purely to make them accessible to <see cref="BuildHost"/> owner class so they can be presented to the user.
+/// When the user confirms, the build process commences which is a 3 stage process. First, <see cref="Create"/>
+/// is called to create the directory structure. Next "dotnet publish" (and/or a custom post-build operation) is
+/// called to build the project and populate the <see cref="BuildAppBin"/> directory. Finally, <see cref="BuildPackage"/>
+/// is called to perform the package build.
 /// </summary>
 public abstract class PackageBuilder
 {
@@ -182,17 +184,18 @@ public abstract class PackageBuilder
     public string PackageRelease { get; }
 
     /// <summary>
-    /// Gets output directory.
+    /// Gets output directory of the final deployable package.
     /// </summary>
     public string OutputDirectory { get; }
 
     /// <summary>
-    /// Gets output filename.
+    /// Gets output filename of the final deployable package.
+    /// Note. For certain builders (namely RPM), this may be a directory which then contains the output.
     /// </summary>
     public abstract string OutputName { get; }
 
     /// <summary>
-    /// Gets output file path.
+    /// Gets output file path "OutputDirectory/OutputName".
     /// </summary>
     public string OutputPath
     {
@@ -214,7 +217,7 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the app root directory, i.e. "${Root}/AppDir". This is equivalent to "AppDir" in AppImage terminology,
-    /// or "buildroot" in RPM terminology.
+    /// or "buildroot" in RPM terminology. Always populated.
     /// </summary>
     public string BuildRoot { get; }
 
@@ -361,14 +364,15 @@ public abstract class PackageBuilder
 
     /// <summary>
     /// Gets the application bin directory to which the dotnet build must publish to (or the C++ make output).
-    /// It will be under <see cref="BuildRoot"/> and may not be equal to <see cref="BuildUsrBin"/>.
-    /// For RPM and Deb, it is expected to be "{BuildRoot}/opt/{AppId}".
+    /// It should always be under <see cref="BuildRoot"/>. For some packages on Linux, it may be equal to
+    /// <see cref="BuildUsrBin"/>, but not necessarily. For RPM and Deb, it is expected to be "{BuildRoot}/opt/{AppId}".
+    /// Always populated.
     /// </summary>
     public abstract string BuildAppBin { get; }
 
     /// <summary>
     /// Gets the path to the application executable on target system (not the build system).
-    /// Typically: "/usr/bin/${AppExecName}" or "/opt/AppId/${AppExecName}"
+    /// See also <see cref="BuildAppBin"/>.
     /// </summary>
     public string InstallExec
     {
@@ -376,7 +380,8 @@ public abstract class PackageBuilder
     }
 
     /// <summary>
-    /// Gets the path to the application directory on target system (not the build system). Typically: "/usr/bin" or "/opt/AppId".
+    /// Gets the path to the application directory on target system (not the build system). On Linux, typically:
+    /// "/usr/bin" or "/opt/AppId". See also <see cref="BuildAppBin"/>.
     /// </summary>
     public abstract string InstallBin { get; }
 
@@ -452,6 +457,7 @@ public abstract class PackageBuilder
     /// string is null or empty. It copies <see cref="IconPaths"/> to their respective destinations, and writes
     /// <see cref="ManifestContent"/> to <see cref="ManifestBuildPath"/>. Finally, it ensures that <see cref="OutputDirectory"/>
     /// exists. It should be overridden to perform additional tasks, but subclass should call this base method first.
+    /// It throws any Exception of failure.
     /// </summary>
     public virtual void Create(string? desktop, string? metainfo)
     {
@@ -523,7 +529,7 @@ public abstract class PackageBuilder
     /// Builds the package. This method is called after <see cref="Create"/> and after <see cref="BuildAppBin"/>
     /// has been populated with the application. The base implementation ensures that the expected runnable binary
     /// exists and calls <see cref="FileOps.Execute(string)"/> against each item in <see cref="PackageCommands"/>.
-    /// It may be overridden to perform additional or other operations.
+    /// It may be overridden to perform additional or other operations. It throws any Exception of failure.
     /// </summary>
     public virtual void BuildPackage()
     {
@@ -694,15 +700,14 @@ public abstract class PackageBuilder
             // Loose any directory
             filename = Path.GetFileName(filename);
 
-            // Interior extension, i.e. the value
-            ext = Path.GetExtension(Path.GetFileNameWithoutExtension(filename));
+            // Interior extension, i.e. the size (here may be ".x32", ".32" or "32x32"
+            ext = Path.GetExtension(Path.GetFileNameWithoutExtension(filename)).Trim('.');
 
-            // Accept "64x64" but key off first value
             int pos = ext.IndexOf('x', StringComparison.OrdinalIgnoreCase);
 
-            if (pos > 0)
+            if (pos > -1 && pos < ext.Length)
             {
-                ext = ext.Substring(1, pos - 1);
+                ext = ext.Substring(pos + 1);
             }
 
             if (int.TryParse(ext, out int size) && StandardIconSizes.Contains(size))

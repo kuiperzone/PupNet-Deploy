@@ -16,7 +16,6 @@
 // with PupNet. If not, see <https://www.gnu.org/licenses/>.
 // -----------------------------------------------------------------------------
 
-using System;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
@@ -25,7 +24,7 @@ using Microsoft.VisualBasic.FileIO;
 namespace KuiperZone.PupNet;
 
 /// <summary>
-/// Wraps standard file operations with desired console output behavior.
+/// Wraps expected file operations with desired console output behavior.
 /// This is mainly for convenience and aesthetic/information purposes.
 /// </summary>
 public class FileOps

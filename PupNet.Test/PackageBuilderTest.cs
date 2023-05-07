@@ -25,6 +25,13 @@ public class PackageBuilderTest
     [Fact]
     public void DefaultIcons_Available()
     {
+        Assert.NotEmpty(PackageBuilder.DefaultTerminalIcons);
+
+        foreach (var item in PackageBuilder.DefaultTerminalIcons)
+        {
+            Assert.True(File.Exists(item));
+        }
+
         Assert.NotEmpty(PackageBuilder.DefaultGuiIcons);
 
         foreach (var item in PackageBuilder.DefaultGuiIcons)
@@ -37,7 +44,10 @@ public class PackageBuilderTest
     public void AppImage_DecodesOK()
     {
         var builder = new AppImageBuilder(new DummyConf());
+
+        Assert.True(builder.IsLinuxExclusive);
         AssertOK(builder, PackageKind.AppImage);
+        Assert.False(builder.IsWindowsExclusive);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.appdata.xml", builder.MetaBuildPath);
 
         // Skip arch - depends on test system -- covered in other tests
@@ -49,7 +59,10 @@ public class PackageBuilderTest
     public void Flatpak_DecodesOK()
     {
         var builder = new FlatpakBuilder(new DummyConf());
+
+        Assert.True(builder.IsLinuxExclusive);
         AssertOK(builder, PackageKind.Flatpak);
+        Assert.False(builder.IsWindowsExclusive);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
         Assert.StartsWith("HelloWorld-5.4.3-2.", builder.OutputName);
@@ -60,7 +73,10 @@ public class PackageBuilderTest
     public void Rpm_DecodesOK()
     {
         var builder = new RpmBuilder(new DummyConf());
+
+        Assert.True(builder.IsLinuxExclusive);
         AssertOK(builder, PackageKind.Rpm);
+        Assert.False(builder.IsWindowsExclusive);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
         Assert.Equal("RPMS", builder.OutputName);
@@ -70,6 +86,9 @@ public class PackageBuilderTest
     public void Debian_DecodesOK()
     {
         var builder = new DebianBuilder(new DummyConf());
+
+        Assert.True(builder.IsLinuxExclusive);
+        Assert.False(builder.IsWindowsExclusive);
         AssertOK(builder, PackageKind.Deb);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
@@ -81,6 +100,9 @@ public class PackageBuilderTest
     public void Setup_DecodesOK()
     {
         var builder = new SetupBuilder(new DummyConf());
+
+        Assert.False(builder.IsLinuxExclusive);
+        Assert.True(builder.IsWindowsExclusive);
         AssertOK(builder, PackageKind.Setup);
         Assert.Null(builder.MetaBuildPath);
 
@@ -122,11 +144,15 @@ public class PackageBuilderTest
 
             Assert.EndsWith($"usr/share/applications/net.example.helloworld.desktop", builder.DesktopBuildPath);
 
+
             Assert.Equal($"Assets/Icon.svg", builder.PrimaryIcon);
 
             Assert.Contains($"Assets/Icon.svg", builder.IconPaths.Keys);
             Assert.Contains($"Assets/Icon.32x32.png", builder.IconPaths.Keys);
-            Assert.Contains($"Assets/Icon.64x64.png", builder.IconPaths.Keys);
+            Assert.Contains($"Assets/Icon.x48.png", builder.IconPaths.Keys);
+            Assert.Contains($"Assets/Icon.64.png", builder.IconPaths.Keys);
+
+            // Excluded on windows
             Assert.DoesNotContain($"Assets/Icon.ico", builder.IconPaths.Keys);
         }
         else
@@ -140,8 +166,9 @@ public class PackageBuilderTest
 
             Assert.Null(builder.DesktopBuildPath);
 
-            // Linux sep is ok
             Assert.Equal($"Assets/Icon.ico", builder.PrimaryIcon);
+
+            // These are empty on non-linus, only has PrimaryIcon
             Assert.True(builder.IconPaths.Count == 0);
         }
         else

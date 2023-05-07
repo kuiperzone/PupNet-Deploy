@@ -375,9 +375,10 @@ public class ConfigurationReader
         sb.Append(CreateHelpField(nameof(AppDescription), AppDescription, true, style,
                 $"Multi-line (surround with triple \"\"\" quotes) application description which provides longer explanation",
                 $"than {nameof(AppShortSummary)} in default language. Optional but it is recommended to specify this. Text",
-                $"separated by an empty line will be treated as separate paragraphs. Avoid complex formatting and do not",
-                $"use HTML or markdown. This content is used by package builders where supported, including RPM and DEB,",
-                $"and is used to populate the {MacroId.AppStreamDescriptionXml.ToVar()} element used in AppStream metadata."));
+                $"separated by an empty line will be treated as separate paragraphs. Avoid complex formatting, and do not",
+                $"use HTML or markdown, other than list items begining with \"* \", \"+ \" or \"- \". This content is",
+                $"used by package builders where supported, including RPM and DEB, and is used to populate the",
+                $"{MacroId.AppStreamDescriptionXml.ToVar()} element used within AppStream metadata."));
 
         sb.Append(CreateHelpField(nameof(AppLicenseId), AppLicenseId, style,
                 $"Mandatory application license ID. This should be one of the recognized SPDX license",
@@ -411,7 +412,8 @@ public class ConfigurationReader
                 $"an item in program menu entries. Do not modify name, as may leave old entries in updated installations."));
 
         sb.Append(CreateHelpField(nameof(PublisherLinkUrl), PublisherLinkUrl, style,
-                $"Optional publisher or application web-link URL."));
+                $"Publisher or application web-link URL. Although optional, it should be considered mandatory if using",
+                $"{nameof(MetaFile)}"));
 
         sb.Append(CreateHelpField(nameof(PublisherEmail), PublisherEmail, style,
                 $"Publisher or maintainer email contact. Although optional, some package builders (i.e. DEB) require it",

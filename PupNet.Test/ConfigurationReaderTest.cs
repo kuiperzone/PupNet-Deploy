@@ -61,7 +61,7 @@ public class ConfigurationReaderTest
     {
         // Use of angle brackets deliberate
         var lines = Create().AppDescription;
-        var exp = new string[] { "Line1", "<Line2>", "", "Line3 has ${LINE3_VAR}" };
+        var exp = new string[] { "Para1-Line1", "<Para1-Line2>", "", "- Bullet1", "* Bullet2", "Para2-Line1 has ${MACRO_VAR}" };
 
         Assert.Equal(exp, lines);
         Assert.Empty(Create(nameof(ConfigurationReader.AppDescription)).AppDescription);

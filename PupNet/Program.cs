@@ -133,7 +133,7 @@ internal class Program
                     Console.WriteLine();
                     Console.WriteLine("IMPORTANT: Always use the ${MACRO_NAME} form, and not $MACRO_NAME.");
                     Console.WriteLine();
-                    Console.WriteLine(new MacrosExpander().ToString(true, true));
+                    Console.WriteLine(new MacroExpander().ToString(true, true));
                     Console.WriteLine();
                     return 0;
                 }

@@ -1,3 +1,14 @@
++ VERSION 1.5.0; 2023-05-07
+- Added ability to parse list items in 'AppDescription' configuration and transpose to HTML.
+- Added XML validation of AppStream metadata (will now warn if invalid prior to build).
+- Bugfix: The configuration property 'IconFiles' handled icon names of form "name.NxN.png", but failed with "name.N.png".
+- The ${PRIME_CATEGORY} macro now defaults to "Utility" if PrimeCategory' configuration is omitted.
+- Added extensive new unit testing
+- Minor changes to configuration documentation
+- Other minor changes
+- Ships with: appimagetool 13 (2020-12-31)
+- Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
+
 + VERSION 1.4.1; 2023-05-06
 - Bugfix #16: AppImage and Flatpak builds rejected AppStream metadata if conf.AppDescription was empty. Now defaults to AppShortSummary.
 - Bugfix #15: AppImage and Flatpak builds rejected AppStream metadata if conf.AppChangeFileEmpty.

@@ -68,6 +68,7 @@ Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
 * AppImage for Linux
 * Setup File for Windows
+- hello
 * Flatpak for Linux
 * Debian Binary Package
 * RPM Binary Package
@@ -769,7 +770,7 @@ packages.
 
 Type `pupnet --help` to display command arguments as expected.
 
-    PupNet Deploy 1.4.0
+    PupNet Deploy 1.4.2
     See also: https://github.com/kuiperzone/PupNet-Deploy
 
     USAGE:
@@ -978,6 +979,10 @@ Type `pupnet --help macro` to see supported macro reference information:
 
 Type `pupnet --help conf` to see supported configuration reference information:
 
+    ########################################
+    # APP PREAMBLE
+    ########################################
+
     ** AppBaseName **
     Mandatory application base name. This MUST BE the base name of the main executable file. It should NOT
     include any directory part or extension, i.e. do not append '.exe' or '.dll'. It should not contain
@@ -1000,15 +1005,16 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Example: AppVersionRelease = 1.0.0[1]
 
     ** AppShortSummary **
-    Mandatory single line application short summary description.
+    Mandatory single line application summary text in default (English) language.
     Example: AppShortSummary = A HelloWorld application
 
     ** AppDescription **
-    Optional multi-line (surround with triple """ quotes) application description which may provide
-    longer text than AppShortSummary. Text separated by an empty line will be treated as paragraphs
-    (complex formatting should be avoided). The content is used by package builders where supported,
-    including RPM and DEB, and may optionally be used to populate the '<description>' element in the
-    AppStream metadata through the use of a macro variable.
+    Multi-line (surround with triple """ quotes) application description which provides longer explanation
+    than AppShortSummary in default language. Optional but it is recommended to specify this. Text
+    separated by an empty line will be treated as separate paragraphs. Avoid complex formatting, and do not
+    use HTML or markdown, other than list items begining with "* ", "+ " or "- ". This content is
+    used by package builders where supported, including RPM and DEB, and is used to populate the
+    ${APPSTREAM_DESCRIPTION_XML} element used within AppStream metadata.
 
     ** AppLicenseId **
     Mandatory application license ID. This should be one of the recognized SPDX license
@@ -1025,10 +1031,9 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Optional path to application changelog file. IMPORTANT. If given, this file should contain version
     information in a predefined format. Namely, it should contain one or more version headings of form:
     '+ VERSION;DATE', under which are to be listed change items of form: '- Change description'. Formatted
-    information will be parsed and used to populate AppStream metadata. Additionally, it will be packaged
-    with the application and used with package builders where supported. NOTE. Superfluous text in the file
-    is ignored, so the file may also contain README information.
-    For information: https://github.com/kuiperzone/PupNet-Deploy.
+    information will be parsed and used to expand the ${APPSTREAM_CHANGELOG_XML} macro used
+    for AppStream metadata (superfluous text is ignored, so the file may also contain README information).
+    The given file will also be packaged with the application verbatim. See: https://github.com/kuiperzone/PupNet-Deploy.
     Example: AppChangeFile = CHANGELOG.txt
 
     ########################################
@@ -1050,7 +1055,8 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Example: PublisherLinkName = Project Page
 
     ** PublisherLinkUrl **
-    Optional publisher or application web-link URL.
+    Publisher or application web-link URL. Although optional, it should be considered mandatory if using
+    MetaFile
     Example: PublisherLinkUrl = https://example.net
 
     ** PublisherEmail **

@@ -52,7 +52,6 @@ public class ZipBuilder : PackageBuilder
                 return Arguments.Arch;
             }
 
-            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
             return Runtime.RuntimeArch.ToString().ToLowerInvariant();
         }
     }

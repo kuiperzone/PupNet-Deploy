@@ -18,6 +18,7 @@
 
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml.Linq;
 
 namespace KuiperZone.PupNet;
 
@@ -42,7 +43,7 @@ public class BuildHost
         Arguments = conf.Arguments;
         Configuration = conf;
         Builder = new BuilderFactory().Create(Configuration);
-        Macros = new MacrosExpander(Builder);
+        Macros = new MacroExpander(Builder);
 
         if (!Configuration.AppId.Contains('.'))
         {
@@ -95,6 +96,17 @@ public class BuildHost
             if (ExpandedMetaInfo == null)
             {
                 Builder.WarningSink.Add("Note. AppStream metadata (.metainfo.xml) file not provided");
+            }
+            else
+            {
+                try
+                {
+                    XDocument.Parse(ExpandedMetaInfo);
+                }
+                catch (Exception e)
+                {
+                    Builder.WarningSink.Add($"CRITICAL. AppStream metadata {Path.GetFileName(Configuration.MetaFile)} is not valid XML. {e.Message}");
+                }
             }
         }
 
@@ -155,7 +167,7 @@ public class BuildHost
     /// <summary>
     /// Get the macro expander.
     /// </summary>
-    public MacrosExpander Macros { get; }
+    public MacroExpander Macros { get; }
 
     /// <summary>
     /// Gets expanded desktop entry content.

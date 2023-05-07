@@ -19,7 +19,8 @@
 namespace KuiperZone.PupNet.Test;
 
 /// <summary>
-/// Dummy configuration with test values. Used in unit tests.
+/// Dummy configuration with test values. The values are expected by unit tests,
+/// so changing them will break the tests.
 /// </summary>
 public class DummyConf : ConfigurationReader
 {
@@ -34,7 +35,7 @@ public class DummyConf : ConfigurationReader
     }
 
     /// <summary>
-    /// Creates demo of given kind. If omit is not null, the property name given
+    /// Creates demo of given kind. For unit test - if omit is not null, the property name given
     /// will be removed from the content, leaving the value to fall back to its default.
     /// </summary>
     public DummyConf(PackageKind kind, string? omit = null)
@@ -53,7 +54,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
         lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
         lines.Add($"{nameof(ConfigurationReader.AppShortSummary)} = Test <application> only");
-        lines.Add($"{nameof(ConfigurationReader.AppDescription)} = \n Line1\n<Line2>\n\n  Line3 has ${{LINE3_VAR}}\n");
+        lines.Add($"{nameof(ConfigurationReader.AppDescription)} = \n Para1-Line1\n<Para1-Line2>\n\n- Bullet1\n* Bullet2\nPara2-Line1 has ${{MACRO_VAR}}\n");
         lines.Add($"{nameof(ConfigurationReader.AppLicenseId)} = LicenseRef-LICENSE");
         lines.Add($"{nameof(ConfigurationReader.AppLicenseFile)} = LICENSE");
         lines.Add($"{nameof(ConfigurationReader.AppChangeFile)} = CHANGELOG");
@@ -69,7 +70,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(ConfigurationReader.DesktopTerminal)} = False");
         lines.Add($"{nameof(ConfigurationReader.PrimeCategory)} = Development");
         lines.Add($"{nameof(ConfigurationReader.DesktopFile)} = app.desktop");
-        lines.Add($"{nameof(ConfigurationReader.IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.64x64.png; Assets/Icon.ico; Assets/Icon.svg;");
+        lines.Add($"{nameof(ConfigurationReader.IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.x48.png; Assets/Icon.64.png; Assets/Icon.ico; Assets/Icon.svg;");
         lines.Add($"{nameof(ConfigurationReader.MetaFile)} = metainfo.xml");
 
         lines.Add($"{nameof(ConfigurationReader.DotnetProjectPath)} = HelloProject");
