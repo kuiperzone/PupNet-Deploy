@@ -68,7 +68,6 @@ Now, **PupNet Deploy** allows you to ship your dotnet application as:
 
 * AppImage for Linux
 * Setup File for Windows
-- hello
 * Flatpak for Linux
 * Debian Binary Package
 * RPM Binary Package
