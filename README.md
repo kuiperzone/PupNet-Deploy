@@ -104,7 +104,7 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
-## First - A General Principle <a name="general-principle"/>
+### First - A General Principle <a name="general-principle"/>
 
 As a general principle when deploying your software, it should be assumed that your application has read-only access to
 it's installation folder. Rather, your application should use the `Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData`
