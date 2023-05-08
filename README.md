@@ -27,9 +27,16 @@ installation file in a single step.
     * [Dotnet Project Path](#dotnet-project-path)
     * [Dotnet Publish Arguments](#dotnet-publish-arguments)
     * [Application Versioning & Changelog](#application-versioning-changelog)
+        * [Application Version (AppVersionRelease)](#application-version)
+        * [Changelog (AppChangeFile)](#changelog)
     * [Terminal vs GUI Applications](#terminal-vs-gui-applications)
+        * [GUI Application](#gui-application)
+        * [Terminal Application](#terminal-application")
     * [Custom Post-Publish Operations](#custom-post-publish-operations)
+        * [Non-Dotnet Projects](#non-dotnet-projects")
     * [Debian & RPM Considerations](#debian-rpm-considerations)
+        * [Install Location](#debian-rpm-install-location)
+        * [Dependencies](#debian-rpm-dependencies)
 
 * [BUILDING THE HELLO WORLD DEMO](#building-the-hello-world-demo)
     * [On Linux](#on-linux)
@@ -204,7 +211,7 @@ You will see that each parameter is documented. However, we will discuss key pro
 ### Desktop File <a name="desktop-file"/>
 
 Note the `DesktopFile` parameter which provides a path to a Linux `.desktop` file. *If you leave it blank, one will
-be generated automatically.* In the Hello World demo, we have specified a file in order to show the contents...
+be generated automatically.* In the Hello World demo, we have specified a file in order to show the default contents...
 
 Open the file `Deploy/app.desktop`, and you will see:
 
@@ -265,8 +272,8 @@ you may still wish to edit and extend this file to provide a screenshot, interna
 additional information such as keywords.
 
 **IMPORTANT:** Since PupNet version 1.4.0, the macros `${APPSTREAM_DESCRIPTION_XML}` and `${APPSTREAM_CHANGELOG_XML}`
-may be used to auto-populate the default application description, and change (release) information. These are described
-in more detail below under [Application Versioning](#application-versioning-changelog).
+may be used to auto-populate the default application description, and change (release) information. The latter is
+described in more detail below under [Application Versioning](#application-versioning-changelog).
 
 **Hint:** You can use PupNet itself to generate a metadata template file for a new project:
 
@@ -327,7 +334,7 @@ consider using Native AOT).
 
 ### Application Versioning & Changelog <a name="application-versioning-changelog"/>
 
-#### Application Version (AppVersionRelease) ####
+#### Application Version (AppVersionRelease) <a name="application-version"/>
 The application version (plus release number) is specified in the `pupnet.conf` file, for example:
 
     AppVersionRelease = 3.2.1[5]
@@ -348,7 +355,7 @@ Here, we can see that the version from our configuration is supplied to the buil
 application part is supplied, i.e. `3.2.1`). This is optional and you may remove it if you wish, although you will
 then need to specify the version both in application code and the `pupnet.conf` file in this case.
 
-#### Changelog (AppChangeFile) ####
+#### Changelog (AppChangeFile) <a name="changelog"/>
 PupNet version 1.4 introduced the `AppChangeFile` configuration property. This gives the path to a changelog file
 which must use a predefined but simple format, or a README file which contains such formatted changelog information.
 
@@ -414,7 +421,7 @@ Finally, it should be stressed that this feature is entirely optional. If it doe
 While the Hello World demo is a terminal application, it was envisaged that a typical use case for PupNet
 would be to deploy GUI applications built with Avalonia that are integrated with the desktop.
 
-#### GUI Application ####
+#### GUI Application <a name="gui-application"/>
 For a GUI application, you will want to ensure the following:
 
     DesktopNoDisplay = false
@@ -422,7 +429,7 @@ For a GUI application, you will want to ensure the following:
 
 You may typically leave `StartCommand` empty, but may set it if you wish.
 
-#### Terminal Application ####
+#### Terminal Application  <a name="terminal-application"/>
 IMPORTANT: Your terminal application will not be in the user's path by default, so note `StartCommand` and
 `SetupCommandPrompt` below. Note, also, that Flatpak is not suitable for command-line centric applications.
 
@@ -493,8 +500,7 @@ Here are the contents of our example bash script:
 
 Likewise, in the Hello World demo bat file which does the equivalent job on Windows.
 
-#### Non-Dotnet Projects ####
-
+#### Non-Dotnet Projects <a name="non-dotnet-projects"/>
 Additionally, you may leverage the post-publish operations (above) to perform the actual build operation itself
 and populate the `${BUILD_APP_BIN}` directory with the output of your build process -- whatever that may be. In
 principle, therefore, you could use this to package a C++ or Python application, provided that it is satisfactory
@@ -506,11 +512,11 @@ IMPORTANT: If you do this, you will need to disable PupNet from calling `dotnet 
 
 ### Debian & RPM Considerations <a name="debian-rpm-considerations"/>
 
-#### Install Location ####
+#### Install Location <a name="debian-rpm-install-location"/>
 With Debian and RPM deployments, your application will be installed to the `/opt` directory, rather than `/usr/bin`.
 If you set `StartCommand`, a tiny bash script will also be installed to `/usr/bin` in order to launch your application.
 
-#### Dependencies ####
+#### Dependencies <a name="debian-rpm-dependencies"/>
 Although publishing a "self-contained" dotnet app should ideally produce a truly *self-contained* package, in reality
 it may have additional dependencies which create complexity when building RPM and Debian deployments.
 
