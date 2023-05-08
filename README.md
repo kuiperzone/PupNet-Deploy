@@ -384,7 +384,7 @@ and/or maintainer contact information, as below.
 Here, the version title and contact information will be ignored and are not used in AppStream data.
 
 It is possible for change items to span multiple lines, as follows, but a change item should not be broken with an
-empty line (otherwise the parser will think it is reading plan superfluous text).
+empty line (otherwise the parser will think it is reading plain superfluous text).
 
 The following two examples are "legal":
 
