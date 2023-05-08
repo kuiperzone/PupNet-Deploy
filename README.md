@@ -33,7 +33,7 @@ installation file in a single step.
         * [GUI Application](#gui-application)
         * [Terminal Application](#terminal-application")
     * [Custom Post-Publish Operations](#custom-post-publish-operations)
-        * [Non-Dotnet Projects](#non-dotnet-projects")
+        * [Non-Dotnet Projects](#non-dotnet-projects)
     * [Debian & RPM Considerations](#debian-rpm-considerations)
         * [Install Location](#debian-rpm-install-location)
         * [Dependencies](#debian-rpm-dependencies)
