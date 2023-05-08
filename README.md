@@ -12,6 +12,7 @@ installation file in a single step.
 ## CONTENTS ##
 
 * [INTRODUCTION](#introduction)
+    * [First - A General Principle](#general-principle)
 
 * [INSTALL & PREREQUISITES](#install-prerequisites)
     * [AppImage Out of the Box](#appimage-out-of-the-box)
@@ -102,6 +103,12 @@ not auto-submit your project to repositories. Note also that, in order to build 
 must be a Linux box and, likewise to build a Windows Setup file, a Windows system (virtual machines are handy).
 
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
+
+## First - A General Principle <a name="general-principle"/>
+
+As a general principle when deploying your software, it should be assumed that your application has read-only access to
+it's installation folder. Rather, your application should use the `Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData`
+location or other suitable special folder to write data.
 
 
 ## INSTALL & PREREQUISITES <a name="install-prerequisites"/>
