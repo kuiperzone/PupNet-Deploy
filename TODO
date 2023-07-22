@@ -1,6 +1,8 @@
 Add multiple --kind values to arguments?
 Implement auto system test for maximal and minimal conf files
 
+Support: nupkg, rpm(xlinux-64), deb(linux-x64), appimage(linux-x64, arm, arm64) and setup (win-x64)
+
 HANDY
 dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.4.1
 dotnet tool install KuiperZone.PupNet -g --add-source ./Deploy/OUT
