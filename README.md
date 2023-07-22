@@ -55,7 +55,6 @@ installation file in a single step.
 
 * [FAQs & GOTCHAS](#faqs-gotchas)
     * [Virtual Box & Symlinks](#virtual-box-symlinks)
-    * [RPM Outputs to a Subdirectory](#rpm-outputs-to-a-subdirectory)
     * [Package Naming is not Consistent](#package-naming-is-not-consistent)
     * [Package Cannot be Removed using Gnome Software Center](#package-cannot-be-removed-using-gnome-software-center)
 
