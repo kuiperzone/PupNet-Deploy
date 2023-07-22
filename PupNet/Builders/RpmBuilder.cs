@@ -28,6 +28,8 @@ namespace KuiperZone.PupNet.Builders;
 public sealed class RpmBuilder : PackageBuilder
 {
     private bool _specFilesHack;
+    private readonly string _rpmPackageName;
+    private readonly string _buildOutputDirectory;
 
     /// <summary>
     /// Constructor.
@@ -35,6 +37,8 @@ public sealed class RpmBuilder : PackageBuilder
     public RpmBuilder(ConfigurationReader conf)
         : base(conf, PackageKind.Rpm)
     {
+        _rpmPackageName = Configuration.PackageName.ToLowerInvariant();
+
         BuildAppBin = Path.Combine(BuildRoot, "opt", Configuration.AppId);
         InstallBin = $"/opt/{Configuration.AppId}";
 
@@ -42,15 +46,21 @@ public sealed class RpmBuilder : PackageBuilder
         ManifestBuildPath = Path.Combine(Root, Configuration.AppId + ".spec");
 
         var list = new List<string>();
-        var temp = Path.Combine(Root, "rpmbuild");
+        var buildDir = Path.Combine(Root, "rpmbuild");
 
-        // Can't this to build for arm64 on an x64 development system?
+        // We are going to put the final rpm file in a temporary directory.
+        // The rpmbuild directory always creates a subdirectory and filename of its own volition,
+        // or form: "out/X86_64/appname-1.5.0-1.x86_64.rpm". We need to find it later and
+        // and copy it to our final output location.
+        _buildOutputDirectory = $"{buildDir}/out";
+
+        // Can't build for arm64 on an x64 development system?
         // https://stackoverflow.com/questions/64563386/how-do-i-package-up-go-code-as-an-arm-rpm
         // https://cmake.cmake.narkive.com/uDOFCNJ3/rpmbuild-architecture
         // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
         var cmd = $"rpmbuild -bb \"{ManifestBuildPath}\"";
-        cmd += $" --define \"_topdir {temp}\" --buildroot=\"{BuildRoot}\"";
-        cmd += $" --define \"_rpmdir {OutputPath}\" --define \"_build_id_links none\"";
+        cmd += $" --define \"_topdir {buildDir}\" --buildroot=\"{BuildRoot}\"";
+        cmd += $" --define \"_rpmdir {_buildOutputDirectory}\" --define \"_build_id_links none\"";
 
         if (Arguments.IsVerbose)
         {
@@ -68,16 +78,16 @@ public sealed class RpmBuilder : PackageBuilder
     {
         get
         {
-            var output = Configuration.Arguments.Output;
-            var name = Path.GetFileName(output);
+            var output = Path.GetFileName(Configuration.Arguments.Output);
 
-            if (string.IsNullOrEmpty(name) || Directory.Exists(output))
+            if (string.IsNullOrEmpty(output))
             {
-                // rpmbuild always treats name as directory - use standard notion
-                return "RPMS";
+                // name-version-release.architecture.rpm
+                // https://docs.oracle.com/en/database/oracle/oracle-database/18/ladbi/rpm-packages-naming-convention.html
+                return $"{_rpmPackageName}_{AppVersion}-{PackageRelease}.{Architecture}.rpm";
             }
 
-            return name;
+            return output;
         }
     }
 
@@ -187,8 +197,65 @@ public sealed class RpmBuilder : PackageBuilder
         Environment.SetEnvironmentVariable("SOURCE_DATE_EPOCH", new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString());
 
         base.BuildPackage();
-
         _specFilesHack = false;
+
+        // Now, we have built rpm to temporary directory (see PackageCommands in constructor).
+        // We have a special method to locate the file, and we will copy to final output location.
+        Operations.CopyFile(LocatePackageFilePath(), OutputPath);
+    }
+
+    private string LocatePackageFilePath(string? dir = null)
+    {
+        // The rpmbuild directory always creates a subdirectory and filename of its own volition,
+        // or form: "out/X86_64/appname-1.5.0-1.x86_64.rpm". Our own determination of the path
+        // should normally work, but we will look for the file if, for example, the architecture
+        // does not match our own, or the naming convention is otherwise different. For this to
+        // work, it is expected that the rpmbuild directory is re-created each time.
+        dir ??= Path.Combine(_buildOutputDirectory, Architecture);
+
+        if (Directory.Exists(dir))
+        {
+            var expect = $"{_rpmPackageName}_{AppVersion}-{PackageRelease}.{Architecture}.rpm";
+            var path = Path.Combine(dir, expect);
+
+            if (File.Exists(path))
+            {
+                // Found in expected location
+                return path;
+            }
+
+            // In this case, we expect a single rpm file
+            var files = Directory.GetFiles(dir, "*.rpm", System.IO.SearchOption.TopDirectoryOnly);
+
+            if (files.Length == 1)
+            {
+                return files[0];
+            }
+
+            if (files.Length > 1)
+            {
+                // We don't which one to use
+                throw new FileNotFoundException("Multiple *.rpm files found under " + dir);
+            }
+
+            throw new FileNotFoundException("Expected *.rpm file not found under " + dir);
+        }
+
+        // In this case, we expect a single directory under dir.
+        var opts = new EnumerationOptions();
+        opts.RecurseSubdirectories = false;
+        opts.ReturnSpecialDirectories = false;
+        opts.IgnoreInaccessible = true;
+
+        var subs = Directory.GetDirectories(dir, "*", opts);
+
+        if (subs.Length == 1)
+        {
+            // Recurse with expected directory
+            return LocatePackageFilePath(subs[0]);
+        }
+
+        throw new DirectoryNotFoundException("Expected single rpm output subdirectory not found under " + dir);
     }
 
     private string GetSpec()
@@ -197,7 +264,7 @@ public sealed class RpmBuilder : PackageBuilder
         // https://rpm-software-management.github.io/rpm/manual/spec.html
         var sb = new StringBuilder();
 
-        sb.AppendLine($"Name: {Configuration.PackageName.ToLowerInvariant()}");
+        sb.AppendLine($"Name: {_rpmPackageName}");
         sb.AppendLine($"Version: {AppVersion}");
         sb.AppendLine($"Release: {PackageRelease}");
         sb.AppendLine($"BuildArch: {Architecture}");

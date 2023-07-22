@@ -1,4 +1,5 @@
-+ VERSION 1.5.1; 2023-07-22
++ VERSION 1.6.0; 2023-07-22
+- IMPORTANT: RPM now creates output file directly under output directory, rather than under "RPMS/arch" sub-directory.
 - Bugfix #21: Inno Setup fails with x86 (dotnet runtime "win-x32")
 - Bugfix #23: AppImage desktop file broken (macros ${INSTALL_BIN} and ${INSTALL_EXEC} now have leading forward slash for AppImage)
 

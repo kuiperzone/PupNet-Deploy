@@ -50,7 +50,7 @@ public class FileOps
 
     /// <summary>
     /// Gets a list of files currently under dir, including sub-paths.
-    /// Paths are relative to given directory. Does not pick up symlinks.
+    /// Output paths are relative to given directory. Does not pick up symlinks.
     /// </summary>
     public static string[] ListFiles(string dir, string filter = "*")
     {
