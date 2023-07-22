@@ -73,6 +73,7 @@ public class SetupBuilder : PackageBuilder
                 return Arguments.Arch;
             }
 
+            // Where supported, these seem to match the Architecture enum names.
             // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
             return Runtime.RuntimeArch.ToString().ToLowerInvariant();
         }
@@ -182,9 +183,17 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"DefaultDirName={{autopf}}\\{Configuration.AppBaseName}");
 
         sb.AppendLine($"AllowNoIcons=yes");
-        sb.AppendLine($"ArchitecturesAllowed={Architecture}");
-        sb.AppendLine($"ArchitecturesInstallIn64BitMode={Architecture}");
         sb.AppendLine($"MinVersion={Configuration.SetupMinWindowsVersion}");
+
+        if (Architecture == "x64" || Architecture == "arm64")
+        {
+            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesallowed
+            sb.AppendLine($"ArchitecturesAllowed={Architecture}");
+
+            // https://jrsoftware.org/ishelp/index.php?topic=setup_architecturesinstallin64bitmode
+            sb.AppendLine($"ArchitecturesInstallIn64BitMode={Architecture}");
+        }
+
 
         sb.AppendLine($"PrivilegesRequired={(Configuration.SetupAdminInstall ? "admin" : "lowest")}");
 

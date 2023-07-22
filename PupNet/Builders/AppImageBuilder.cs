@@ -34,8 +34,7 @@ public class AppImageBuilder : PackageBuilder
     {
         BuildAppBin = BuildUsrBin ?? throw new ArgumentNullException(nameof(BuildUsrBin));
 
-        // No leading '/' here
-        InstallBin = "usr/bin";
+        InstallBin = "/usr/bin";
 
         // Not used
         ManifestBuildPath = null;
@@ -228,7 +227,7 @@ public class AppImageBuilder : PackageBuilder
 
         // IMPORTANT - Create AppRun link
         // ln -s {target} {link}
-        Operations.Execute($"ln -s \"{InstallExec}\" \"{Path.Combine(BuildRoot, "AppRun")}\"");
+        Operations.Execute($"ln -s \"{InstallExec.TrimStart('/')}\" \"{Path.Combine(BuildRoot, "AppRun")}\"");
     }
 
     /// <summary>

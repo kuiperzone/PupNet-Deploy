@@ -1,3 +1,7 @@
++ VERSION 1.5.1; 2023-07-22
+- Bugfix #21: Inno Setup fails with x86 (dotnet runtime "win-x32")
+- Bugfix #23: AppImage desktop file broken (macros ${INSTALL_BIN} and ${INSTALL_EXEC} now have leading forward slash)
+
 + VERSION 1.5.0; 2023-05-07
 - Added ability to parse list items in 'AppDescription' configuration and transpose to HTML.
 - Added XML validation of AppStream metadata (will now warn if invalid prior to build).
