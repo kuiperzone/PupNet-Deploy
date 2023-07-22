@@ -79,7 +79,8 @@ public class PackageBuilderTest
         Assert.False(builder.IsWindowsExclusive);
         Assert.EndsWith("usr/share/metainfo/net.example.helloworld.metainfo.xml", builder.MetaBuildPath);
 
-        Assert.Equal("RPMS", builder.OutputName);
+        Assert.StartsWith("helloworld_5.4.3-2", builder.OutputName);
+        Assert.EndsWith(".rpm", builder.OutputName);
     }
 
     [Fact]
