@@ -1335,11 +1335,6 @@ If you are using VirtualBox with your project, note that symbolic links are disa
 itself, and this may cause problems with generating AppImages. To overcome this, copy your entire project to your home
 directory in the virtual machine. Alternatively, it is possible to enable shared-folder symlinks in VirtualBox.
 
-### RPM Outputs to a Subdirectory <a name="rpm-outputs-to-a-subdirectory"/>
-
-The RPM package builder creates subdirectories under the directory that you specify. This is normal
-behaviour and cannot be overridden.
-
 ### Package Naming is not Consistent <a name="package-naming-is-not-consistent"/>
 
 You may notice that PupNet outputs differences in package naming styles. For example:
