@@ -96,7 +96,7 @@ public class ChangeParser
                     continue;
                 }
 
-                // Allow "+ description", but not "------"
+                // Allow "- description", but not "------"
                 if (line.StartsWith(ChangePrefix) && !line.StartsWith(new string(ChangePrefix, 2)))
                 {
                     // New change item
@@ -251,7 +251,8 @@ public class ChangeParser
     {
         const int MaxVersion = 25;
 
-        if (line.StartsWith(HeaderPrefix))
+        // Allow "+ ", but not "++++"
+        if (line.StartsWith(HeaderPrefix) && !line.StartsWith(new string(HeaderPrefix, 2)))
         {
             var items = line.Split(HeaderSeparator, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 

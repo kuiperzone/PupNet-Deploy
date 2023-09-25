@@ -163,11 +163,11 @@ internal class Program
                 {
                     if (conf.PupnetVersion != null)
                     {
-                        Console.WriteLine($"Upgrade {name} from version {conf.PupnetVersion} to {Program.Version}?");
+                        Console.WriteLine($"Upgrade {name} from version {conf.PupnetVersion} to {Version}?");
                     }
                     else
                     {
-                        Console.WriteLine($"Upgrade {name} to version {Program.Version}?");
+                        Console.WriteLine($"Upgrade {name} to version {Version}?");
                     }
 
                     if (!decoder.IsVerbose)
@@ -187,7 +187,7 @@ internal class Program
                 ops.CopyFile(path, path + ".old");
                 ops.WriteFile(path, conf.ToString(style), true);
 
-                Console.WriteLine($"Updated {name} to version {Program.Version} OK");
+                Console.WriteLine($"Updated {name} to version {Version} OK");
                 return 0;
             }
             else

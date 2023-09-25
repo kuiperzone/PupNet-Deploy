@@ -24,11 +24,15 @@
 		<PackageProjectUrl>https://github.com/kuiperzone/PupNet-Deploy</PackageProjectUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
-
   	</PropertyGroup>
 
+	<Target Name="CleanBinObj" AfterTargets="Clean">
+		<RemoveDir Directories="$(ProjectDir)$(BaseOutputPath)" />
+		<RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />
+	</Target>
+
 	<ItemGroup>
-    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="2.0.0" />
+    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="1.0.2" />
 	</ItemGroup>
 
 

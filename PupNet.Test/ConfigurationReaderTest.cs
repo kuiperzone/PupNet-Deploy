@@ -323,7 +323,7 @@ public class ConfigurationReaderTest
     [Fact]
     public void SetupSignTool_Optional_DecodeOK()
     {
-        Assert.Equal("signtool.exe", Create().SetupSignTool);
+        Assert.Equal(DummyConf.ExpectSignTool, Create().SetupSignTool);
         Assert.Null(Create(nameof(ConfigurationReader.SetupSignTool)).SetupSignTool);
     }
 

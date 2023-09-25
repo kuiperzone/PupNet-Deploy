@@ -204,6 +204,7 @@ public class SetupBuilder : PackageBuilder
 
         if (!string.IsNullOrEmpty(Configuration.SetupSignTool))
         {
+            // SetupSignTool = \"C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/signtool.exe" sign /f "{#GetEnv('SigningCertificate')}" /p "{#GetEnv('SigningCertificatePassword')}" /tr http://timestamp.sectigo.com /td sha256 /fd sha256 $f
             sb.AppendLine($"SignTool={Configuration.SetupSignTool}");
         }
 

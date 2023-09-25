@@ -102,7 +102,8 @@ public abstract class PackageBuilder
     /// <summary>
     /// Known and accepted PNG icon sizes.
     /// </summary>
-    public static IReadOnlyCollection<int> StandardIconSizes = new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256, 512, 1024 });
+    public static IReadOnlyCollection<int> StandardIconSizes { get; } =
+        new List<int>(new int[] { 16, 24, 32, 48, 64, 96, 128, 256, 512, 1024 });
 
     /// <summary>
     /// Gets default GUI icons.

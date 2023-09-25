@@ -454,13 +454,13 @@ public class BuildHost
 
             if (!string.IsNullOrEmpty(pa))
             {
-                sb.Append(" ");
+                sb.Append(' ');
                 sb.Append(pa);
             }
 
             sb.Append(" -o \"");
             sb.Append(builder.BuildAppBin);
-            sb.Append("\"");
+            sb.Append('"');
 
             list.Add(sb.ToString());
         }

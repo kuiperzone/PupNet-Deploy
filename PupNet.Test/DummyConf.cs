@@ -24,6 +24,9 @@ namespace KuiperZone.PupNet.Test;
 /// </summary>
 public class DummyConf : ConfigurationReader
 {
+    public const string ExpectSignTool =
+        "\"C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64/signtool.exe\" sign /f \"{#GetEnv('SigningCertificate')}\" /p \"{#GetEnv('SigningCertificatePassword')}\" /tr http://timestamp.sectigo.com /td sha256 /fd sha256 $f";
+
     public DummyConf()
         : base(new ArgumentReader(), Create())
     {
@@ -48,59 +51,59 @@ public class DummyConf : ConfigurationReader
         var lines = new List<string>();
 
         // Quote variations
-        lines.Add($"{nameof(ConfigurationReader.AppBaseName)} = 'HelloWorld'");
-        lines.Add($"{nameof(ConfigurationReader.AppFriendlyName)} = Hello World");
-        lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloworld\"");
-        lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
-        lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
-        lines.Add($"{nameof(ConfigurationReader.AppShortSummary)} = Test <application> only");
-        lines.Add($"{nameof(ConfigurationReader.AppDescription)} = \n Para1-Line1\n<Para1-Line2>\n\n- Bullet1\n* Bullet2\nPara2-Line1 has ${{MACRO_VAR}}\n");
-        lines.Add($"{nameof(ConfigurationReader.AppLicenseId)} = LicenseRef-LICENSE");
-        lines.Add($"{nameof(ConfigurationReader.AppLicenseFile)} = LICENSE");
-        lines.Add($"{nameof(ConfigurationReader.AppChangeFile)} = CHANGELOG");
+        lines.Add($"{nameof(AppBaseName)} = 'HelloWorld'");
+        lines.Add($"{nameof(AppFriendlyName)} = Hello World");
+        lines.Add($"{nameof(AppId)} = \"net.example.helloworld\"");
+        lines.Add($"{nameof(AppVersionRelease)} = 5.4.3[2]");
+        lines.Add($"{nameof(PackageName)} = HelloWorld");
+        lines.Add($"{nameof(AppShortSummary)} = Test <application> only");
+        lines.Add($"{nameof(AppDescription)} = \n Para1-Line1\n<Para1-Line2>\n\n- Bullet1\n* Bullet2\nPara2-Line1 has ${{MACRO_VAR}}\n");
+        lines.Add($"{nameof(AppLicenseId)} = LicenseRef-LICENSE");
+        lines.Add($"{nameof(AppLicenseFile)} = LICENSE");
+        lines.Add($"{nameof(AppChangeFile)} = CHANGELOG");
 
-        lines.Add($"{nameof(ConfigurationReader.PublisherName)} = Kuiper Zone");
-        lines.Add($"{nameof(ConfigurationReader.PublisherCopyright)} = Copyright Kuiper Zone");
-        lines.Add($"{nameof(ConfigurationReader.PublisherLinkName)} = kuiper.zone");
-        lines.Add($"{nameof(ConfigurationReader.PublisherLinkUrl)} = https://kuiper.zone");
-        lines.Add($"{nameof(ConfigurationReader.PublisherEmail)} = email@example.net");
+        lines.Add($"{nameof(PublisherName)} = Kuiper Zone");
+        lines.Add($"{nameof(PublisherCopyright)} = Copyright Kuiper Zone");
+        lines.Add($"{nameof(PublisherLinkName)} = kuiper.zone");
+        lines.Add($"{nameof(PublisherLinkUrl)} = https://kuiper.zone");
+        lines.Add($"{nameof(PublisherEmail)} = email@example.net");
 
-        lines.Add($"{nameof(ConfigurationReader.StartCommand)} = helloworld");
-        lines.Add($"{nameof(ConfigurationReader.DesktopNoDisplay)} = TRUE");
-        lines.Add($"{nameof(ConfigurationReader.DesktopTerminal)} = False");
-        lines.Add($"{nameof(ConfigurationReader.PrimeCategory)} = Development");
-        lines.Add($"{nameof(ConfigurationReader.DesktopFile)} = app.desktop");
-        lines.Add($"{nameof(ConfigurationReader.IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.x48.png; Assets/Icon.64.png; Assets/Icon.ico; Assets/Icon.svg;");
-        lines.Add($"{nameof(ConfigurationReader.MetaFile)} = metainfo.xml");
+        lines.Add($"{nameof(StartCommand)} = helloworld");
+        lines.Add($"{nameof(DesktopNoDisplay)} = TRUE");
+        lines.Add($"{nameof(DesktopTerminal)} = False");
+        lines.Add($"{nameof(PrimeCategory)} = Development");
+        lines.Add($"{nameof(DesktopFile)} = app.desktop");
+        lines.Add($"{nameof(IconFiles)} = Assets/Icon.32x32.png; Assets/Icon.x48.png; Assets/Icon.64.png; Assets/Icon.ico; Assets/Icon.svg;");
+        lines.Add($"{nameof(MetaFile)} = metainfo.xml");
 
-        lines.Add($"{nameof(ConfigurationReader.DotnetProjectPath)} = HelloProject");
-        lines.Add($"{nameof(ConfigurationReader.DotnetPublishArgs)} = --self-contained true");
-        lines.Add($"{nameof(ConfigurationReader.DotnetPostPublish)} = PostPublishCommand.sh");
-        lines.Add($"{nameof(ConfigurationReader.DotnetPostPublishOnWindows)} = PostPublishCommandOnWindows.bat");
+        lines.Add($"{nameof(DotnetProjectPath)} = HelloProject");
+        lines.Add($"{nameof(DotnetPublishArgs)} = --self-contained true");
+        lines.Add($"{nameof(DotnetPostPublish)} = PostPublishCommand.sh");
+        lines.Add($"{nameof(DotnetPostPublishOnWindows)} = PostPublishCommandOnWindows.bat");
 
-        lines.Add($"{nameof(ConfigurationReader.OutputDirectory)} = Deploy");
+        lines.Add($"{nameof(OutputDirectory)} = Deploy");
 
-        lines.Add($"{nameof(ConfigurationReader.AppImageArgs)} = -appargs");
-        lines.Add($"{nameof(ConfigurationReader.AppImageVersionOutput)} = true");
+        lines.Add($"{nameof(AppImageArgs)} = -appargs");
+        lines.Add($"{nameof(AppImageVersionOutput)} = true");
 
-        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformRuntime)} = org.freedesktop.Platform");
-        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformSdk)} = org.freedesktop.Sdk");
-        lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformVersion)} = \"18.00\"");
-        lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
-        lines.Add($"{nameof(ConfigurationReader.FlatpakBuilderArgs)} = -flatargs");
+        lines.Add($"{nameof(FlatpakPlatformRuntime)} = org.freedesktop.Platform");
+        lines.Add($"{nameof(FlatpakPlatformSdk)} = org.freedesktop.Sdk");
+        lines.Add($"{nameof(FlatpakPlatformVersion)} = \"18.00\"");
+        lines.Add($"{nameof(FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
+        lines.Add($"{nameof(FlatpakBuilderArgs)} = -flatargs");
 
-        lines.Add($"{nameof(ConfigurationReader.RpmAutoReq)} = true");
-        lines.Add($"{nameof(ConfigurationReader.RpmAutoProv)} = false");
-        lines.Add($"{nameof(ConfigurationReader.RpmRequires)} = rpm-requires1;rpm-requires2");
+        lines.Add($"{nameof(RpmAutoReq)} = true");
+        lines.Add($"{nameof(RpmAutoProv)} = false");
+        lines.Add($"{nameof(RpmRequires)} = rpm-requires1;rpm-requires2");
 
-        lines.Add($"{nameof(ConfigurationReader.DebianRecommends)} = deb-depends1;deb-depends2");
+        lines.Add($"{nameof(DebianRecommends)} = deb-depends1;deb-depends2");
 
-        lines.Add($"{nameof(ConfigurationReader.SetupAdminInstall)} = true");
-        lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
-        lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 6.9");
-        lines.Add($"{nameof(ConfigurationReader.SetupSignTool)} = signtool.exe");
-        lines.Add($"{nameof(ConfigurationReader.SetupSuffixOutput)} = Setup");
-        lines.Add($"{nameof(ConfigurationReader.SetupVersionOutput)} = true");
+        lines.Add($"{nameof(SetupAdminInstall)} = true");
+        lines.Add($"{nameof(SetupCommandPrompt)} = Command Prompt");
+        lines.Add($"{nameof(SetupMinWindowsVersion)} = 6.9");
+        lines.Add($"{nameof(SetupSignTool)} = {ExpectSignTool}");
+        lines.Add($"{nameof(SetupSuffixOutput)} = Setup");
+        lines.Add($"{nameof(SetupVersionOutput)} = true");
 
         Remove(lines, omit);
 

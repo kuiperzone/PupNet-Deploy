@@ -74,7 +74,7 @@ public class ArgumentReader
     public const string NewAllValue = "all";
     public const string NewAllowedSequence = $"conf|desktop|meta|all";
 
-    private string _string;
+    private readonly string _string;
 
     /// <summary>
     /// Default constructor. Values are defaults only.
@@ -119,7 +119,7 @@ public class ArgumentReader
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
         IsVerbose = args.GetOrDefault(VerboseLongArg, false);
         IsUpgradeConf = args.GetOrDefault(UpgradeConfLongArg, false);
-        IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false);
+        IsSkipYes = args.GetOrDefault(SkipYesShortArg, SkipYesLongArg, false) || GetEnvironmentFlag("CI");
 
         if (NewFile == null)
         {
@@ -206,7 +206,8 @@ public class ArgumentReader
     public bool IsUpgradeConf { get; }
 
     /// <summary>
-    /// Gets whether to skip yes.
+    /// Gets whether to skip yes. Also set to true if "CI" environment variable is true.
+    /// See: https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
     /// </summary>
     public bool IsSkipYes { get; }
 
@@ -331,6 +332,18 @@ public class ArgumentReader
 
         throw new ArgumentException($"Invalid or absent value for -{sname}, --{lname}\n" +
             "Use one of: " + string.Join(',', Enum.GetValues<T>()));
+    }
+
+    private static bool GetEnvironmentFlag(string name)
+    {
+        try
+        {
+            return name.Length != 0 && Environment.GetEnvironmentVariable(name)?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 }

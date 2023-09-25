@@ -1,7 +1,13 @@
++ VERSION 1.7.0; 2023-10-25
+- Feature #24: Automatically skips confirmation if environment variable "CI=true" is defined.
+- Other minor tweaks.
+
+
 + VERSION 1.6.0; 2023-07-22
 - IMPORTANT: RPM now creates output file directly under output directory, rather than under "RPMS/arch" sub-directory.
 - Bugfix #21: Inno Setup fails with x86 (dotnet runtime "win-x32")
 - Bugfix #23: AppImage desktop file broken (macros ${INSTALL_BIN} and ${INSTALL_EXEC} now have leading forward slash for AppImage)
+
 
 + VERSION 1.5.0; 2023-05-07
 - Added ability to parse list items in 'AppDescription' configuration and transpose to HTML.
@@ -14,6 +20,7 @@
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
+
 + VERSION 1.4.1; 2023-05-06
 - Bugfix #16: AppImage and Flatpak builds rejected AppStream metadata if conf.AppDescription was empty. Now defaults to AppShortSummary.
 - Bugfix #15: AppImage and Flatpak builds rejected AppStream metadata if conf.AppChangeFileEmpty.
@@ -23,20 +30,18 @@
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
-+ VERSION 1.4.0; 2023-05-05
 
++ VERSION 1.4.0; 2023-05-05
 - Added 'AppDescription' property to configuration (IMPORTANT NEW FEATURE - see website for information)
 - Added ${APPSTREAM_DESCRIPTION_XML} macro to support release information in AppStream metadata
 - Updated AppStream metadata template to include ${APPSTREAM_CHANGELOG_XML}
 - Now uses 'AppDescription' content when building both RPM and DEB packages
-
 - Added 'AppChangeFile' property to configuration (IMPORTANT NEW FEATURE - see website for information)
 - Added ${APPSTREAM_CHANGELOG_XML} macro to support release information in AppStream metadata
 - Updated AppStream metadata template to include ${APPSTREAM_DESCRIPTION_XML}
 - The AppChangeFile file is now packaged verbatim to the bin directory of deployments
 - Added 'InfoBeforeFile' to Windows Setup in order to show AppChangeFile file content
 - Added CHANGELOG section to console output when building a package (contains parsed changes only)
-
 - Added MACRO section (verbose only) to console output when building a package (useful for debugging)
 - Extensive updates to README documentation
 - Other minor corrections and changes

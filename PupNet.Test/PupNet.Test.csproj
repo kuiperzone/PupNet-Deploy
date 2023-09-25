@@ -22,6 +22,11 @@
     </PackageReference>
   </ItemGroup>
 
+	<Target Name="CleanBinObj" AfterTargets="Clean">
+		<RemoveDir Directories="$(ProjectDir)$(BaseOutputPath)" />
+		<RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />
+	</Target>
+
   <ItemGroup>
     <ProjectReference Include="..\PupNet\PupNet.csproj" />
   </ItemGroup>

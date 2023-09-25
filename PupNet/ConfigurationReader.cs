@@ -311,7 +311,7 @@ public class ConfigurationReader
     /// </summary>
     public string? ReadAssociatedFile(string? path)
     {
-        if (path != null && path != ConfigurationReader.PathDisable && (AssertPaths || File.Exists(path)))
+        if (path != null && path != PathDisable && (AssertPaths || File.Exists(path)))
         {
             // Force linux style
             var content = File.ReadAllText(path).Trim().ReplaceLineEndings("\n");
@@ -348,6 +348,11 @@ public class ConfigurationReader
         if (style != DocStyles.Reference)
         {
             sb.Append(CreateBreaker($"{Program.ProductName.ToUpperInvariant()}: {Program.Version}", style, true));
+
+            if (style == DocStyles.NoComments)
+            {
+                sb.Append($"Use: '{Program.CommandName} --{ArgumentReader.HelpLongArg} conf' for information.");
+            }
         }
 
         sb.Append(CreateBreaker("APP PREAMBLE", style));
