@@ -351,7 +351,7 @@ public class ConfigurationReader
 
             if (style == DocStyles.NoComments)
             {
-                sb.Append($"# Use: '{Program.CommandName} --{ArgumentReader.HelpLongArg} conf' for information.");
+                sb.AppendLine($"# Use: '{Program.CommandName} --{ArgumentReader.HelpLongArg} conf' for information.");
             }
         }
 
