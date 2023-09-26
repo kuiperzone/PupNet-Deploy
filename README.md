@@ -781,84 +781,84 @@ packages.
 
 Type `pupnet --help` to display command arguments as expected.
 
-    PupNet Deploy 1.4.2
+    PupNet Deploy 1.7.1
     See also: https://github.com/kuiperzone/PupNet-Deploy
 
     USAGE:
-    pupnet [<file.pupnet.conf>] [--option-n value-n]
+        pupnet [<file.pupnet.conf>] [--option-n value-n]
 
     Example:
-    pupnet app..pupnet.conf -y -r linux-arm64
+        pupnet app..pupnet.conf -y -r linux-arm64
 
     Always give .pupnet.conf file first. If .pupnet.conf file is omitted, the default is the one in the working directory.
 
     Build Options:
-    -k, --kind <Zip|AppImage|Deb|Rpm|Flatpak|Setup>
-    Package output kind. If omitted, one is chosen according to the runtime (AppImage on linux).
-    Example: pupnet HelloWorld -k Flatpak
+        -k, --kind <zip|appimage|deb|rpm|flatpak|setup>
+        Package output kind. If omitted, one is chosen according to the runtime (AppImage on linux).
+        Example: pupnet HelloWorld -k Flatpak
 
-    -r, --runtime <linux-x64|linux-arm64|win-x64...>
-    Dotnet publish runtime identifier. Default: linux-x64.
-    Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
-    See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+        -r, --runtime <linux-x64|linux-arm64|win-x64...>
+        Dotnet publish runtime identifier. Default: linux-x64.
+        Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
+        See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 
-    -c, --build <Release|Debug>
-    Optional build target (or 'Configuration' in dotnet terminology).
-    Value should be 'Release' or 'Debug' only. Default: Release.
+        -c, --build <Release|Debug>
+        Optional build target (or 'Configuration' in dotnet terminology).
+        Value should be 'Release' or 'Debug' only. Default: Release.
 
-    -e, --clean
-    Call 'dotnet clean' prior to 'dotnet publish'. Default: false.
+        -e, --clean
+        Call 'dotnet clean' prior to 'dotnet publish'. Default: false.
 
-    -v, --app-version <version[release]>
-    Specifies application version-release in form 'version[release]', where value in square
-    brackets is package release. Overrides AppVersionRelease in conf file.
-    Example: 1.2.3[1].
+        -v, --app-version <version[release]>
+        Specifies application version-release in form 'version[release]', where value in square
+        brackets is package release. Overrides AppVersionRelease in conf file.
+        Example: 1.2.3[1].
 
-    -p, --property <name=value>
-    Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
-    Example: -p DefineConstants=TRACE;DEBUG
+        -p, --property <name=value>
+        Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
+        Example: -p DefineConstants=TRACE;DEBUG
 
-    --arch value
-    Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
-    not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id
-    and will be successfully detected automatically. However, in the event of a problem, the value
-    explicitly supplied here will be used to override. It should be provided in the form
-    expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
+        --arch value
+        Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
+        not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id
+        and will be successfully detected automatically. However, in the event of a problem, the value
+        explicitly supplied here will be used to override. It should be provided in the form
+        expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
 
-    -o, --output <filename>
-    Force package output filename. Normally this is derived from parameters in the configuration.
-    This value will be used to override. Example: -o AppName.AppImage
+        -o, --output <filename>
+        Force package output filename. Normally this is derived from parameters in the configuration.
+        This value will be used to override. Example: -o AppName.AppImage
 
-    --verbose
-    Indicates verbose output when building. It is used also with --new option.
+        --verbose
+        Indicates verbose output when building. It is used also with --new option.
 
-    -u, --run
-    Performs a test run of the application after successful build (where supported).
+        -u, --run
+        Performs a test run of the application after successful build (where supported).
 
-    -y, --skip-yes
-    Skips confirmation prompts (assumes yes).
+        -y, --skip-yes
+        Skips confirmation prompts (assumes yes).
 
     Other Options:
 
-    -n, --new <conf|desktop|meta|all> [--verbose] [--skip-yes]
-    Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
-    A base file name may optionally be given. If --verbose is used, a configuration file with
-    documentation comments is generated. Use 'all' to generate a full set of configuration assets.
-    Example: pupnet HelloWorld -n all --verbose
+        -n, --new <conf|desktop|meta|all> [--verbose] [--skip-yes]
+        Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
+        A base file name may optionally be given. If --verbose is used, a configuration file with
+        documentation comments is generated. Use 'all' to generate a full set of configuration assets.
+        Example: pupnet HelloWorld -n all --verbose
 
-    --upgrade-conf [--verbose] [--skip-yes]
-    Upgrades supplied .pupnet.conf file to latest version parameters. For example, if the
-    conf file was created with program version 1.1 and new parameters where added in version
-    1.2, this command will upgrade the file by adding new parameters with default values.
-    If --verbose is used, a configuration file with documentation comments is generated.
-    Example: pupnet file.pupnet.conf --upgrade-conf --verbose
+        --upgrade-conf [--verbose] [--skip-yes]
+        Upgrades supplied .pupnet.conf file to latest version parameters. For example, if the
+        conf file was created with program version 1.1 and new parameters where added in version
+        1.2, this command will upgrade the file by adding new parameters with default values.
+        If --verbose is used, a configuration file with documentation comments is generated.
+        Example: pupnet file.pupnet.conf --upgrade-conf --verbose
 
-    -h, --help <args|macro|conf>
-    Show help information. Optional value specifies what kind of information to display.
-    Default is 'args'. Example: pupnet -h macro
+        -h, --help <args|macro|conf>
+        Show help information. Optional value specifies what kind of information to display.
+        Default is 'args'. Example: pupnet -h macro
 
-    --version
-    Show version and associated information.
+        --version
+        Show version and associated information.
 
 ### Macro Reference <a name="macro-reference"/>
 
