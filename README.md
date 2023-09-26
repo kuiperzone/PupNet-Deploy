@@ -1384,15 +1384,16 @@ it was difficult to handle the increased complexity in a bash script, so I re-wr
 *PupNet Deploy* is the result.
 
 In the process, however, I had cause to reflect on certain things, including the sad fact that the
-[sandbox model of Flatpak is IMHO broken](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
+[security model of Flatpak is IMHO broken](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
 because I intended to use Flatpak to deploy my other [application project](https://github.com/kuiperzone/AvantGarde),
 but found that there are several important scenarios which Flatpak cannot support, including the deployment of development
 tools. Regardless, I still thought it useful for developers to be able ship software in formats convenient for users,
-so I added Flatpak to PupNet. However, I took out my anger by adding RPM and Debian formats in order to provide alternatives.
+and recognise that Flatpak is a popular packaging technology, so I added Flatpak to PupNet. However, I took out my
+frustration by adding RPM and Debian formats in order to provide alternatives where Flatpak is unsuitable.
 
 I would not be keen on adding more formats in the Linux space, however, as each deployment option must be maintained.
-Rather, I would be interested to see how things play out in the future, especially with regard Snap packages. I note also
-the trend toward centralized repository-only distribution models. For example, here is a quote from the
+Rather, I would be interested to see how things play out in the future. I note also the trend toward centralized
+repository-only distribution models. For example, here is a quote from the
 [Gnome Team](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7):
 
 *Stand-alone RPM files are really not a use case we want to encourage people to use.*
@@ -1401,8 +1402,8 @@ Repository only installations is not a paradigm I am fully onboard with, althoug
 I support the idea of freedom and that means developers and users having the freedom to create and share software themselves,
 without necessarily having to go through third-parties who may act as gate-keepers.
 
-This is why I support [AppImage](https://github.com/AppImage/AppImageKit) as a means of software distribution on Linux,
-as it always best to keep the choice!
+This is why I support [AppImage](https://github.com/AppImage/AppImageKit) and Setup files on Windows as a means of software
+distribution, as it always best to keep the choice!
 
 ### Notes on Extending PupNet <a name="notes-on-extending-pupnet"/>
 
