@@ -19,6 +19,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.VisualBasic.FileIO;
 
 namespace KuiperZone.PupNet;
@@ -189,14 +190,14 @@ public class FileOps
     /// <summary>
     /// Writes file content. Does nothing if either value is null.
     /// </summary>
-    public void WriteFile(string? path, string? content, bool replace = false)
+    public void WriteFile(string? path, string? content, bool replace = false, Encoding? encoding = null)
     {
         if (!string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(content) && (replace || !File.Exists(path)))
         {
             try
             {
                 Write("Create File: ", path);
-                File.WriteAllText(path, content);
+                File.WriteAllText(path, content, encoding == null ? Encoding.UTF8 : encoding);
                 WriteLine(" ... OK");
             }
             catch
