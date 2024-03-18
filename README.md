@@ -791,7 +791,7 @@ packages.
 
 Type `pupnet --help` to display command arguments as expected.
 
-    PupNet Deploy 1.7.1
+    PupNet Deploy 1.8.0
     See also: https://github.com/kuiperzone/PupNet-Deploy
 
     USAGE:
