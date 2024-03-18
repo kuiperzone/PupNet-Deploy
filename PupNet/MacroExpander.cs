@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -97,7 +97,7 @@ public class MacroExpander
         else
         {
             // Macro cannot be empty - manufacture minimal change
-            var change = $"<release version=\"{builder.AppVersion}\" date=\"{DateTime.UtcNow.ToString("yyyy-MM-dd")}\"/>";
+            var change = $"<release version=\"{builder.AppVersion}\" date=\"{DateTime.UtcNow:yyyy-MM-dd}\"/>";
             dict.Add(MacroId.AppStreamChangelogXml, change);
         }
 
@@ -206,7 +206,7 @@ public class MacroExpander
     /// <summary>
     /// Expand all macros in text content. Simple search replace. Case sensitive.
     /// </summary>
-    [return: NotNullIfNotNull("content")]
+    [return: NotNullIfNotNull(nameof(content))]
     public string? Expand(string? content, bool escape, string? itemName = null)
     {
         if (!string.IsNullOrEmpty(content) && content.Contains("${"))
@@ -234,7 +234,7 @@ public class MacroExpander
     /// <summary>
     /// Overload.
     /// </summary>
-    [return: NotNullIfNotNull("content")]
+    [return: NotNullIfNotNull(nameof(content))]
     public string? Expand(string? content, string? itemName = null)
     {
         return Expand(content, false, itemName);
@@ -330,11 +330,11 @@ public class MacroExpander
 
         if (p0 > -1)
         {
-            string varStr = content.Substring(p0, Math.Max(content.Length - p0, 5)) + "...";
+            string varStr = string.Concat(content.AsSpan(p0, Math.Max(content.Length - p0, 5)), "...");
 
             // Find terminator
             int next = content.IndexOf(MatchPrefix, p0 + 1);
-            int p1 = content.IndexOf("}", p0 + 1);
+            int p1 = content.IndexOf('}', p0 + 1);
 
             if (p1 > p0 && (next < 0 || p1 < next))
             {

@@ -1,3 +1,14 @@
++ VERSION 1.8.0; 2024-03-18
+- Built with .NET8
+- Added -j,--project command line argument.
+- Now detects the $DOTNET_HOST_PATH environment variable and uses it if defined.
+- Updated documentation concerning NETSDK1194. #27
+- Updated default FlatpakPlatformVersion to latest 23.08 at time of writing.
+- Removed dependency on Yaap.
+- Bugfix: Added trailing ';' to Categories value of desktop file. #33
+- BugFix: Use of ';' between property values did not work. Should now use ',' with pupnet.
+
+
 + VERSION 1.7.1; 2023-10-26
 - Bugfix: Fix upgrade-conf bug introduced in 1.7.0.
 

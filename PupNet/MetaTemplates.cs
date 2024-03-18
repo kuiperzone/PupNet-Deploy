@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -48,7 +48,7 @@ public static class MetaTemplates
         list.Add($"NoDisplay={MacroId.DesktopNoDisplay.ToVar()}");
         list.Add($"X-AppImage-Integrate={MacroId.DesktopIntegrate.ToVar()}");
         list.Add($"Terminal={MacroId.DesktopTerminal.ToVar()}");
-        list.Add($"Categories={MacroId.PrimeCategory.ToVar()}");
+        list.Add($"Categories={MacroId.PrimeCategory.ToVar()};");
         list.Add($"MimeType=");
         list.Add($"Keywords=");
 

@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -39,7 +39,6 @@ public class SetupBuilder : PackageBuilder
         // Not used. This is decided at install time via interaction with user.
         InstallBin = "";
 
-        // We do not set the content here
         ManifestBuildPath = Path.Combine(Root, Configuration.AppBaseName + ".iss");
         ManifestContent = GetInnoFile();
 
@@ -178,12 +177,11 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine($"InfoBeforeFile={Configuration.AppChangeFile}");
         sb.AppendLine($"LicenseFile={Configuration.AppLicenseFile}");
         sb.AppendLine($"SetupIconFile={PrimaryIcon}");
-
-        sb.AppendLine($"DefaultGroupName={Configuration.AppFriendlyName}");
-        sb.AppendLine($"DefaultDirName={{autopf}}\\{Configuration.AppBaseName}");
-
         sb.AppendLine($"AllowNoIcons=yes");
         sb.AppendLine($"MinVersion={Configuration.SetupMinWindowsVersion}");
+
+        sb.AppendLine($"DefaultDirName={{autopf}}\\{Configuration.SetupGroupName ?? Configuration.AppBaseName}");
+        sb.AppendLine($"DefaultGroupName={Configuration.SetupGroupName ?? Configuration.AppFriendlyName}");
 
         if (Architecture == "x64" || Architecture == "arm64")
         {

@@ -1,7 +1,21 @@
+Add:
+// https://github.com/dotnet/docs/blob/main/docs/core/tools/dotnet-environment-variables.md#dotnet_host_path
+var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+
+https://github.com/kuiperzone/PupNet-Deploy/issues/30
+
+NETSDK1194: The "--output" option isn't supported
+See: https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/7.0/solution-level-output-no-longer-valid
+
 Add multiple --kind values to arguments?
 Implement auto system test for maximal and minimal conf files
 
 Support: nupkg, rpm(xlinux-64), deb(linux-x64), appimage(linux-x64, arm, arm64) and setup (win-x64)
+
+
+RpmRequires
+DebRecommends
+
 
 HANDY
 dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.4.1

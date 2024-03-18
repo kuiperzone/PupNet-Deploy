@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -164,6 +164,19 @@ public class ArgumentReaderTest
     }
 
     [Fact]
+    public void Project_DecodeOK()
+    {
+        var args = new ArgumentReader();
+        Assert.Null(args.Project);
+
+        args = new ArgumentReader("-j path.csproj");
+        Assert.Equal("path.csproj", args.Project);
+
+        args = new ArgumentReader("--project path.csproj");
+        Assert.Equal("path.csproj", args.Project);
+    }
+
+    [Fact]
     public void New_DecodeOK()
     {
         var args = new ArgumentReader();
@@ -179,4 +192,5 @@ public class ArgumentReaderTest
         args = new ArgumentReader("-n Meta");
         Assert.Equal("meta", args.NewFile);
     }
+
 }

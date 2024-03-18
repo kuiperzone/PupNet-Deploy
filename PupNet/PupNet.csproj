@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
@@ -16,7 +16,7 @@
 		<PackageId>KuiperZone.PupNet</PackageId>
 		<Product>PupNet Deploy</Product>
 		<Authors>Andy Thomas</Authors>
-		<Copyright>© Andy Thomas 2022-23</Copyright>
+		<Copyright>© Andy Thomas 2022-24</Copyright>
 		<Company>KuiperZone</Company>
 		<Description>Publish, Package and Deploy as: AppImage, Windows Setup, Flatpak, Deb, RPM and Zip</Description>
 		<PackageTags>publish;pack;deploy;AppImage;flatpak;deb;rpm;setup;installer;linux;</PackageTags>
@@ -30,11 +30,6 @@
 		<RemoveDir Directories="$(ProjectDir)$(BaseOutputPath)" />
 		<RemoveDir Directories="$(ProjectDir)$(BaseIntermediateOutputPath)" />
 	</Target>
-
-	<ItemGroup>
-    	<PackageReference Include="KuiperZone.Utility.Yaap" Version="1.0.2" />
-	</ItemGroup>
-
 
 	<ItemGroup>
 

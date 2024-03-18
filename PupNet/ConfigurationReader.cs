@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -59,7 +59,7 @@ public class ConfigurationReader
             AppLicenseFile = "LICENSE.txt";
             AppChangeFile = "CHANGELOG.txt";
 
-            PublisherCopyright = "Copyright (C) Acme Ltd 2023";
+            PublisherCopyright = "Copyright (C) Acme Ltd 2024";
             PublisherLinkName = "Project Page";
             PublisherLinkUrl = "https://example.net";
             PublisherEmail = "contact@example.net";
@@ -74,6 +74,7 @@ public class ConfigurationReader
             PackageName = "HelloWorld";
             AppImageArgs = "--sign";
             FlatpakBuilderArgs = "--gpg-keys=FILE";
+            SetupGroupName = "HelloWorld Demo";
             SetupCommandPrompt = "Command Prompt";
             SetupSuffixOutput = "Setup";
             SetupVersionOutput = true;
@@ -144,7 +145,15 @@ public class ConfigurationReader
         MetaFile = GetOptional(nameof(MetaFile), ValueFlags.AssertPathWithDisable);
         IconFiles = GetCollection(nameof(IconFiles), ValueFlags.AssertPath);
 
-        DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable) ?? LocalDirectory;
+        if (args.Project != null)
+        {
+            DotnetProjectPath = AssertPathFlags(nameof(DotnetProjectPath), args.Project, ValueFlags.AssertPathWithDisable);
+        }
+        else
+        {
+            DotnetProjectPath = GetOptional(nameof(DotnetProjectPath), ValueFlags.AssertPathWithDisable) ?? LocalDirectory;
+        }
+
         DotnetPublishArgs = GetOptional(nameof(DotnetPublishArgs), ValueFlags.None);
         DotnetPostPublish = GetOptional(nameof(DotnetPostPublish), ValueFlags.AssertPath);
         DotnetPostPublishOnWindows = GetOptional(nameof(DotnetPostPublishOnWindows), ValueFlags.AssertPath);
@@ -167,6 +176,7 @@ public class ConfigurationReader
         FlatpakBuilderArgs = GetOptional(nameof(FlatpakBuilderArgs), ValueFlags.None);
         FlatpakFinishArgs = GetCollection(nameof(FlatpakFinishArgs), ValueFlags.None, "=", "--");
 
+        SetupGroupName = GetOptional(nameof(SetupGroupName), ValueFlags.Safe);
         SetupAdminInstall = GetBool(nameof(SetupAdminInstall), SetupAdminInstall);
         SetupCommandPrompt = GetOptional(nameof(SetupCommandPrompt), ValueFlags.Safe);
         SetupMinWindowsVersion = GetMandatory(nameof(SetupMinWindowsVersion), ValueFlags.StrictSafe);
@@ -225,7 +235,7 @@ public class ConfigurationReader
     public string? AppChangeFile { get; }
 
     public string PublisherName { get; } = "The Hello World Team";
-    public string? PublisherCopyright { get; } = "Copyright (C) Hello World Team 2023";
+    public string? PublisherCopyright { get; } = "Copyright (C) Hello World Team 2024";
     public string? PublisherLinkName { get; } = "Home Page";
     public string? PublisherLinkUrl { get; }
     public string? PublisherEmail { get; }
@@ -251,7 +261,7 @@ public class ConfigurationReader
 
     public string FlatpakPlatformRuntime { get; } = "org.freedesktop.Platform";
     public string FlatpakPlatformSdk { get; } = "org.freedesktop.Sdk";
-    public string FlatpakPlatformVersion { get; } = "22.08";
+    public string FlatpakPlatformVersion { get; } = "23.08";
     public IReadOnlyCollection<string> FlatpakFinishArgs { get; } = new string[]
         { "--socket=wayland", "--socket=x11", "--filesystem=host", "--share=network" };
     public string? FlatpakBuilderArgs { get; }
@@ -264,6 +274,7 @@ public class ConfigurationReader
     public IReadOnlyCollection<string> DebianRecommends { get; } = new string[]
         { "libc6", "libgcc1", "libgcc-s1", "libgssapi-krb5-2", "libicu", "libssl", "libstdc++6", "libunwind", "zlib1g" };
 
+    public string? SetupGroupName { get; }
     public bool SetupAdminInstall { get; }
     public string? SetupCommandPrompt { get; }
     public string SetupMinWindowsVersion { get; } = "10";
@@ -475,10 +486,10 @@ public class ConfigurationReader
         sb.Append(CreateBreaker("DOTNET PUBLISH", style));
 
         sb.Append(CreateHelpField(nameof(DotnetProjectPath), DotnetProjectPath, style,
-                $"Optional path relative to this file in which to find the dotnet project (.csproj) or solution (.sln)",
-                $"file, or the directory containing it. If empty (default), a single project or solution file is",
-                $"expected under the same directory as this file. IMPORTANT. If set to '{PathDisable}', dotnet publish",
-                $"is disabled (not called). Instead, only {nameof(DotnetPostPublish)} is called."));
+                $"Optional path relative to this file in which to find the dotnet project (.csproj) file, or the",
+                $"directory containing it. If empty (default), a single project file is expected under the same",
+                $"directory as this file. IMPORTANT. If set to '{PathDisable}', dotnet publish is disabled",
+                $"(i.e. not called). Instead, only {nameof(DotnetPostPublish)} is called."));
 
         sb.Append(CreateHelpField(nameof(DotnetPublishArgs), DotnetPublishArgs, style,
                 $"Optional arguments supplied to 'dotnet publish'. Do NOT include '-r' (runtime), or '-c' (configuration)",
@@ -590,6 +601,12 @@ public class ConfigurationReader
 
         sb.Append(CreateBreaker("WINDOWS SETUP OPTIONS", style));
 
+        sb.Append(CreateHelpField(nameof(SetupGroupName), SetupGroupName, style,
+                $"Optional application group name used as the Start Menu folder and install directory under Program Files.",
+                $"Specifically, it is used to define the InnoSetup DefaultGroupName and DefaultDirName parameters.",
+                $"If empty (default), suitable values are used based on your application.", 
+                $"See: https://jrsoftware.org/ishelp/index.php?topic=setup_defaultgroupname"));
+
         sb.Append(CreateHelpField(nameof(SetupAdminInstall), SetupAdminInstall, style,
                 $"Boolean (true or false) which specifies whether the application is to be installed in administrative",
                 $"mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm"));
@@ -632,7 +649,7 @@ public class ConfigurationReader
         if (p0 > -1)
         {
             p0 += prefix.Length;
-            int p1 = content.IndexOf("\n", p0);
+            int p1 = content.IndexOf('\n', p0);
 
             if (p1 > p0)
             {
@@ -674,19 +691,19 @@ public class ConfigurationReader
         return sb.ToString();
     }
 
-    private string CreateHelpField(string name, string? value, DocStyles style, params string[] help)
+    private static string CreateHelpField(string name, string? value, DocStyles style, params string[] help)
     {
         var pair = $"{name} = {value}";
         return CreateHelpFieldCore(name, pair, style, help);
     }
 
-    private string CreateHelpField(string name, bool value, DocStyles style, params string[] help)
+    private static string CreateHelpField(string name, bool value, DocStyles style, params string[] help)
     {
         var pair = $"{name} = {value.ToString().ToLowerInvariant()}";
         return CreateHelpFieldCore(name, pair, style, help);
     }
 
-    private string CreateHelpField(string name, IReadOnlyCollection<string> values, bool multi, DocStyles style, params string[] help)
+    private static string CreateHelpField(string name, IReadOnlyCollection<string> values, bool multi, DocStyles style, params string[] help)
     {
         var sb = new StringBuilder(name);
         sb.Append(" = ");
@@ -711,7 +728,7 @@ public class ConfigurationReader
         return CreateHelpFieldCore(name, sb.ToString(), style, help);
     }
 
-    private string CreateHelpFieldCore(string name, string pair, DocStyles style, IEnumerable<string> help)
+    private static string CreateHelpFieldCore(string name, string pair, DocStyles style, IEnumerable<string> help)
     {
         var sb = new StringBuilder(256);
 

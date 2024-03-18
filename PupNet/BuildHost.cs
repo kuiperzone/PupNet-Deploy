@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -27,6 +27,8 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class BuildHost
 {
+    private static readonly string DotnetHost = GetDotnetHost();
+
     /// <summary>
     /// Constructor.
     /// </summary>
@@ -386,7 +388,22 @@ public class BuildHost
         }
     }
 
-    private static IReadOnlyCollection<string> GetPublishCommands(PackageBuilder builder)
+    private static string GetDotnetHost()
+    {
+        // Locate dotnet
+        // https://github.com/dotnet/docs/blob/main/docs/core/tools/dotnet-environment-variables.md#dotnet_host_path
+        var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+
+        if (string.IsNullOrEmpty(dotnet))
+        {
+            // In path (default)
+            return "dotnet";
+        }
+
+        return dotnet;
+    }
+
+    private static List<string> GetPublishCommands(PackageBuilder builder)
     {
         // Returns unexpanded
         var list = new List<string>();
@@ -399,7 +416,7 @@ public class BuildHost
             if (conf.Arguments.Clean)
             {
                 // Clean first
-                sb.Append("dotnet clean");
+                sb.Append($"{DotnetHost} clean");
 
                 if (!string.IsNullOrEmpty(conf.DotnetProjectPath) && conf.DotnetProjectPath != ".")
                 {
@@ -411,7 +428,7 @@ public class BuildHost
             }
 
             // PUBLISH
-            sb.Append("dotnet publish");
+            sb.Append($"{DotnetHost} publish");
             var pa = conf.DotnetPublishArgs;
 
             if (!string.IsNullOrEmpty(conf.DotnetProjectPath) && conf.DotnetProjectPath != ".")
@@ -421,9 +438,9 @@ public class BuildHost
 
             if (pa != null)
             {
+                // Cannot allow
                 if (pa.Contains("-o ") || pa.Contains("--output "))
                 {
-                    // Cannot be allowed
                     throw new ArgumentException($"The -o, --output option cannot be used in {nameof(conf.DotnetPublishArgs)}");
                 }
 
@@ -442,14 +459,30 @@ public class BuildHost
 
             if (!string.IsNullOrEmpty(conf.Arguments.Property))
             {
-                sb.Append(" -");
+                sb.Append(' ');
+                var prop = conf.Arguments.Property;
+                bool quoted = prop.Contains('"');
+
+                if (!quoted)
+                {
+                    // See: https://github.com/dotnet/sdk/issues/9562
+                    sb.Append('"');
+                    prop = conf.Arguments.Property.Replace(",", "%2C");
+                }
+
+                sb.Append('-');
 
                 if (!conf.Arguments.Property.StartsWith("p:"))
                 {
                     sb.Append("p:");
                 }
 
-                sb.Append(conf.Arguments.Property);
+                sb.Append(prop);
+
+                if (!quoted)
+                {
+                    sb.Append('"');
+                }
             }
 
             if (!string.IsNullOrEmpty(pa))

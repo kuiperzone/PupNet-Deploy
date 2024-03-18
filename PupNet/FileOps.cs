@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -27,21 +27,13 @@ namespace KuiperZone.PupNet;
 /// Wraps expected file operations with desired console output behavior.
 /// This is mainly for convenience and aesthetic/information purposes.
 /// </summary>
-public class FileOps
+public class FileOps(string? root = null)
 {
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    public FileOps(string? root = null)
-    {
-        Root = root;
-    }
-
     /// <summary>
     /// Gets the root directory for operations. This is used for display purposes only where directory path is
     /// removed from the displayed path.
     /// </summary>
-    public string? Root { get; }
+    public string? Root { get; } = root;
 
     /// <summary>
     /// Gets or sets whether to display commands and path information. Default is true.

@@ -12,7 +12,7 @@ installation file in a single step.
 ## CONTENTS ##
 
 * [INTRODUCTION](#introduction)
-    * [First - A General Principle](#general-principle)
+    * [General Principles](#general-principles)
 
 * [INSTALL & PREREQUISITES](#install-prerequisites)
     * [AppImage Out of the Box](#appimage-out-of-the-box)
@@ -54,6 +54,7 @@ installation file in a single step.
     * [Configuration Reference](#configuration-reference)
 
 * [FAQs & GOTCHAS](#faqs-gotchas)
+    * [NETSDK1194: The "--output" option isn't supported](#NETSDK1194)
     * [Virtual Box & Symlinks](#virtual-box-symlinks)
     * [Package Naming is not Consistent](#package-naming-is-not-consistent)
     * [Package Cannot be Removed using Gnome Software Center](#package-cannot-be-removed-using-gnome-software-center)
@@ -103,10 +104,18 @@ must be a Linux box and, likewise to build a Windows Setup file, a Windows syste
 
 However, it is possible to build a Debian package on an RPM machine, and viceversa.
 
-### First - A General Principle <a name="general-principle"/>
+### General Principles <a name="general-principles"/>
 
+#### Single App per Install Package ####
+It is assumed that you are building a deployment package containing a single application. AppImages also work this way
+and, from .NET7 onward, it is no longer possible to `publish` a dotnet solution containing multiple projects.
+
+This may be something investigated in the future but, for the moment, PupNet is not suitable for deploying a suit of
+applications as a single package.
+
+#### Read-only Access to Installation ####
 As a general principle when deploying your software, it should be assumed that your application has read-only access to
-it's installation folder. Rather, your application should use the `Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData`
+its installation folder. Your application should use the `Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData`
 location or other suitable special folder to write data.
 
 
@@ -116,7 +125,8 @@ To install as a dotnet tool:
 
     dotnet tool install -g KuiperZone.PupNet
 
-Currently, the "PupNet tool" targets .NET6 LTS (this does not restrict the dotnet version of your own projects).
+Currently, the "PupNet tool" targets .NET8 LTS (this does not restrict the dotnet version of your own projects).
+The last version of PupNet built against .NET6 was 1.7.1.
 
 Alternatively, for self-contained installers:
 
@@ -143,9 +153,9 @@ or:
 
 And then use flatpak to install:
 
-    sudo flatpak install flathub org.freedesktop.Platform//22.08 org.freedesktop.Sdk//22.08
+    sudo flatpak install flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
 
-Here, the version number (22.08) was the latest at the time of writing, but will be subject to update.
+Here, the version number (23.08) was the latest at the time of writing, but will be subject to update.
 See [Flatpak Available Runtimes](https://docs.flatpak.org/en/latest/available-runtimes.html).
 
 ### Debian Packages on Linux <a name="debian-packages-on-linux"/>
@@ -316,11 +326,11 @@ or simply as: `name.64.png`.
 ### Dotnet Project Path <a name="dotnet-project-path"/>
 
 When building the deployment, PupNet first calls `dotnet publish` on your project. To do this, it needs to know where
-your project or solution lives. In `HelloWorld.pupnet.conf`, you may note that the `DotnetProjectPath` value is empty,
-however. This is because the `pupnet.conf` sits in the same directory as the `HelloWorld.sln` file.
+your project lives. In `HelloWorld.pupnet.conf`, you may note that file is at the solution level, but `DotnetProjectPath`
+value provides the project directory.
 
-If your `pupnet.conf` files shares the same directory as your `.sln` or `.csproj` file, you may leave `DotnetProjectPath`
-empty. Otherwise use this field to specify the path to your solution or project file or directory relative to the location
+If your `pupnet.conf` files shares the same directory as your `.csproj` file, you may leave `DotnetProjectPath`
+empty. Otherwise use this field to specify the path to your project file or directory relative to the location
 of the configuration file.
 
 
@@ -793,72 +803,76 @@ Type `pupnet --help` to display command arguments as expected.
     Always give .pupnet.conf file first. If .pupnet.conf file is omitted, the default is the one in the working directory.
 
     Build Options:
-        -k, --kind <zip|appimage|deb|rpm|flatpak|setup>
-        Package output kind. If omitted, one is chosen according to the runtime (AppImage on linux).
-        Example: pupnet HelloWorld -k Flatpak
+       -k, --kind <zip|appimage|deb|rpm|flatpak|setup>
+       Package output kind. If omitted, one is chosen according to the runtime (AppImage on linux).
+       Example: pupnet HelloWorld -k Flatpak
 
-        -r, --runtime <linux-x64|linux-arm64|win-x64...>
-        Dotnet publish runtime identifier. Default: linux-x64.
-        Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
-        See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
+       -r, --runtime <linux-x64|linux-arm64|win-x64...>
+       Dotnet publish runtime identifier. Default: linux-x64.
+       Valid examples include: 'linux-x64', 'linux-arm64' and 'win-x64' etc.
+       See: https://docs.microsoft.com/en-us/dotnet/core/rid-catalog
 
-        -c, --build <Release|Debug>
-        Optional build target (or 'Configuration' in dotnet terminology).
-        Value should be 'Release' or 'Debug' only. Default: Release.
+       -c, --build <Release|Debug>
+       Optional build target (or 'Configuration' in dotnet terminology).
+       Value should be 'Release' or 'Debug' only. Default: Release.
 
-        -e, --clean
-        Call 'dotnet clean' prior to 'dotnet publish'. Default: false.
+       -j, --project Path to .csproj
+       Optional path to the .csproj file or directory containing it. Overrides DotnetProjectPath
+       in the conf file.
 
-        -v, --app-version <version[release]>
-        Specifies application version-release in form 'version[release]', where value in square
-        brackets is package release. Overrides AppVersionRelease in conf file.
-        Example: 1.2.3[1].
+       -e, --clean
+       Call 'dotnet clean' prior to 'dotnet publish'. Default: false.
 
-        -p, --property <name=value>
-        Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
-        Example: -p DefineConstants=TRACE;DEBUG
+       -v, --app-version <version[release]>
+       Specifies application version-release in form 'version[release]', where value in square
+       brackets is package release. Overrides AppVersionRelease in conf file.
+       Example: 1.2.3[1].
 
-        --arch value
-        Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
-        not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id
-        and will be successfully detected automatically. However, in the event of a problem, the value
-        explicitly supplied here will be used to override. It should be provided in the form
-        expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
+       -p, --property <name=value>
+       Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
+       Example: -p DefineConstants=TRACE,DEBUG
 
-        -o, --output <filename>
-        Force package output filename. Normally this is derived from parameters in the configuration.
-        This value will be used to override. Example: -o AppName.AppImage
+       --arch <value>
+       Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is
+       not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id
+       and will be successfully detected automatically. However, in the event of a problem, the value
+       explicitly supplied here will be used to override. It should be provided in the form
+       expected by the underlying package builder (i.e. rpmbuild, appimagetool or InnoSetup etc.).
 
-        --verbose
-        Indicates verbose output when building. It is used also with --new option.
+       -o, --output <filename>
+       Force package output filename. Normally this is derived from parameters in the configuration.
+       This value will be used to override. Example: -o AppName.AppImage
 
-        -u, --run
-        Performs a test run of the application after successful build (where supported).
+       --verbose
+       Indicates verbose output when building. It is used also with --new option.
 
-        -y, --skip-yes
-        Skips confirmation prompts (assumes yes).
+       -u, --run
+       Performs a test run of the application after successful build (where supported).
+
+       -y, --skip-yes
+       Skips confirmation prompts (assumes yes).
 
     Other Options:
 
-        -n, --new <conf|desktop|meta|all> [--verbose] [--skip-yes]
-        Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
-        A base file name may optionally be given. If --verbose is used, a configuration file with
-        documentation comments is generated. Use 'all' to generate a full set of configuration assets.
-        Example: pupnet HelloWorld -n all --verbose
+       -n, --new <conf|desktop|meta|all> [--verbose] [--skip-yes]
+       Creates a new empty conf file or associated file (i.e. desktop of metadata) for a new project.
+       A base file name may optionally be given. If --verbose is used, a configuration file with
+       documentation comments is generated. Use 'all' to generate a full set of configuration assets.
+       Example: pupnet HelloWorld -n all --verbose
 
-        --upgrade-conf [--verbose] [--skip-yes]
-        Upgrades supplied .pupnet.conf file to latest version parameters. For example, if the
-        conf file was created with program version 1.1 and new parameters where added in version
-        1.2, this command will upgrade the file by adding new parameters with default values.
-        If --verbose is used, a configuration file with documentation comments is generated.
-        Example: pupnet file.pupnet.conf --upgrade-conf --verbose
+       --upgrade-conf [--verbose] [--skip-yes]
+       Upgrades supplied .pupnet.conf file to latest version parameters. For example, if the
+       conf file was created with program version 1.1 and new parameters where added in version
+       1.2, this command will upgrade the file by adding new parameters with default values.
+       If --verbose is used, a configuration file with documentation comments is generated.
+       Example: pupnet file.pupnet.conf --upgrade-conf --verbose
 
-        -h, --help <args|macro|conf>
-        Show help information. Optional value specifies what kind of information to display.
-        Default is 'args'. Example: pupnet -h macro
+       -h, --help <args|macro|conf>
+       Show help information. Optional value specifies what kind of information to display.
+       Default is 'args'. Example: pupnet -h macro
 
-        --version
-        Show version and associated information.
+       --version
+       Show version and associated information.
 
 ### Macro Reference <a name="macro-reference"/>
 
@@ -1057,7 +1071,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
 
     ** PublisherCopyright **
     Optional copyright statement.
-    Example: PublisherCopyright = Copyright (C) Acme Ltd 2023
+    Example: PublisherCopyright = Copyright (C) Acme Ltd 2024
 
     ** PublisherLinkName **
     Optional publisher or application web-link name. Note that Windows Setup packages
@@ -1139,10 +1153,10 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ########################################
 
     ** DotnetProjectPath **
-    Optional path relative to this file in which to find the dotnet project (.csproj) or solution (.sln)
-    file, or the directory containing it. If empty (default), a single project or solution file is
-    expected under the same directory as this file. IMPORTANT. If set to 'NONE', dotnet publish
-    is disabled (not called). Instead, only DotnetPostPublish is called.
+    Optional path relative to this file in which to find the dotnet project (.csproj) file, or the
+    directory containing it. If empty (default), a single project file is expected under the same
+    directory as this file. IMPORTANT. If set to 'NONE', dotnet publish is disabled
+    (i.e. not called). Instead, only DotnetPostPublish is called.
     Example: DotnetProjectPath = Source
 
     ** DotnetPublishArgs **
@@ -1218,7 +1232,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     ** FlatpakPlatformVersion **
     The platform runtime version. The latest available version may change periodically.
     Refer to Flatpak documentation.
-    Example: FlatpakPlatformVersion = 22.08
+    Example: FlatpakPlatformVersion = 23.08
 
     ** FlatpakFinishArgs **
     Flatpak manifest 'finish-args' sandbox permissions. Optional, but if empty, the application will have
@@ -1232,10 +1246,10 @@ Type `pupnet --help conf` to see supported configuration reference information:
         --share=network
     """
 
-    ** FlatpakBuilderArgs **
-    Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
-    See flatpak-builder --help.
-    Example: FlatpakBuilderArgs = --gpg-keys=FILE
+** FlatpakBuilderArgs **
+Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
+See flatpak-builder --help.
+Example: FlatpakBuilderArgs = --gpg-keys=FILE
 
     ########################################
     # RPM OPTIONS
@@ -1291,6 +1305,13 @@ Type `pupnet --help conf` to see supported configuration reference information:
     # WINDOWS SETUP OPTIONS
     ########################################
 
+    ** SetupGroupName **
+    Optional application group name used as the Start Menu folder and install directory under Program Files.
+    Specifically, it is used to define the InnoSetup DefaultGroupName and DefaultDirName parameters.
+    If empty (default), suitable values are used based on your application.
+    See: https://jrsoftware.org/ishelp/index.php?topic=setup_defaultgroupname
+    Example: SetupGroupName = HelloWorld Demo
+
     ** SetupAdminInstall **
     Boolean (true or false) which specifies whether the application is to be installed in administrative
     mode, or per-user. Default is false. See: https://jrsoftware.org/ishelp/topic_admininstallmode.htm
@@ -1325,8 +1346,17 @@ Type `pupnet --help conf` to see supported configuration reference information:
     at command line.
     Example: SetupVersionOutput = true
 
-
 ## FAQs & GOTCHAS <a name="faqs-gotchas"/>
+
+### NETSDK1194: The "--output" option isn't supported <a name="NETSDK1194"/>
+
+From .NET7 ownward, the `dotnet publish` no longer accepts a `.sln` file or directory containing one as input. It's
+current behaviour for .NET8.0 is to warn rather than fail but this may change in a future .NET release.
+
+For your pupnet.conf files, the solution is to either place the conf file in the same directory as your `.csproj`
+file, or specify the `.csproj` file location using the `DotnetProjectPath` parameter.
+
+See also: [Solution-level --output option no longer valid for build-related commands](https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/7.0/solution-level-output-no-longer-valid).
 
 ### Virtual Box & Symlinks <a name="virtual-box-symlinks"/>
 
@@ -1342,7 +1372,8 @@ You may notice that PupNet outputs differences in package naming styles. For exa
     pupnet-deploy_0.0.1-1_amd64.deb
 
 PupNet follows the naming conventions used with the respective packages. This includes, for example, different CPU
-architecture naming conventions. In some, it normal to include the version in the file, but not in others.
+architecture naming conventions. With some package naming styles, it is normal to include the version in the filename,
+but not in others.
 
 ### Package Cannot be Removed using Gnome Software Center <a name="package-cannot-be-removed-using-gnome-software-center"/>
 
@@ -1383,32 +1414,15 @@ At the time, I was excited by Flatpak and it was my original intention to add Fl
 it was difficult to handle the increased complexity in a bash script, so I re-wrote everything as a C# application and
 *PupNet Deploy* is the result.
 
-In the process, however, I had cause to reflect on certain things, including the sad fact that the
-[security model of Flatpak is IMHO broken](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
+In the process, however, I had cause to reflect on certain things, including the fact that the
+[security model of Flatpak is broken IMHO](https://ludocode.com/blog/flatpak-is-not-the-future). This came about
 because I intended to use Flatpak to deploy my other [application project](https://github.com/kuiperzone/AvantGarde),
 but found that there are several important scenarios which Flatpak cannot support, including the deployment of development
-tools. Regardless, I still thought it useful for developers to be able ship software in formats convenient for users,
-and recognise that Flatpak is a popular packaging technology, so I added Flatpak to PupNet. However, I took out my
-frustration by adding RPM and Debian formats in order to provide alternatives where Flatpak is unsuitable.
-
-I would not be keen on adding more formats in the Linux space, however, as each deployment option must be maintained.
-Rather, I would be interested to see how things play out in the future. I note also the trend toward centralized
-repository-only distribution models. For example, here is a quote from the
-[Gnome Team](https://discourse.gnome.org/t/gnome-software-open-and-uninstall-button-not-working-for-app/14338/7):
-
-*Stand-alone RPM files are really not a use case we want to encourage people to use.*
-
-Repository only installations is not a paradigm I am fully onboard with, although I recognize its advantages. Rather,
-I support the idea of freedom and that means developers and users having the freedom to create and share software themselves,
-without necessarily having to go through third-parties who may act as gate-keepers.
-
-This is why I support [AppImage](https://github.com/AppImage/AppImageKit) and Setup files on Windows as a means of software
-distribution, as it always best to keep the choice!
+tools. Regardless, I thought it useful for developers to be able ship software in formats convenient for users,
+and recognise that Flatpak is a popular packaging technology. However, I felt that RPM and Debian formats should be added
+in order to provide alternatives where Flatpak is unsuitable.
 
 ### Notes on Extending PupNet <a name="notes-on-extending-pupnet"/>
-
-All that being said, it may be advantageous at some point to have the ability to deploy to MacOS, Android and iOS.
-However, these are not technologies with which I am familiar.
 
 Anyone wishing to extend PupNet, should study how the existing `RpmBuilder`, `FlatpakBuilder` and Windows `SetupBuilder`
 classes override and extend the behaviour of the `PackageBuilder` base class. The `PackageBuilder` base class is Linux
@@ -1418,7 +1432,7 @@ Moreover, a new enum value would need to be added to the `PackageKind` type. It 
 existing `PackageKind` values, and add the new type behaviour to switch statements wherever encountered, including
 the `BuilderFactory` class.
 
-Please do feel free to post questions to the Github Discussion area. Where possible, I will happy to respond.
+Please do feel free to post questions to the Github Discussion area. Where possible, I will be happy to respond.
 
 ### An Application which uses PupNet Deploy <a name="an-application-which-uses-pupnet-deploy"/>
 

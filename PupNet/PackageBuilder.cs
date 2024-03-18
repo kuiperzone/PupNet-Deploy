@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -74,12 +74,9 @@ public abstract class PackageBuilder
         // Should be ico on Windows, or SVG or PNG on linux
         PrimaryIcon = GetSourceIcon(kind, Configuration.IconFiles);
 
-        if (PrimaryIcon == null)
-        {
-            // It can be null on Windows.
-            // Fallback to embedded icons on Linux
-            PrimaryIcon = GetSourceIcon(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
-        }
+        // It can be null on Windows.
+        // Fallback to embedded icons on Linux
+        PrimaryIcon ??= GetSourceIcon(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
 
         // Ignore fact file might not exist if AssertPaths if false (test only)
         if (Configuration.AssertPaths || File.Exists(Configuration.AppChangeFile))

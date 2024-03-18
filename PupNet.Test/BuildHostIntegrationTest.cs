@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -171,50 +171,50 @@ public class BuildHostIntegrationTest
             var lines = new List<string>();
 
             // The idea here is to include only the minimal set of configuration we expect to build successfully
-            lines.Add($"{nameof(ConfigurationReader.AppBaseName)} = 'HelloWorld'");
-            lines.Add($"{nameof(ConfigurationReader.AppFriendlyName)} = Hello World");
-            lines.Add($"{nameof(ConfigurationReader.AppId)} = \"net.example.helloworld\"");
-            lines.Add($"{nameof(ConfigurationReader.AppVersionRelease)} = 5.4.3[2]");
-            lines.Add($"{nameof(ConfigurationReader.AppShortSummary)} = Test <application> only");
-            lines.Add($"{nameof(ConfigurationReader.AppLicenseId)} = LicenseRef-LICENSE");
+            lines.Add($"{nameof(AppBaseName)} = 'HelloWorld'");
+            lines.Add($"{nameof(AppFriendlyName)} = Hello World");
+            lines.Add($"{nameof(AppId)} = \"net.example.helloworld\"");
+            lines.Add($"{nameof(AppVersionRelease)} = 5.4.3[2]");
+            lines.Add($"{nameof(AppShortSummary)} = Test <application> only");
+            lines.Add($"{nameof(AppLicenseId)} = LicenseRef-LICENSE");
 
-            lines.Add($"{nameof(ConfigurationReader.PublisherName)} = Kuiper Zone");
-            lines.Add($"{nameof(ConfigurationReader.PublisherLinkUrl)} = https://kuiper.zone");
-            lines.Add($"{nameof(ConfigurationReader.PublisherEmail)} = email@example.net");
+            lines.Add($"{nameof(PublisherName)} = Kuiper Zone");
+            lines.Add($"{nameof(PublisherLinkUrl)} = https://kuiper.zone");
+            lines.Add($"{nameof(PublisherEmail)} = email@example.net");
 
-            lines.Add($"{nameof(ConfigurationReader.DesktopTerminal)} = true");
+            lines.Add($"{nameof(DesktopTerminal)} = true");
 
-            lines.Add($"{nameof(ConfigurationReader.OutputDirectory)} = {workDir}");
+            lines.Add($"{nameof(OutputDirectory)} = {workDir}");
 
             // IMPORTANT - SDK must be installed
-            lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformRuntime)} = org.freedesktop.Platform");
-            lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformSdk)} = org.freedesktop.Sdk");
-            lines.Add($"{nameof(ConfigurationReader.FlatpakPlatformVersion)} = \"22.00\"");
-            lines.Add($"{nameof(ConfigurationReader.SetupMinWindowsVersion)} = 10");
+            lines.Add($"{nameof(FlatpakPlatformRuntime)} = org.freedesktop.Platform");
+            lines.Add($"{nameof(FlatpakPlatformSdk)} = org.freedesktop.Sdk");
+            lines.Add($"{nameof(FlatpakPlatformVersion)} = \"22.00\"");
+            lines.Add($"{nameof(SetupMinWindowsVersion)} = 10");
 
             // Always include metafile We actually need to create the file here
             var metapath = Path.Combine(workDir, "app.metainfo.xml");
             File.WriteAllText(metapath, MetaTemplates.MetaInfo);
-            lines.Add($"{nameof(ConfigurationReader.MetaFile)} = {metapath}");
+            lines.Add($"{nameof(MetaFile)} = {metapath}");
 
             if (complete)
             {
                 // Here we add extended configuration we consider optional extras
-                lines.Add($"{nameof(ConfigurationReader.PackageName)} = HelloWorld");
-                lines.Add($"{nameof(ConfigurationReader.AppDescription)} = Test description\n\n* bullet1\n- bullet2\nLine2");
-                lines.Add($"{nameof(ConfigurationReader.PublisherCopyright)} = Copyright Kuiper Zone");
-                lines.Add($"{nameof(ConfigurationReader.PublisherLinkName)} = kuiper.zone");
+                lines.Add($"{nameof(PackageName)} = HelloWorld");
+                lines.Add($"{nameof(AppDescription)} = Test description\n\n* bullet1\n- bullet2\nLine2");
+                lines.Add($"{nameof(PublisherCopyright)} = Copyright Kuiper Zone");
+                lines.Add($"{nameof(PublisherLinkName)} = kuiper.zone");
 
-                lines.Add($"{nameof(ConfigurationReader.DesktopNoDisplay)} = false");
-                lines.Add($"{nameof(ConfigurationReader.PrimeCategory)} = Development");
-                lines.Add($"{nameof(ConfigurationReader.AppImageVersionOutput)} = true");
-                lines.Add($"{nameof(ConfigurationReader.FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
+                lines.Add($"{nameof(DesktopNoDisplay)} = false");
+                lines.Add($"{nameof(PrimeCategory)} = Development");
+                lines.Add($"{nameof(AppImageVersionOutput)} = true");
+                lines.Add($"{nameof(FlatpakFinishArgs)} = --socket=wayland;--socket=fallback-x11;--filesystem=host;--share=network");
 
-                lines.Add($"{nameof(ConfigurationReader.RpmAutoReq)} = true");
-                lines.Add($"{nameof(ConfigurationReader.RpmAutoProv)} = false");
+                lines.Add($"{nameof(RpmAutoReq)} = true");
+                lines.Add($"{nameof(RpmAutoProv)} = false");
 
-                lines.Add($"{nameof(ConfigurationReader.SetupVersionOutput)} = true");
-                lines.Add($"{nameof(ConfigurationReader.SetupCommandPrompt)} = Command Prompt");
+                lines.Add($"{nameof(SetupVersionOutput)} = true");
+                lines.Add($"{nameof(SetupCommandPrompt)} = Command Prompt");
 
                 // Need to create dummy icons in order to get the thing to build (we cheat with dummy files).
                 // However, we can't write dummy ico for windows because Setup would fail (needs to be valid icon)
@@ -228,7 +228,7 @@ public class BuildHostIntegrationTest
                 icons.Add(Path.Combine(workDir, "Icon.svg"));
                 File.WriteAllText(icons[^1], "Dummy file");
 
-                lines.Add($"{nameof(ConfigurationReader.IconFiles)} = {string.Join(';', icons)}");
+                lines.Add($"{nameof(IconFiles)} = {string.Join(';', icons)}");
             }
 
             return lines.ToArray();

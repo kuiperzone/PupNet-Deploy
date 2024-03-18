@@ -1,6 +1,6 @@
 // -----------------------------------------------------------------------------
 // PROJECT   : PupNet
-// COPYRIGHT : Andy Thomas (C) 2022-23
+// COPYRIGHT : Andy Thomas (C) 2022-24
 // LICENSE   : GPL-3.0-or-later
 // HOMEPAGE  : https://github.com/kuiperzone/PupNet
 //
@@ -17,7 +17,6 @@
 // -----------------------------------------------------------------------------
 
 using System.Text;
-using KuiperZone.Utility.Yaap;
 
 namespace KuiperZone.PupNet;
 
@@ -26,45 +25,48 @@ namespace KuiperZone.PupNet;
 /// </summary>
 public class ArgumentReader
 {
-    public const string KindShortArg = "k";
+    public const char KindShortArg = 'k';
     public const string KindLongArg = "kind";
 
-    public const string RidShortArg = "r";
+    public const char RidShortArg = 'r';
     public const string RidLongArg = "runtime";
 
-    public const string BuildShortArg = "c";
+    public const char BuildShortArg = 'c';
     public const string BuildLongArg = "build";
 
-    public const string CleanShortArg = "e";
+    public const char ProjectShortArg = 'j';
+    public const string ProjectLongArg = "project";
+
+    public const char CleanShortArg = 'e';
     public const string CleanLongArg = "clean";
 
-    public const string VersionReleaseShortArg = "v";
+    public const char VersionReleaseShortArg = 'v';
     public const string VersionReleaseLongArg = "app-version";
 
-    public const string PropertyShortArg = "p";
+    public const char PropertyShortArg = 'p';
     public const string PropertyLongArg = "property";
 
     public const string ArchLongArg = "arch";
 
-    public const string OutputShortArg = "o";
+    public const char OutputShortArg = 'o';
     public const string OutputLongArg = "output";
 
-    public const string RunShortArg = "u";
+    public const char RunShortArg = 'u';
     public const string RunLongArg = "run";
 
     public const string VerboseLongArg = "verbose";
 
-    public const string SkipYesShortArg = "y";
+    public const char SkipYesShortArg = 'y';
     public const string SkipYesLongArg = "skip-yes";
 
-    public const string NewShortArg = "n";
+    public const char NewShortArg = 'n';
     public const string NewLongArg = "new";
 
     public const string UpgradeConfLongArg = "upgrade-conf";
 
     public const string VersionLongArg = "version";
 
-    public const string HelpShortArg = "h";
+    public const char HelpShortArg = 'h';
     public const string HelpLongArg = "help";
 
     // New files
@@ -108,13 +110,14 @@ public class ArgumentReader
         _string = args.ToString();
         Parser = args;
 
-        Value = args.Value;
+        Value = args.FirstValueOrNull;
 
         NewFile = args.GetOrDefault(NewShortArg, NewLongArg, null)?.ToLowerInvariant();
 
         Arch = args.GetOrDefault(ArchLongArg, null);
         Runtime = args.GetOrDefault(RidShortArg, RidLongArg, RuntimeConverter.DefaultRuntime);
         Build = args.GetOrDefault(BuildShortArg, BuildLongArg, "Release");
+        Project = args.GetOrDefault(ProjectShortArg, ProjectLongArg, null);
         VersionRelease = args.GetOrDefault(VersionReleaseShortArg, VersionReleaseLongArg, null);
         Clean = args.GetOrDefault(CleanShortArg, CleanLongArg, false);
         IsVerbose = args.GetOrDefault(VerboseLongArg, false);
@@ -159,6 +162,11 @@ public class ArgumentReader
     /// Gets the target build configuration (Release or Debug).
     /// </summary>
     public string Build { get; }
+
+    /// <summary>
+    /// Gets the project path override.
+    /// </summary>
+    public string? Project { get; }
 
     /// <summary>
     /// Gets whether to call dotnet clean prior to publish.
@@ -254,6 +262,10 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Optional build target (or 'Configuration' in dotnet terminology).");
         sb.AppendLine($"{indent}Value should be 'Release' or 'Debug' only. Default: Release.");
         sb.AppendLine();
+        sb.AppendLine($"{indent}-{ProjectShortArg}, --{ProjectLongArg} Path to .csproj");
+        sb.AppendLine($"{indent}Optional path to the .csproj file or directory containing it. Overrides {nameof(ConfigurationReader.DotnetProjectPath)}");
+        sb.AppendLine($"{indent}in the conf file.");
+        sb.AppendLine();
         sb.AppendLine($"{indent}-{CleanShortArg}, --{CleanLongArg}");
         sb.AppendLine($"{indent}Call 'dotnet clean' prior to 'dotnet publish'. Default: false.");
         sb.AppendLine();
@@ -264,9 +276,9 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}-{PropertyShortArg}, --{PropertyLongArg} <name=value>");
         sb.AppendLine($"{indent}Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.");
-        sb.AppendLine($"{indent}Example: -{PropertyShortArg} DefineConstants=TRACE;DEBUG");
+        sb.AppendLine($"{indent}Example: -{PropertyShortArg} DefineConstants=TRACE,DEBUG");
         sb.AppendLine();
-        sb.AppendLine($"{indent}--{ArchLongArg} value");
+        sb.AppendLine($"{indent}--{ArchLongArg} <value>");
         sb.AppendLine($"{indent}Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is");
         sb.AppendLine($"{indent}not normally necessary as, in most cases, the architecture is defined by the dotnet runtime-id");
         sb.AppendLine($"{indent}and will be successfully detected automatically. However, in the event of a problem, the value");
@@ -322,7 +334,7 @@ public class ArgumentReader
         return _string;
     }
 
-    private static T AssertEnum<T>(string sname, string lname, string value) where T : struct, Enum
+    private static T AssertEnum<T>(char sname, string lname, string value) where T : struct, Enum
     {
         // Provides more error information
         if (Enum.TryParse<T>(value, true, out T rslt))
