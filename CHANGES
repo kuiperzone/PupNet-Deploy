@@ -1,6 +1,7 @@
 + VERSION 1.8.0; 2024-03-18
 - Built with .NET8
 - Added -j,--project command line argument.
+- Added SetupGroupName configuration parameter.
 - Now detects the $DOTNET_HOST_PATH environment variable and uses it if defined.
 - Updated documentation concerning NETSDK1194. #27
 - Updated default FlatpakPlatformVersion to latest 23.08 at time of writing.

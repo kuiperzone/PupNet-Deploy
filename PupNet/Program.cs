@@ -52,7 +52,7 @@ internal class Program
     /// <summary>
     /// Gets the program product name.
     /// </summary>
-    public const string Copyright = "Copyright © Andy Thomas 2022-23";
+    public const string Copyright = "Copyright © Andy Thomas 2022-24";
 
     /// <summary>
     /// Gets the project URL.

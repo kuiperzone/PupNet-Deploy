@@ -1,4 +1,4 @@
-dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.7.1
+dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.8.0
 pupnet -r linux-x64 -k deb -y
 pupnet -r linux-x64 -k rpm -y
 pupnet -r linux-x64 -k appimage -y
