@@ -816,7 +816,7 @@ Type `pupnet --help` to display command arguments as expected.
        Optional build target (or 'Configuration' in dotnet terminology).
        Value should be 'Release' or 'Debug' only. Default: Release.
 
-       -j, --project Path to .csproj
+       -j, --project <csproj path>
        Optional path to the .csproj file or directory containing it. Overrides DotnetProjectPath
        in the conf file.
 
@@ -830,7 +830,7 @@ Type `pupnet --help` to display command arguments as expected.
 
        -p, --property <name=value>
        Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.
-       Example: -p DefineConstants=TRACE,DEBUG
+       Separate multiple values with comma. Example: -p DefineConstants=TRACE,DEBUG
 
        --arch <value>
        Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is

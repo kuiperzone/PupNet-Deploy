@@ -262,7 +262,7 @@ public class ArgumentReader
         sb.AppendLine($"{indent}Optional build target (or 'Configuration' in dotnet terminology).");
         sb.AppendLine($"{indent}Value should be 'Release' or 'Debug' only. Default: Release.");
         sb.AppendLine();
-        sb.AppendLine($"{indent}-{ProjectShortArg}, --{ProjectLongArg} Path to .csproj");
+        sb.AppendLine($"{indent}-{ProjectShortArg}, --{ProjectLongArg} <csproj path>");
         sb.AppendLine($"{indent}Optional path to the .csproj file or directory containing it. Overrides {nameof(ConfigurationReader.DotnetProjectPath)}");
         sb.AppendLine($"{indent}in the conf file.");
         sb.AppendLine();
@@ -276,7 +276,7 @@ public class ArgumentReader
         sb.AppendLine();
         sb.AppendLine($"{indent}-{PropertyShortArg}, --{PropertyLongArg} <name=value>");
         sb.AppendLine($"{indent}Specifies a property to be supplied to dotnet publish command. Do not use for app versioning.");
-        sb.AppendLine($"{indent}Example: -{PropertyShortArg} DefineConstants=TRACE,DEBUG");
+        sb.AppendLine($"{indent}Separate multiple values with comma. Example: -{PropertyShortArg} DefineConstants=TRACE,DEBUG");
         sb.AppendLine();
         sb.AppendLine($"{indent}--{ArchLongArg} <value>");
         sb.AppendLine($"{indent}Force target architecture, i.e. as 'x86_64', 'amd64' or 'aarch64' etc. Note that this is");
