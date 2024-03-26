@@ -798,9 +798,10 @@ Type `pupnet --help` to display command arguments as expected.
         pupnet [<file.pupnet.conf>] [--option-n value-n]
 
     Example:
-        pupnet app..pupnet.conf -y -r linux-arm64
+        pupnet app.pupnet.conf -y -r linux-arm64
 
-    Always give .pupnet.conf file first. If .pupnet.conf file is omitted, the default is the one in the working directory.
+    Always give .pupnet.conf file first. If .pupnet.conf file is omitted, the default is the one in the
+    working directory.
 
     Build Options:
        -k, --kind <zip|appimage|deb|rpm|flatpak|setup>
@@ -1246,10 +1247,10 @@ Type `pupnet --help conf` to see supported configuration reference information:
         --share=network
     """
 
-** FlatpakBuilderArgs **
-Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
-See flatpak-builder --help.
-Example: FlatpakBuilderArgs = --gpg-keys=FILE
+    ** FlatpakBuilderArgs **
+    Additional arguments for use with flatpak-builder. Useful for signing. Default is empty.
+    See flatpak-builder --help.
+    Example: FlatpakBuilderArgs = --gpg-keys=FILE
 
     ########################################
     # RPM OPTIONS
