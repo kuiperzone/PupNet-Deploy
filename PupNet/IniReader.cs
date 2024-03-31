@@ -172,7 +172,7 @@ public class IniReader
 
                     if (pos > -1)
                     {
-                        sb.Append(line.Substring(0, pos));
+                        _ = sb.Append(line.AsSpan(0, pos));
                         value = sb.ToString().Trim();
                         return name;
                     }
