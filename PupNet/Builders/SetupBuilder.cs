@@ -272,7 +272,7 @@ public class SetupBuilder : PackageBuilder
         if (!string.IsNullOrEmpty(Configuration.SetupUninstallScript))
         {
             string uninstallScriptPath = $"{{app}}\\{Configuration.SetupUninstallScript}";
-            sb.AppendLine($"Filename: \"{uninstallScriptPath}\"; Flags: runhidden shellexec waituntilterminated");
+            sb.AppendLine($"Filename: \"{uninstallScriptPath}\"; Flags: runhidden waituntilterminated");
         }
         sb.AppendLine();
         sb.AppendLine("[UninstallDelete]");
