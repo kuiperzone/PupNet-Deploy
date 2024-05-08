@@ -104,7 +104,7 @@ public class DummyConf : ConfigurationReader
         lines.Add($"{nameof(SetupSignTool)} = {ExpectSignTool}");
         lines.Add($"{nameof(SetupSuffixOutput)} = Setup");
         lines.Add($"{nameof(SetupVersionOutput)} = true");
-        lines.Add($"{nameof(SetupUninstallCommand)} = uninstall.bat");
+        lines.Add($"{nameof(SetupUninstallScript)} = uninstall.bat");
 
         Remove(lines, omit);
 

@@ -1347,13 +1347,14 @@ Type `pupnet --help conf` to see supported configuration reference information:
     at command line.
     Example: SetupVersionOutput = true
 
-    ** SetupUninstallCommand **
-    Optional path and arguments to an additional file that should be executed before uninstall.
-    The command is executed at the installation path of your application.
+    ** SetupUninstallScript **
+    Optional name of a script to run before uninstall.
+    This is script file relative to the directory of the application and must have a default file association.
     This binds to the `[UninstallRun]` section of InnoSetup.
-    This is useful if your application has non-static configurable storage locations for data.
+    From this script, you may want to run your application, which is very useful if 
+    your application has non-static configurable storage locations for data.
 
-    Example: HelloWorld.exe --uninstall
+    Example: uninstall.bat
 
 ## FAQs & GOTCHAS <a name="faqs-gotchas"/>
 

@@ -78,7 +78,7 @@ public class ConfigurationReader
             SetupCommandPrompt = "Command Prompt";
             SetupSuffixOutput = "Setup";
             SetupVersionOutput = true;
-            SetupUninstallCommand = "uninstall.bat";
+            SetupUninstallScript = "uninstall.bat";
         }
 
         if (!string.IsNullOrEmpty(metabase))
@@ -184,7 +184,7 @@ public class ConfigurationReader
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
         SetupSuffixOutput = GetOptional(nameof(SetupSuffixOutput), ValueFlags.SafeNoSpace);
         SetupVersionOutput = GetBool(nameof(SetupVersionOutput), SetupVersionOutput);
-        SetupUninstallCommand = GetOptional(nameof(SetupUninstallCommand), ValueFlags.None);
+        SetupUninstallScript = GetOptional(nameof(SetupUninstallScript), ValueFlags.None);
 
         // Not actually a key-value, but a comment
         PupnetVersion = ExtractVersion(reader.ToString());
@@ -283,7 +283,7 @@ public class ConfigurationReader
     public string? SetupSignTool { get; }
     public string? SetupSuffixOutput { get; }
     public bool SetupVersionOutput { get; }
-    public string? SetupUninstallCommand { get; }
+    public string? SetupUninstallScript { get; }
 
     public string? PupnetVersion { get; }
 
@@ -639,12 +639,13 @@ public class ConfigurationReader
                 $"i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. Ignored if the output filename is specified",
                 $"at command line."));
         
-        sb.Append(CreateHelpField(nameof(SetupUninstallCommand), SetupUninstallCommand, style,
-            $"Optional path and arguments to an additional file that should be executed before uninstall.",
-            $"The command is executed at the installation path of your application.",
+        sb.Append(CreateHelpField(nameof(SetupUninstallScript), SetupUninstallScript, style,
+            $"Optional name of a script to run before uninstall.",
+            $"This is script file relative to the directory of the application and must have a default file association.",
             $"This binds to the `[UninstallRun]` section of InnoSetup.",
-            $"This is useful if your application has non-static configurable storage locations for data.",
-            $"Example: HelloWorld.exe --uninstall"));
+            $"From this script, you may want to run your application, which is very useful if ",
+            $"your application has non-static configurable storage locations for data.",
+            $"Example: uninstall.bat"));
 
         return sb.ToString().Trim().ReplaceLineEndings("\n");
     }

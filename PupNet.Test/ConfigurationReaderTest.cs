@@ -344,8 +344,8 @@ public class ConfigurationReaderTest
     [Fact]
     public void UninstallCommand_String_IsValid()
     {
-        Assert.NotNull(Create().SetupUninstallCommand);
-        Assert.NotNull(Create(nameof(ConfigurationReader.SetupUninstallCommand)).SetupUninstallCommand);
+        Assert.NotNull(Create().SetupUninstallScript);
+        Assert.NotNull(Create(nameof(ConfigurationReader.SetupUninstallScript)).SetupUninstallScript);
     }
 
     [Fact]

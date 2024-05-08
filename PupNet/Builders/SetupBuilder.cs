@@ -269,9 +269,10 @@ public class SetupBuilder : PackageBuilder
         sb.AppendLine("Type: filesandordirs; Name: \"{group}\\*\";");
         sb.AppendLine();
         sb.AppendLine("[UninstallRun]");
-        if (!string.IsNullOrEmpty(Configuration.SetupUninstallCommand))
+        if (!string.IsNullOrEmpty(Configuration.SetupUninstallScript))
         {
-            sb.AppendLine($"Filename: \"{Configuration.SetupUninstallCommand}\"; Flags: runhidden");
+            string uninstallScriptPath = $"{{app}}\\{Configuration.SetupUninstallScript}";
+            sb.AppendLine($"Filename: \"{uninstallScriptPath}\"; Flags: runhidden shellexec waituntilterminated");
         }
         sb.AppendLine();
         sb.AppendLine("[UninstallDelete]");

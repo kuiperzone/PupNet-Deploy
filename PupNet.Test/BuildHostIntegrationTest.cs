@@ -214,7 +214,7 @@ public class BuildHostIntegrationTest
                 lines.Add($"{nameof(RpmAutoProv)} = false");
 
                 lines.Add($"{nameof(SetupVersionOutput)} = true");
-                lines.Add($"{nameof(SetupUninstallCommand)} = uninstall.bat");
+                lines.Add($"{nameof(SetupUninstallScript)} = uninstall.bat");
                 lines.Add($"{nameof(SetupCommandPrompt)} = Command Prompt");
 
                 // Need to create dummy icons in order to get the thing to build (we cheat with dummy files).
