@@ -78,6 +78,7 @@ public class ConfigurationReader
             SetupCommandPrompt = "Command Prompt";
             SetupSuffixOutput = "Setup";
             SetupVersionOutput = true;
+            SetupUninstallCommand = "uninstall.bat";
         }
 
         if (!string.IsNullOrEmpty(metabase))
@@ -183,6 +184,7 @@ public class ConfigurationReader
         SetupSignTool = GetOptional(nameof(SetupSignTool), ValueFlags.None);
         SetupSuffixOutput = GetOptional(nameof(SetupSuffixOutput), ValueFlags.SafeNoSpace);
         SetupVersionOutput = GetBool(nameof(SetupVersionOutput), SetupVersionOutput);
+        SetupUninstallCommand = GetOptional(nameof(SetupUninstallCommand), ValueFlags.None);
 
         // Not actually a key-value, but a comment
         PupnetVersion = ExtractVersion(reader.ToString());
@@ -281,6 +283,7 @@ public class ConfigurationReader
     public string? SetupSignTool { get; }
     public string? SetupSuffixOutput { get; }
     public bool SetupVersionOutput { get; }
+    public string? SetupUninstallCommand { get; }
 
     public string? PupnetVersion { get; }
 
@@ -635,6 +638,13 @@ public class ConfigurationReader
                 $"Boolean (true or false) which sets whether to include the application version in the setup filename,",
                 $"i.e. 'HelloWorld-1.2.3-x86_64.exe'. Default is false. Ignored if the output filename is specified",
                 $"at command line."));
+        
+        sb.Append(CreateHelpField(nameof(SetupUninstallCommand), SetupUninstallCommand, style,
+            $"Optional path and arguments to an additional file that should be executed before uninstall.",
+            $"The command is executed at the installation path of your application.",
+            $"This binds to the `[UninstallRun]` section of InnoSetup.",
+            $"This is useful if your application has non-static configurable storage locations for data.",
+            $"Example: HelloWorld.exe --uninstall"));
 
         return sb.ToString().Trim().ReplaceLineEndings("\n");
     }

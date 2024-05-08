@@ -1347,6 +1347,14 @@ Type `pupnet --help conf` to see supported configuration reference information:
     at command line.
     Example: SetupVersionOutput = true
 
+    ** SetupUninstallCommand **
+    Optional path and arguments to an additional file that should be executed before uninstall.
+    The command is executed at the installation path of your application.
+    This binds to the `[UninstallRun]` section of InnoSetup.
+    This is useful if your application has non-static configurable storage locations for data.
+
+    Example: HelloWorld.exe --uninstall
+
 ## FAQs & GOTCHAS <a name="faqs-gotchas"/>
 
 ### NETSDK1194: The "--output" option isn't supported <a name="NETSDK1194"/>
