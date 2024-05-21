@@ -32,7 +32,8 @@ public class AppImageBuilder : PackageBuilder
     public AppImageBuilder(ConfigurationReader conf)
         : base(conf, PackageKind.AppImage)
     {
-        BuildAppBin = BuildUsrBin ?? throw new ArgumentNullException(nameof(BuildUsrBin));
+        BuildAppBin = BuildUsrBin
+            ?? throw new InvalidOperationException(nameof(BuildUsrBin));
 
         InstallBin = "/usr/bin";
 

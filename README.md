@@ -7,7 +7,11 @@
 **PupNet Deploy** is a cross-platform deployment utility which packages your .NET project as a ready-to-ship
 installation file in a single step.
 
-*If you like this project, don't forget to click star and share.*
+## Announcement 2024 ##
+I'd like to take a moment to thank recent contributors, but also say that I'm not in position to maintain this
+project on a timely basis. That doesn't mean that it's abandoned and I do, in fact, plan on making updates in the
+future, especially around AppImage. I've just go other commitments at the moment which take up a lot of my time.
+Thank you. Kuiper
 
 ## CONTENTS ##
 
@@ -1351,7 +1355,7 @@ Type `pupnet --help conf` to see supported configuration reference information:
     Optional name of a script to run before uninstall.
     This is script file relative to the directory of the application and must have a default file association.
     This binds to the `[UninstallRun]` section of InnoSetup.
-    From this script, you may want to run your application, which is very useful if 
+    From this script, you may want to run your application, which is very useful if
     your application has non-static configurable storage locations for data.
 
     Example: uninstall.bat
