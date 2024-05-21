@@ -1347,6 +1347,15 @@ Type `pupnet --help conf` to see supported configuration reference information:
     at command line.
     Example: SetupVersionOutput = true
 
+    ** SetupUninstallScript **
+    Optional name of a script to run before uninstall.
+    This is script file relative to the directory of the application and must have a default file association.
+    This binds to the `[UninstallRun]` section of InnoSetup.
+    From this script, you may want to run your application, which is very useful if 
+    your application has non-static configurable storage locations for data.
+
+    Example: uninstall.bat
+
 ## FAQs & GOTCHAS <a name="faqs-gotchas"/>
 
 ### NETSDK1194: The "--output" option isn't supported <a name="NETSDK1194"/>

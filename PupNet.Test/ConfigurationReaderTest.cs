@@ -340,6 +340,13 @@ public class ConfigurationReaderTest
         Assert.True(Create().SetupVersionOutput);
         Assert.False(Create(nameof(ConfigurationReader.SetupVersionOutput)).SetupVersionOutput);
     }
+    
+    [Fact]
+    public void UninstallCommand_String_IsValid()
+    {
+        Assert.NotNull(Create().SetupUninstallScript);
+        Assert.NotNull(Create(nameof(ConfigurationReader.SetupUninstallScript)).SetupUninstallScript);
+    }
 
     [Fact]
     public void ToString_VisualInspection()
