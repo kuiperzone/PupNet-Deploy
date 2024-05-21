@@ -10,7 +10,7 @@ installation file in a single step.
 ## Announcement 2024 ##
 I'd like to take a moment to thank recent contributors, but also say that I'm not in position to maintain this
 project on a timely basis. That doesn't mean that it's abandoned and I do, in fact, plan on making updates in the
-future, especially around AppImage. I've just go other commitments at the moment which take up a lot of my time.
+future, especially around AppImage. I've just got other commitments at the moment which take up a lot of my time.
 Thank you. Kuiper
 
 ## CONTENTS ##
