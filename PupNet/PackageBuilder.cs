@@ -388,7 +388,7 @@ public abstract class PackageBuilder
     /// "Spec file" content. For Flatpak, it is the "manifest". For deb, it is the "control file". It must not contain
     /// macros. It may be null if not used.
     /// </summary>
-    public abstract string? ManifestContent { get; }
+    public abstract string? ManifestContent { get; set; }
 
     /// <summary>
     /// Gets the manifest file path to which <see cref="ManifestContent"/> will be written.

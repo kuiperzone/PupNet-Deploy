@@ -147,6 +147,7 @@ public sealed class RpmBuilder : PackageBuilder
     public override string? ManifestContent
     {
         get { return GetSpec(); }
+        set { throw new NotImplementedException(); }
     }
 
     /// <summary>
