@@ -62,13 +62,13 @@ public abstract class PackageBuilder
         BuildRoot = Path.Combine(Root, AppRootName);
         Operations = new(Root);
 
-        IconPaths = GetShareIconPaths(Configuration.IconFiles);
+        IconPaths = GetShareIconPaths(kind, Configuration.IconFiles);
 
         if (IconPaths.Count == 0)
         {
             // Fallback to embedded icons on Linux
             // Should always empty on non-linux systems
-            IconPaths = GetShareIconPaths(Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
+            IconPaths = GetShareIconPaths(kind, Configuration.DesktopTerminal ? DefaultTerminalIcons : DefaultGuiIcons);
         }
 
         // Should be ico on Windows, or SVG or PNG on linux
@@ -746,6 +746,13 @@ public abstract class PackageBuilder
 
                 // Or biggest PNG
                 int size = GetStandardPngSize(item);
+                
+                //Flatpak max resolution is 512
+                if (kind == PackageKind.Flatpak)
+                {
+                    if(size > 512)
+                        continue;
+                }
 
                 if (size > max)
                 {
@@ -759,7 +766,7 @@ public abstract class PackageBuilder
         return rslt;
     }
 
-    private string? MapSourceIconToSharePath(string sourcePath)
+    private string? MapSourceIconToSharePath(PackageKind kind, string sourcePath)
     {
         if (BuildShareIcons != null)
         {
@@ -774,6 +781,8 @@ public abstract class PackageBuilder
 
             if (size > 0)
             {
+                if (kind == PackageKind.Flatpak && size > 512)
+                    return null;
                 return Path.Combine(BuildShareIcons, "hicolor", $"{size}x{size}", "apps", Configuration.AppId) + ".png";
             }
         }
@@ -781,7 +790,7 @@ public abstract class PackageBuilder
         return null;
     }
 
-    private IReadOnlyDictionary<string, string> GetShareIconPaths(IReadOnlyCollection<string> sources)
+    private IReadOnlyDictionary<string, string> GetShareIconPaths(PackageKind kind,IReadOnlyCollection<string> sources)
     {
         // Empty on windows
         var dict = new Dictionary<string, string>();
@@ -790,7 +799,7 @@ public abstract class PackageBuilder
         {
             foreach (var item in sources)
             {
-                var dest = MapSourceIconToSharePath(item);
+                var dest = MapSourceIconToSharePath(kind, item);
 
                 if (dest != null)
                 {
