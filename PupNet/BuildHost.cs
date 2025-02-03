@@ -219,6 +219,33 @@ public class BuildHost
                 }
             }
 
+            if (Builder.Kind == PackageKind.Setup)
+            {
+                if (Directory.GetFiles(Builder.BuildAppBin, "*.dll").Length == 0)
+                {
+                    if (Builder.ManifestContent != null)
+                    {
+                        Console.WriteLine("No dll files found");
+                        StringReader reader = new StringReader(Builder.ManifestContent);
+                        string line = reader.ReadLine();
+                        var sb = new StringBuilder();
+                        while (line != null)
+                        {
+                            if (line.Contains($"Source: \"{Builder.BuildAppBin}\\*.dll\"; DestDir: \"{{app}}\""))
+                            {
+                                Console.WriteLine("Skipping dll line: " + line);    
+                            }
+                            else
+                            {
+                                sb.AppendLine(line);
+                            }
+                            line = reader.ReadLine();
+                        }
+                        Builder.ManifestContent = sb.ToString().TrimEnd();    
+                    }
+                }
+            }
+
             Console.WriteLine();
             Console.WriteLine("Building Package ...");
             Builder.BuildPackage();

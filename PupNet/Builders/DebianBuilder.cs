@@ -130,6 +130,7 @@ public sealed class DebianBuilder : PackageBuilder
     public override string? ManifestContent
     {
         get { return GetControlFile(); }
+        set { throw new NotImplementedException(); }
     }
 
     /// <summary>

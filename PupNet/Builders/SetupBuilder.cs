@@ -96,7 +96,7 @@ public class SetupBuilder : PackageBuilder
     /// <summary>
     /// Implements.
     /// </summary>
-    public override string? ManifestContent { get; }
+    public override string? ManifestContent { get; set; }
 
     /// <summary>
     /// Implements.
