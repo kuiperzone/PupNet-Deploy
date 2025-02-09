@@ -74,7 +74,7 @@ public class AppImageBuilder : PackageBuilder
     /// <summary>
     /// Gets the embedded appimagetool version.
     /// </summary>
-    public const string AppImageVersion = "Version 13 (2020-12-31)";
+    public const string AppImageVersion = "Continuous (2024-12-21)";
 
     /// <summary>
     /// Gets full path to embedded appimagetool. Null if architecture not supported.
