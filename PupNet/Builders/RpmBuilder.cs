@@ -272,6 +272,11 @@ public sealed class RpmBuilder : PackageBuilder
         sb.AppendLine($"License: {Configuration.AppLicenseId}");
         sb.AppendLine($"Vendor: {Configuration.PublisherName}");
 
+        if (!string.IsNullOrEmpty(Configuration.RpmGroup))
+        {
+            sb.AppendLine($"Group: {Configuration.RpmGroup}");
+        }
+
         if (!string.IsNullOrEmpty(Configuration.PublisherLinkUrl))
         {
             sb.AppendLine($"Url: {Configuration.PublisherLinkUrl}");

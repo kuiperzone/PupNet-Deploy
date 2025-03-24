@@ -167,6 +167,7 @@ public class ConfigurationReader
 
         RpmAutoReq = GetBool(nameof(RpmAutoReq), RpmAutoReq);
         RpmAutoProv = GetBool(nameof(RpmAutoProv), RpmAutoProv);
+        RpmGroup = GetOptional(nameof(RpmGroup), ValueFlags.None);
         RpmRequires = GetCollection(nameof(RpmRequires), RpmRequires, ValueFlags.SafeNoSpace);
 
         DebianRecommends = GetCollection(nameof(DebianRecommends), DebianRecommends, ValueFlags.SafeNoSpace);
@@ -270,6 +271,7 @@ public class ConfigurationReader
 
     public bool RpmAutoReq { get; } = false;
     public bool RpmAutoProv { get; } = true;
+    public string? RpmGroup { get; }
     public IReadOnlyCollection<string> RpmRequires { get; } = new string[]
         { "krb5-libs", "libicu", "openssl-libs", "zlib" };
 
@@ -582,6 +584,10 @@ public class ConfigurationReader
                 $"Boolean (true or false) which specifies whether to build the RPM package with 'AutoProv' equal to yes or no.",
                 $"Refer: https://rpm-software-management.github.io/rpm/manual/spec.html"));
 
+        sb.Append(CreateHelpField(nameof(RpmGroup), RpmGroup, style,
+                $"The specified group must be in the list of groups known to RPM. This list is located in the file /usr/lib/rpm/GROUPS",
+                $"which is part of the rpm package."));
+            
         sb.Append(CreateHelpField(nameof(RpmRequires), RpmRequires, true, style,
                 $"Optional list of RPM dependencies. The list may include multiple values separated with semicolon or given",
                 $"in multi-line form. If empty, a self-contained dotnet package will successfully run on many (but not all)",
