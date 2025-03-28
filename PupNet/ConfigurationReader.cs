@@ -168,9 +168,17 @@ public class ConfigurationReader
         RpmAutoReq = GetBool(nameof(RpmAutoReq), RpmAutoReq);
         RpmAutoProv = GetBool(nameof(RpmAutoProv), RpmAutoProv);
         RpmGroup = GetOptional(nameof(RpmGroup), ValueFlags.None);
+        RpmPre = GetCollection(nameof(RpmPre), ValueFlags.MultiText);
+        RpmPost = GetCollection(nameof(RpmPost), ValueFlags.MultiText);
+        RpmPreUn = GetCollection(nameof(RpmPreUn), ValueFlags.MultiText);
+        RpmPostUn = GetCollection(nameof(RpmPostUn), ValueFlags.MultiText);
         RpmRequires = GetCollection(nameof(RpmRequires), RpmRequires, ValueFlags.SafeNoSpace);
 
         DebianRecommends = GetCollection(nameof(DebianRecommends), DebianRecommends, ValueFlags.SafeNoSpace);
+        DebianPreInst = GetCollection(nameof(DebianPreInst), DebianPreInst, ValueFlags.MultiText);
+        DebianPostInst = GetCollection(nameof(DebianPostInst), DebianPostInst, ValueFlags.MultiText);
+        DebianPreRm = GetCollection(nameof(DebianPreRm), DebianPreRm, ValueFlags.MultiText);
+        DebianPostRm = GetCollection(nameof(DebianPostRm), DebianPostRm, ValueFlags.MultiText);
 
         FlatpakPlatformRuntime = GetMandatory(nameof(FlatpakPlatformRuntime), ValueFlags.StrictSafe);
         FlatpakPlatformSdk = GetMandatory(nameof(FlatpakPlatformSdk), ValueFlags.StrictSafe);
@@ -272,11 +280,22 @@ public class ConfigurationReader
     public bool RpmAutoReq { get; } = false;
     public bool RpmAutoProv { get; } = true;
     public string? RpmGroup { get; }
+
+    public IReadOnlyCollection<string> RpmPre { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> RpmPost { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> RpmPreUn { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> RpmPostUn { get; } = Array.Empty<string>(); 
+    
     public IReadOnlyCollection<string> RpmRequires { get; } = new string[]
         { "krb5-libs", "libicu", "openssl-libs", "zlib" };
 
     public IReadOnlyCollection<string> DebianRecommends { get; } = new string[]
         { "libc6", "libgcc1", "libgcc-s1", "libgssapi-krb5-2", "libicu", "libssl", "libstdc++6", "libunwind", "zlib1g" };
+    
+    public IReadOnlyCollection<string> DebianPreInst { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> DebianPostInst { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> DebianPreRm { get; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> DebianPostRm { get; } = Array.Empty<string>(); 
 
     public string? SetupGroupName { get; }
     public bool SetupAdminInstall { get; }
@@ -587,6 +606,18 @@ public class ConfigurationReader
         sb.Append(CreateHelpField(nameof(RpmGroup), RpmGroup, style,
                 $"The specified group must be in the list of groups known to RPM. This list is located in the file /usr/lib/rpm/GROUPS",
                 $"which is part of the rpm package."));
+
+        sb.Append(CreateHelpField(nameof(RpmPre), RpmPre, true, style, 
+            "The script is executed before the package is installed into the system."));
+        
+        sb.Append(CreateHelpField(nameof(RpmPost), RpmPost, true, style, 
+            "The script is executed after the package is installed into the system."));
+        
+        sb.Append(CreateHelpField(nameof(RpmPreUn), RpmPreUn, true, style, 
+            "The script is executed before the package is removed from the system."));
+        
+        sb.Append(CreateHelpField(nameof(RpmPostUn), RpmPostUn, true, style, 
+            "The script is executed after the package is removed from the system."));
             
         sb.Append(CreateHelpField(nameof(RpmRequires), RpmRequires, true, style,
                 $"Optional list of RPM dependencies. The list may include multiple values separated with semicolon or given",
@@ -595,10 +626,8 @@ public class ConfigurationReader
                 $"Default values are recommended for use with dotnet and RPM packages at the time of writing.",
                 $"For updated information, see: https://learn.microsoft.com/en-us/dotnet/core/install/linux-rhel#dependencies"));
 
-
-
         sb.Append(CreateBreaker("DEBIAN OPTIONS", style));
-
+        
         sb.Append(CreateHelpField(nameof(DebianRecommends), DebianRecommends, true, style,
                 $"Optional list of Debian dependencies. The list may include multiple values separated with semicolon or given",
                 $"in multi-line form. If empty, a self-contained dotnet package will successfully run on many (but not all)",
@@ -606,7 +635,17 @@ public class ConfigurationReader
                 $"Default values are recommended for use with dotnet and Debian packages at the time of writing.",
                 $"For updated information, see: https://learn.microsoft.com/en-us/dotnet/core/install/linux-ubuntu#dependencies"));
 
-
+        sb.Append(CreateHelpField(nameof(DebianPreInst), DebianPreInst, true, style, 
+            "The script is executed before the package is installed into the system."));
+        
+        sb.Append(CreateHelpField(nameof(DebianPostInst), DebianPostInst, true, style, 
+            "The script is executed after the package is installed into the system."));
+        
+        sb.Append(CreateHelpField(nameof(DebianPreRm), DebianPreRm, true, style, 
+            "The script is executed before the package is removed from the system."));
+        
+        sb.Append(CreateHelpField(nameof(DebianPostRm), DebianPostRm, true, style, 
+            "The script is executed after the package is removed from the system."));
 
         sb.Append(CreateBreaker("WINDOWS SETUP OPTIONS", style));
 

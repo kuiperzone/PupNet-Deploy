@@ -141,6 +141,11 @@ public sealed class RpmBuilder : PackageBuilder
     /// </summary>
     public override string? ManifestBuildPath { get; }
 
+    public override IEnumerable<(string Path, string Content)> GetExtraContents()
+    {
+        yield break;
+    }
+
     /// <summary>
     /// Implements.
     /// </summary>
@@ -343,6 +348,50 @@ public sealed class RpmBuilder : PackageBuilder
         }
         */
 
+        if (Configuration.RpmPre.Count != 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("%pre");
+            
+            foreach (var item in Configuration.RpmPre)
+            {
+                sb.AppendLine(item);
+            }
+        }
+        
+        if (Configuration.RpmPost.Count != 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("%post");
+            
+            foreach (var item in Configuration.RpmPost)
+            {
+                sb.AppendLine(item);
+            }
+        }
+        
+        if (Configuration.RpmPreUn.Count != 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("%preun");
+            
+            foreach (var item in Configuration.RpmPreUn)
+            {
+                sb.AppendLine(item);
+            }
+        }
+        
+        if (Configuration.RpmPostUn.Count != 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine("%postun");
+            
+            foreach (var item in Configuration.RpmPostUn)
+            {
+                sb.AppendLine(item);
+            }
+        }
+        
         // https://stackoverflow.com/questions/57385249/in-an-rpm-files-section-is-it-possible-to-specify-a-directory-and-all-of-its-fi
         sb.AppendLine();
         sb.AppendLine("%files");
