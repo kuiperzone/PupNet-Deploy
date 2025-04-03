@@ -396,6 +396,8 @@ public abstract class PackageBuilder
     /// </summary>
     public abstract string? ManifestBuildPath { get; }
 
+    public abstract IEnumerable<(string Path, string Content)> GetExtraContents();
+
     /// <summary>
     /// Gets the destination path of the LICENSE file in the build directory. This will cause
     /// <see cref="ConfigurationReader.AppLicenseFile"/> to be copied into <see cref="BinBin"/>.
@@ -578,6 +580,11 @@ public abstract class PackageBuilder
         // Write manifest just before build, as ManifestContents is virtual and
         // may change after Create() and dotnet publish in some deployments.
         Operations.WriteFile(ManifestBuildPath, ManifestContent);
+
+        foreach (var extraContent in GetExtraContents())
+        {
+            Operations.WriteFile(extraContent.Path, extraContent.Content);
+        }
 
         Operations.Execute(PackageCommands);
     }

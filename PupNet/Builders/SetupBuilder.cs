@@ -93,6 +93,11 @@ public class SetupBuilder : PackageBuilder
     /// </summary>
     public override string? ManifestBuildPath { get; }
 
+    public override IEnumerable<(string Path, string Content)> GetExtraContents()
+    {
+        yield break;
+    }
+
     /// <summary>
     /// Implements.
     /// </summary>

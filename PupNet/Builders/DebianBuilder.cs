@@ -53,6 +53,34 @@ public sealed class DebianBuilder : PackageBuilder
         var archiveDirectory = Path.Combine(OutputDirectory, OutputName);
         cmd += $"--build \"{BuildRoot}\" \"{archiveDirectory}\"";
         list.Add(cmd);
+        
+        var extraPaths = new List<string>();
+        if (Configuration.DebianPreInst.Count != 0)
+        {
+            extraPaths.Add(Path.Combine(BuildRoot, "DEBIAN/preinst"));
+        }
+
+        if (Configuration.DebianPostInst.Count != 0)
+        {
+            extraPaths.Add(Path.Combine(BuildRoot, "DEBIAN/postinst"));
+        }
+
+        if (Configuration.DebianPreRm.Count != 0)
+        {
+            extraPaths.Add(Path.Combine(BuildRoot, "DEBIAN/prerm"));
+        }
+
+        if (Configuration.DebianPostRm.Count != 0)
+        {
+            extraPaths.Add(Path.Combine(BuildRoot, "DEBIAN/postrm"));
+        }
+
+        if (extraPaths.Count > 0)
+        {
+            // set permission must be set before build command
+            list.Insert(0, $"chmod +x {string.Join(' ', extraPaths)}");
+        }
+        
         PackageCommands = list;
     }
 
@@ -123,6 +151,53 @@ public sealed class DebianBuilder : PackageBuilder
     /// Implements.
     /// </summary>
     public override string? ManifestBuildPath { get; }
+
+    public override IEnumerable<(string Path, string Content)> GetExtraContents()
+    {
+        if (Configuration.DebianPreInst.Count != 0)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in Configuration.DebianPreInst)
+            {
+                sb.AppendLine(item);
+            }
+
+            yield return (Path.Combine(BuildRoot, "DEBIAN/preinst"), sb.ToString());
+        }
+        
+        if (Configuration.DebianPostInst.Count != 0)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in Configuration.DebianPostInst)
+            {
+                sb.AppendLine(item);
+            }
+            
+            yield return (Path.Combine(BuildRoot, "DEBIAN/postinst"), sb.ToString());
+        }
+        
+        if (Configuration.DebianPreRm.Count != 0)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in Configuration.DebianPreRm)
+            {
+                sb.AppendLine(item);
+            }
+
+            yield return (Path.Combine(BuildRoot, "DEBIAN/prerm"), sb.ToString());
+        }
+        
+        if (Configuration.DebianPostRm.Count != 0)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in Configuration.DebianPostRm)
+            {
+                sb.AppendLine(item);
+            }
+            
+            yield return (Path.Combine(BuildRoot, "DEBIAN/postrm"), sb.ToString());
+        }
+    }
 
     /// <summary>
     /// Implements.
