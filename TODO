@@ -1,3 +1,7 @@
+zone.kuiper.ShannonCalculator.appdata.xml
+  I: zone.kuiper.ShannonCalculator:8: developer-name-tag-deprecated
+  I: zone.kuiper.ShannonCalculator:~: developer-info-missing
+
 Add:
 // https://github.com/dotnet/docs/blob/main/docs/core/tools/dotnet-environment-variables.md#dotnet_host_path
 var dotnet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
