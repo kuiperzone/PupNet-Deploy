@@ -1,0 +1,11 @@
+NUGET
+You can install from assets here, or simply install or update tto latest using Nuget:
+
+    dotnet tool install -g KuiperZone.PupNet
+
+or update:
+
+    dotnet tool update -g KuiperZone.PupNet
+
+The "PupNet tool" targets .NET8, but this does not restrict the dotnet version of your own projects. It requires the
+installation of external builder tools to package everything except zip files.

@@ -1,0 +1,34 @@
+[*.{cs,vb}]
+
+# Use object initializers
+dotnet_diagnostic.IDE0017.severity = none
+
+# Use expression body for methods
+dotnet_diagnostic.IDE0022.severity = none
+
+# Collection initialization can be simplified
+dotnet_diagnostic.IDE0028.severity = none
+
+# Variable declaration can be deconstructed (tuples)
+dotnet_diagnostic.IDE0042.severity = none
+
+# Use range operator
+dotnet_diagnostic.IDE0057.severity = none
+
+# Use switch expression
+dotnet_diagnostic.IDE0066.severity = none
+
+# Collection initialization can be simplified -- no it can't!
+dotnet_diagnostic.IDE0301.severity = none
+
+# Collection initialization can be simplified -- no it can't!
+dotnet_diagnostic.IDE0305.severity = none
+
+# Collection initialization can be simplified
+dotnet_diagnostic.IDE0306.severity = none
+
+# Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none
+
+# Implement the equality operators and make their behavior identical to that of the Equals method
+# dotnet_diagnostic.CA2231.severity = none

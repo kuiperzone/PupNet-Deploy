@@ -1,3 +1,19 @@
++ VERSION 1.9.0; 2025-07-05
+- BREAKING CHANGE: Embedded appimagetool removed in this release. Now requires appimagetool-x86_64.AppImage, appimagetool-aarch64.AppImage etc. to be in the $PATH.
+- IMPORTANT: Newer external appimagetool releases now resolve issue with fuse3 on some systems inc. Ubuntu.
+- Added "AppImageRuntimePath" configuration option for support where no internet connection available. The value is optional and empty by default.
+- Added: Now writes package build artifacts to output directory "OUT/Artifacts.PackageName.Arch". This includes the flatpak-builder project for flatpak.
+- Added 'StartupWMClass' to desktop file template and assigned "${APP_BASE_NAME}" by default. This ensures icon is displayed under recent Gnome versions.
+- Added "X-AppImage-Name" entry to desktop file template and assigned "${APP_ID}" by default.
+- Added "X-AppImage-Version" entry to desktop file template and assigned "${APP_VERSION}" by default.
+- Added "X-AppImage-Arch" entry to desktop file template and assigned "${PACKAGE_ARCH}" by default.
+- Added ${PACKAGE_ARCH} macro to support "X-AppImage-Arch" desktop entry.
+- BugFix: Failing to run of flatpak with --run" option as part of the build process.
+- The "X-AppImage-Integrate" entry was removed from desktop file template (is this still used?).
+- Other code cleanup changes.
+- Tested against InnoSetup 6.4.3 on Windows, and noted the warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. (To be address in later version)
+
+
 + VERSION 1.8.0; 2024-03-18
 - Built with .NET8
 - Added -j,--project command line argument.
@@ -41,7 +57,7 @@
 - Bugfix #16: AppImage and Flatpak builds rejected AppStream metadata if conf.AppDescription was empty. Now defaults to AppShortSummary.
 - Bugfix #15: AppImage and Flatpak builds rejected AppStream metadata if conf.AppChangeFileEmpty.
 - Bugfix #14: AppImage failed if conf.IconPaths empty. On Linux a default icon will be used (previously worked but was broken due to change).
-- Bugfix #13: Incorrect </description> tag in AppStream example text (may be uncommented by user)
+- Bugfix #13: Incorrect description tag in AppStream example text (may be uncommented by user)
 - Updated to show CHANGELOG on console only with --verbose command option
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2

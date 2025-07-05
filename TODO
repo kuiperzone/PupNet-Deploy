@@ -1,6 +1,38 @@
+Address:
+
 zone.kuiper.ShannonCalculator.appdata.xml
   I: zone.kuiper.ShannonCalculator:8: developer-name-tag-deprecated
   I: zone.kuiper.ShannonCalculator:~: developer-info-missing
+
+Get flatpak to output manifest?
+https://opensource.com/article/19/10/how-build-flatpak-packaging
+
+On InnotSetup, we now get warning (this Windows 11 only?"
+Warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases.
+
+
+HANDY
+dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.4.1
+dotnet tool install KuiperZone.PupNet -g --add-source ./Deploy/OUT
+dotnet tool uninstall KuiperZone.PupNet -g
+dotnet tool update KuiperZone.PupNet -g --add-source ./Deploy/OUT
+
+
+
+LEGACY
+
+Update PRM and Deb libs
+
+Icons not showing on AppImage, RPM, and deb?
+Add to desktop:
+StartupWMClass=AvantGarde
+Need conditional variable?
+
+Added AppImageRuntimePath
+
+Add gotchas
+Cannot start AppImage from vscode terminal
+
 
 Add:
 // https://github.com/dotnet/docs/blob/main/docs/core/tools/dotnet-environment-variables.md#dotnet_host_path
@@ -21,11 +53,6 @@ RpmRequires
 DebRecommends
 
 
-HANDY
-dotnet pack -c Release -o ./Deploy/OUT -p:Version=1.4.1
-dotnet tool install KuiperZone.PupNet -g --add-source ./Deploy/OUT
-dotnet tool uninstall KuiperZone.PupNet -g
-dotnet tool update KuiperZone.PupNet -g --add-source ./Deploy/OUT
 
 
 DONE

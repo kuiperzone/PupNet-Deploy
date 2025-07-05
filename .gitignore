@@ -1,65 +1,127 @@
 ###############################################################################
-# Project Specific
+# README
 ###############################################################################
 
-INTERNAL/
+# These conform to ".fossil-settings/ignore-glob", but are also intended
+# to work with ".gitignore". They are generic for: C#, C++ and Qt.
+
+# Project specific
+*.old
+
 
 ###############################################################################
-# Hidden
+# GIT
 ###############################################################################
 
+# UNCOMMENT FOR GIT
+# Comment out for fossil
 .*
-*~
-~*
-
 **/.*/
-
-*.lock
-*.~lock
-
-Thumbs.db
-Thumbs.db:encryptable
-desktop.ini
-
-# Explicitly Allow
 !.gitignore
+!.editorconfig
+
+# UNCOMMENT FOR FOSSIL
+# Comment out for git
+#.git/
+#**/.git/
+#.gitignore
+
 
 ###############################################################################
-# Ignore Builds & Binaries
+# IGNORE DIRECTORIES
 ###############################################################################
 
-# Bin, Obj, Out, Output
-**/[Bb][Ii][Nn]/
-**/[Oo][Bb][Jj]/
-**/[Oo][Uu][Tt]/
-**/[Oo][Uu][Tt][Pp][Uu][Tt]/
+bin/
+Bin/
+**/bin/
+**/Bin/
 
-# Build
-**/[Bb][Ll][Dd]/
-**/[Bb][Uu][Ii][Ll][Dd]/
+obj/
+Obj/
+**/obj/
+**/Obj/
 
-# Debug, Release, Profile
-**/[Dd][Ee][Bb][Uu][Gg]*/
-**/*-[Dd][Ee][Bb][Uu][Gg]/
-**/[Rr][Ee][Ll][Ee][Aa][Ss][Ee]*/
-**/*-[Rr][Ee][Ll][Ee][Aa][Ss][Ee]*/
-**/[Pp][Rr][Oo][Ff][Ii][Ll][Ee]*/
+debug/
+Debug/
+**/debug/
+**/Debug/
 
-# AppDir
-**/[Aa][Pp][Pp][Dd][Ii][Rr]*/
+log/
+Log/
+LOG/
+**/log/
+**/Log/
+**/LOG/
 
-# Temp
-**/[Tt][Mm][Pp]/
-**/[Tt][Ee][Mm][Pp]/
-**/[Ss][Cc][Rr][Aa][Tt][Cc][Hh]/
+logs/
+Logs/
+LOGS/
+**/logs/
+**/Logs/
+**/LOGS/
 
-# Logs
-**/[Ll][Oo][Gg]/
-**/[Ll][Oo][Gg][Ss]/
+build/
+Build/
+BUILD/
+**/build/
+**/Build/
+**/BUILD/
 
-# Binaries
-*.exe
-*.dll
+out/
+Out/
+OUT/
+**/out/
+**/Out/
+**/OUT/
+
+bld/
+**/bld/
+
+AppDir/
+**/AppDir/
+
+tmp/
+Tmp/
+**/tmp/
+**/Tmp/
+
+temp/
+Temp/
+**/temp/
+**/Temp/
+
+Scratch/
+scratch/
+**/Scratch/
+**/scratch/
+
+nocommit/
+NoCommit/
+NOCOMMIT/
+**/nocommit/
+**/NoCommit/
+**/NOCOMMIT/
+
+no-commit/
+No-Commit/
+NO-COMMIT/
+**/no-commit/
+**/No-Commit/
+**/NO-COMMIT/
+
+noncommit/
+NonCommit/
+NONCOMMIT/
+**/noncommit/
+**/NonCommit/
+**/NONCOMMIT/
+
+non-commit/
+Non-Commit/
+NON-COMMIT/
+**/non-commit/
+**/Non-Commit/
+**/NON-COMMIT/
 
 
 ###############################################################################
@@ -70,6 +132,21 @@ desktop.ini
 *.lo
 *.o
 *.obj
+
+
+###############################################################################
+# Binary files
+###############################################################################
+
+*.AppImage
+*.exe
+
+
+###############################################################################
+# Log files
+###############################################################################
+
+*.log
 
 
 ###############################################################################
@@ -94,8 +171,6 @@ ipch/
 *.sln.docstates
 .nuget/
 _ReSharper.*
-packages/
-artifacts/
 *.userprefs
 *DS_Store
 *.sln.ide
@@ -125,4 +200,28 @@ artifacts/
 moc_*.cpp
 qrc_*.cpp
 ui_*.h
+
+
+###############################################################################
+# Misc Hidden
+###############################################################################
+
+*~
+~*
+
+_*
+_*/
+**/_*/
+
+*.lock
+*.~lock
+
+thumbs.db
+Thumbs.db
+**/thumbs.db
+**/Thumbs.db
+
+desktop.ini
+**/desktop.ini
+
 
