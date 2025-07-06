@@ -1,4 +1,4 @@
-+ VERSION 1.9.0; 2025-07-05
++ 1.9.0; 2025-07-05
 - BREAKING CHANGE: Embedded appimagetool removed in this release. Now requires appimagetool-x86_64.AppImage, appimagetool-aarch64.AppImage etc. to be in the $PATH.
 - IMPORTANT: Newer external appimagetool releases now resolve issue with fuse3 on some systems inc. Ubuntu.
 - Added "AppImageRuntimePath" configuration option for support where no internet connection available. The value is optional and empty by default.
@@ -14,7 +14,7 @@
 - Tested against InnoSetup 6.4.3 on Windows, and noted the warning: Architecture identifier "x64" is deprecated. Substituting "x64os", but note that "x64compatible" is preferred in most cases. (To be address in later version)
 
 
-+ VERSION 1.8.0; 2024-03-18
++ 1.8.0; 2024-03-18
 - Built with .NET8
 - Added -j,--project command line argument.
 - Added SetupGroupName configuration parameter.
@@ -26,22 +26,22 @@
 - BugFix: Use of ';' between property values did not work. Should now use ',' with pupnet.
 
 
-+ VERSION 1.7.1; 2023-10-26
++ 1.7.1; 2023-10-26
 - Bugfix: Fix upgrade-conf bug introduced in 1.7.0.
 
 
-+ VERSION 1.7.0; 2023-10-25
++ 1.7.0; 2023-10-25
 - Feature #24: Automatically skips confirmation if environment variable "CI=true" is defined.
 - Other minor tweaks.
 
 
-+ VERSION 1.6.0; 2023-07-22
++ 1.6.0; 2023-07-22
 - IMPORTANT: RPM now creates output file directly under output directory, rather than under "RPMS/arch" sub-directory.
 - Bugfix #21: Inno Setup fails with x86 (dotnet runtime "win-x32")
 - Bugfix #23: AppImage desktop file broken (macros ${INSTALL_BIN} and ${INSTALL_EXEC} now have leading forward slash for AppImage)
 
 
-+ VERSION 1.5.0; 2023-05-07
++ 1.5.0; 2023-05-07
 - Added ability to parse list items in 'AppDescription' configuration and transpose to HTML.
 - Added XML validation of AppStream metadata (will now warn if invalid prior to build).
 - Bugfix: The configuration property 'IconFiles' handled icon names of form "name.NxN.png", but failed with "name.N.png".
@@ -53,7 +53,7 @@
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.4.1; 2023-05-06
++ 1.4.1; 2023-05-06
 - Bugfix #16: AppImage and Flatpak builds rejected AppStream metadata if conf.AppDescription was empty. Now defaults to AppShortSummary.
 - Bugfix #15: AppImage and Flatpak builds rejected AppStream metadata if conf.AppChangeFileEmpty.
 - Bugfix #14: AppImage failed if conf.IconPaths empty. On Linux a default icon will be used (previously worked but was broken due to change).
@@ -63,7 +63,7 @@
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.4.0; 2023-05-05
++ 1.4.0; 2023-05-05
 - Added 'AppDescription' property to configuration (IMPORTANT NEW FEATURE - see website for information)
 - Added ${APPSTREAM_DESCRIPTION_XML} macro to support release information in AppStream metadata
 - Updated AppStream metadata template to include ${APPSTREAM_CHANGELOG_XML}
@@ -81,11 +81,11 @@
 - Tested against: rpmbuild RPM version 4.18.1, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.3.1; 2023-05-01
++ 1.3.1; 2023-05-01
 - Bugfix: Fix package creation when file path of contents contain spaces (enclose file path with quotes when executing chmod)
 
 
-+ VERSION 1.3.0; 2023-04-18
++ 1.3.0; 2023-04-18
 - Added RpmAutoProv and RpmAutoReq properties to configuration
 - Added RpmRequires property to configuration to allow specification of RPM dependencies
 - Added DebianRecommends property to configuration to allow specification of Debian dependencies
@@ -99,7 +99,7 @@
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.2.2; 2023-04-14
++ 1.2.2; 2023-04-14
 - Now supplied as .NET6 tool (explicitly built against .NET6 LTS rather than .NET7)
 - Bugfix: AppImage failed to run on some systems (updated AppImage runtimes)
 - Bugfix: Added 'BuildRequires: desktop-file-utils' to RPM spec file
@@ -107,13 +107,13 @@
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.2.1; 2023-04-13
++ 1.2.1; 2023-04-13
 - Bugfix: Unable to show --help or --version due to recent changes
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.2.0; 2023-04-13
++ 1.2.0; 2023-04-13
 - Now ships as a dotnet tool (.NET7)
 - Added upgrade-conf CLI option to upgrade existing pupnet.conf file
 - Added SetupAdminInstall to configuration to allow install with admin privileges in Windows Setup
@@ -129,19 +129,19 @@
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.2
 
 
-+ VERSION 1.1.0; 2023-03-30
++ 1.1.0; 2023-03-30
 - Now ships internally with fuse run-times to allow cross-build for: x64, am64 (aarch64) and Arm (32-bit) architectures.
 - Support for building AppImages on 32-bit Arm development platforms
 - Ships with: appimagetool 13 (2020-12-31)
 - Tested against: rpmbuild RPM version 4.18.0, dpkg 1.21.21, flatpak-builder 1.2.3, InnoSetup 6.2.0
 
 
-+ VERSION 1.0.1; 2023-03-22
++ 1.0.1; 2023-03-22
 - Now shows AppImageTool version only on Linux.
 - Minor updates to built-in help information.
 - Added screenshot to metainfo.xml
 
 
-+ VERSION 1.0.0; 2023-03-22
++ 1.0.0; 2023-03-22
 - Initial Release
 - Tested against: appimagetool: 13 (2020-12-31); rpmbuild: RPM version 4.18.0; dpkg: 1.21.20;flatpak-builder: 1.2.3;InnoSetup: 6.2.0
