@@ -140,7 +140,7 @@ Or:
 
     dotnet tool update -g KuiperZone.PupNet
 
-The "PupNet tool" targets .NET8 and 9, but this does not restrict the dotnet version of your own projects.
+The "PupNet tool" targets .NET8, but this does not restrict the dotnet version of your own projects.
 
 
 <a id="appimage-on-linux"></a>
@@ -274,9 +274,11 @@ Open the file `Deploy/app.desktop`, and you will see:
     Exec=${INSTALL_EXEC}
     TryExec=${INSTALL_EXEC}
     NoDisplay=${DESKTOP_NODISPLAY}
-    X-AppImage-Version=${APP_VERSION}
     Terminal=${DESKTOP_TERMINAL}
     Categories=${PRIME_CATEGORY}
+    X-AppImage-Name=${APP_ID};
+    X-AppImage-Version=${APP_VERSION};
+    X-AppImage-Arch=${PACKAGE_ARCH};
     MimeType=
     Keywords=
 
@@ -420,13 +422,12 @@ then need to specify the version both in application code and the `pupnet.conf` 
 <a id="changelog"></a>
 
 #### Changelog (AppChangeFile)
-PupNet version 1.4 introduced the `AppChangeFile` configuration property. This gives the path to a changelog file
-which must use a predefined but simple format, or a README file which contains such formatted changelog information.
+PupNet version 1.4 introduced the `AppChangeFile` configuration property. This gives the path to a plain text changelog
+file (i.e. "CHANGES") which must use a predefined but simple format.
 
 PupNet will parse the file and extract relevant change information. This is used to expand the
 `${APPSTREAM_CHANGELOG_XML}` macro variable which may optionally be used within the `<release>` element of your
-AppStream metadata file. This means that lengthy version change information need only be specified once (in a changelog
-or README file).
+AppStream metadata file. This means that lengthy version change information need only be specified once.
 
 Version change information is to be provided as one or more version release sections prefixed with '+' and a leading
 version number, and suffixed with trailing date. Subsequent change items are prefixed with '-', as shown below.
@@ -448,6 +449,12 @@ and/or maintainer contact information, as below.
 
 Here, the version title and contact information will be ignored and are not used in AppStream data.
 
+##### Combining CHANGES & README
+It is possible for `AppChangeFile` configuration value to point to a README file containing the above information. In
+this case, the changes will be extracted from the README but, in order for this to work reliably, the README file should
+be **plain text** rather than markdown, otherwisethe formats may conflict where markdown list items are used.
+
+##### Format Notes
 It is possible for change items to span multiple lines, as follows, but a change item should not be broken with an
 empty line (otherwise the parser will think it is reading plain superfluous text).
 
