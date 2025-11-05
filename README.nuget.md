@@ -54,7 +54,7 @@ with PupNet. If not, see <https://www.gnu.org/licenses/>.
 
 RECENT CHANGES
 
-+ 1.9.1; 2025-11-05
++ VERSION 1.9.1
 - BugFix: RPM build failing to copy artifacts at end of build process.
 
 + VERSION 1.9.0
