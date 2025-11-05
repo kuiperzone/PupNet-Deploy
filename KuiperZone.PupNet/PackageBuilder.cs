@@ -606,25 +606,35 @@ public abstract class PackageBuilder
     /// </summary>
     protected virtual void CopyArtifacts()
     {
-        // Ensure empty
-        Operations.RemoveDirectory(OutputArtifactsDirectory);
-
-        if (ManifestBuildPath != null)
+        try
         {
-            var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(ManifestBuildPath));
-            Operations.CopyFile(ManifestBuildPath, dest, true);
+            // Ensure empty
+            Operations.RemoveDirectory(OutputArtifactsDirectory);
+
+            if (ManifestBuildPath != null)
+            {
+                var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(ManifestBuildPath));
+                Operations.CopyFile(ManifestBuildPath, dest, true);
+            }
+
+            if (DesktopBuildPath != null)
+            {
+                var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(DesktopBuildPath));
+                Operations.CopyFile(DesktopBuildPath, dest, true);
+            }
+
+            if (MetaBuildPath != null)
+            {
+                var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(MetaBuildPath));
+                Operations.CopyFile(MetaBuildPath, dest, true);
+            }
         }
-
-        if (DesktopBuildPath != null)
+        catch (Exception e)
         {
-            var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(DesktopBuildPath));
-            Operations.CopyFile(DesktopBuildPath, dest, true);
-        }
-
-        if (MetaBuildPath != null)
-        {
-            var dest = Path.Combine(OutputArtifactsDirectory, Path.GetFileName(MetaBuildPath));
-            Operations.CopyFile(MetaBuildPath, dest, true);
+            // Catch this on failure. We've had cases where copying artifacts fail,
+            // preventing the process from completing, when in fact the output is
+            // built and this stage provides only additional associated content.
+            WarningSink.Add($"WARNING. Failed to copy artifacts to: {OutputArtifactsDirectory}\n{e}");
         }
     }
 
@@ -845,4 +855,3 @@ public abstract class PackageBuilder
     }
 
 }
-

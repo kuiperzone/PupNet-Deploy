@@ -58,7 +58,10 @@ public sealed class RpmBuilder : PackageBuilder
         // https://stackoverflow.com/questions/64563386/how-do-i-package-up-go-code-as-an-arm-rpm
         // https://cmake.cmake.narkive.com/uDOFCNJ3/rpmbuild-architecture
         // https://stackoverflow.com/questions/2777737/how-to-set-the-rpmbuild-destination-folder
-        var cmd = $"rpmbuild -bb \"{ManifestBuildPath}\"";
+
+        // Note. v1.9.1 -- added "--noclean" option.
+
+        var cmd = $"rpmbuild -bb --noclean \"{ManifestBuildPath}\"";
         cmd += $" --define \"_topdir {buildDir}\" --buildroot=\"{BuildRoot}\"";
         cmd += $" --define \"_rpmdir {_buildOutputDirectory}\" --define \"_build_id_links none\"";
 
@@ -376,4 +379,3 @@ public sealed class RpmBuilder : PackageBuilder
     }
 
 }
-
