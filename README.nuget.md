@@ -54,6 +54,9 @@ with PupNet. If not, see <https://www.gnu.org/licenses/>.
 
 RECENT CHANGES
 
++ 1.9.1; 2025-11-05
+- BugFix: RPM build failing to copy artifacts at end of build process.
+
 + VERSION 1.9.0
 - BREAKING CHANGE: Embedded appimagetool removed in this release. Now requires appimagetool-x86_64.AppImage, appimagetool-aarch64.AppImage etc. to be in the $PATH.
 - IMPORTANT: Newer external appimagetool releases now resolve issue with fuse3 on some systems inc. Ubuntu.
